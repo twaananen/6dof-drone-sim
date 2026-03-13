@@ -80,8 +80,7 @@ static func unpack_state(packet: PackedByteArray) -> Dictionary:
     if version != VERSION:
         return {"valid": false, "error": "invalid_version", "version": version}
 
-    var state := default_state()
-    state["version"] = version
+    var state: Dictionary = {"version": version}
     state["sequence"] = buf.get_u32()
     state["timestamp_usec"] = buf.get_u64()
     state["tracking_valid"] = buf.get_u8() == 1
@@ -93,7 +92,7 @@ static func unpack_state(packet: PackedByteArray) -> Dictionary:
         buf.get_float(),
         buf.get_float(),
         buf.get_float()
-    )
+    ).normalized()
     state["linear_velocity"] = _get_vector3(buf)
     state["angular_velocity"] = _get_vector3(buf)
     state["trigger"] = buf.get_float()

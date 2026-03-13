@@ -38,14 +38,9 @@ func push_state(mapped_outputs: Dictionary) -> void:
     for key in ["yaw", "throttle", "roll", "pitch", "aux_analog_1", "aux_analog_2"]:
         buf.put_float(float(mapped_outputs.get(key, 0.0)))
     var buttons: int = 0
-    if mapped_outputs.get("aux_button_1", 0.0) >= 0.5:
-        buttons |= 1 << 0
-    if mapped_outputs.get("aux_button_2", 0.0) >= 0.5:
-        buttons |= 1 << 1
-    if mapped_outputs.get("aux_button_3", 0.0) >= 0.5:
-        buttons |= 1 << 2
-    if mapped_outputs.get("aux_button_4", 0.0) >= 0.5:
-        buttons |= 1 << 3
+    for i in range(4):
+        if mapped_outputs.get("aux_button_%d" % (i + 1), 0.0) >= 0.5:
+            buttons |= 1 << i
     buf.put_u16(buttons)
     _peer.put_packet(buf.data_array)
 

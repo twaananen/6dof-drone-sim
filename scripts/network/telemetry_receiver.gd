@@ -25,8 +25,9 @@ func _process(_delta: float) -> void:
             continue
 
         var sequence := int(unpacked.get("sequence", -1))
-        if _last_sequence >= 0 and sequence <= _last_sequence:
-            continue
+        if _last_sequence >= 0:
+            if sequence <= _last_sequence and (_last_sequence - sequence) < 1000:
+                continue
         if _last_sequence >= 0 and sequence > _last_sequence + 1:
             packets_dropped += sequence - _last_sequence - 1
         _last_sequence = sequence

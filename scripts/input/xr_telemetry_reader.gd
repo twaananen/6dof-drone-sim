@@ -23,8 +23,8 @@ func read_state() -> Dictionary:
     var pose = controller.get_pose()
     state["tracking_valid"] = true
     state["event_flags"] = _consume_event_flags()
-    state["grip_position"] = controller.global_position
-    state["grip_orientation"] = controller.global_transform.basis.get_rotation_quaternion()
+    state["grip_position"] = controller.position
+    state["grip_orientation"] = controller.transform.basis.get_rotation_quaternion()
     state["linear_velocity"] = pose.linear_velocity if pose != null else Vector3.ZERO
     state["angular_velocity"] = pose.angular_velocity if pose != null else Vector3.ZERO
     state["trigger"] = controller.get_float("trigger")

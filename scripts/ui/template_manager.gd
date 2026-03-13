@@ -81,3 +81,4 @@ func _scan_dir(dir_path: String, bundled: bool) -> void:
             if template.load_from_file(full_path) == OK:
                 _catalog[template.template_name] = {"path": full_path, "bundled": bundled}
         name = dir.get_next()
+    dir.list_dir_end()

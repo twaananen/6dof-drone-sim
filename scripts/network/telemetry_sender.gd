@@ -13,8 +13,7 @@ func _ready() -> void:
 
 
 func send_state(state: Dictionary) -> void:
-    var enriched: Dictionary = RawControllerState.default_state()
-    enriched.merge(state, true)
+    var enriched := state.duplicate()
     enriched["sequence"] = _sequence
     enriched["timestamp_usec"] = Time.get_ticks_usec()
     last_send_time_usec = enriched["timestamp_usec"]

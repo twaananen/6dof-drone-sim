@@ -13,7 +13,7 @@ const TemplateManager = preload("res://scripts/ui/template_manager.gd")
 @onready var template_editor: TemplateEditor = $VBox/MainSplit/TemplateEditor
 @onready var raw_panel: TelemetryPanel = $VBox/MainSplit/Panels/RawPanel
 @onready var derived_panel: TelemetryPanel = $VBox/MainSplit/Panels/DerivedPanel
-@onready var output_panel: OutputPanel = $VBox/MainSplit/Panels/OutputPanel
+@onready var output_panel: TelemetryPanel = $VBox/MainSplit/Panels/OutputPanel
 
 var _source_deriver: SourceDeriver = SourceDeriver.new()
 var _mapping_engine: MappingEngine = MappingEngine.new()
@@ -22,6 +22,12 @@ var _template_manager: TemplateManager = TemplateManager.new()
 var _active_template: MappingTemplate
 var _last_timestamp_usec: int = 0
 var _last_outputs: Dictionary = {}
+var _was_failsafe_active: bool = true
+var _last_status_send_usec: int = 0
+var _pending_raw_state: Dictionary
+var _pending_derived: Dictionary
+var _pending_outputs: Dictionary
+var _ui_dirty: bool = false
 
 
 func _ready() -> void:
@@ -46,8 +52,13 @@ func _process(_delta: float) -> void:
 		control_server.has_client(),
 		_active_template.template_name,
 		_failsafe.is_active(),
-		telemetry_receiver.get_stats()["packets_received"]
+		telemetry_receiver.packets_received
 	)
+	if _ui_dirty:
+		_ui_dirty = false
+		raw_panel.set_payload("Raw Telemetry", _serialize_state_for_ui(_pending_raw_state))
+		derived_panel.set_payload("Derived Sources", _pending_derived)
+		output_panel.set_payload("Mapped Outputs", _pending_outputs)
 
 
 func _on_state_received(state: Dictionary) -> void:
@@ -66,19 +77,29 @@ func _on_state_received(state: Dictionary) -> void:
 	_last_timestamp_usec = timestamp_usec
 
 	var derived: Dictionary = _source_deriver.derive_sources(state)
-	var outputs: Dictionary = _mapping_engine.neutral_outputs()
-	if not _failsafe.update(timestamp_usec):
+	var outputs: Dictionary
+	if not _failsafe.update():
+		if _was_failsafe_active:
+			_mapping_engine.clear_integrators()
+			_was_failsafe_active = false
 		outputs = _mapping_engine.process(derived, dt)
 	else:
+		_was_failsafe_active = true
 		_mapping_engine.clear_integrators()
-		outputs = _failsafe.neutralize(outputs)
+		outputs = _mapping_engine.neutral_outputs()
 
 	_last_outputs = outputs
 	backend.push_state(outputs)
-	raw_panel.set_payload("Raw Telemetry", _serialize_state_for_ui(state))
-	derived_panel.set_payload("Derived Sources", derived)
-	output_panel.set_payload("Mapped Outputs", outputs)
-	_send_status_update()
+
+	_pending_raw_state = state
+	_pending_derived = derived
+	_pending_outputs = outputs
+	_ui_dirty = true
+
+	var now_usec := Time.get_ticks_usec()
+	if now_usec - _last_status_send_usec > 100000:
+		_send_status_update()
+		_last_status_send_usec = now_usec
 
 
 func _apply_template(template: MappingTemplate) -> void:
@@ -89,6 +110,7 @@ func _apply_template(template: MappingTemplate) -> void:
 
 
 func _on_template_saved(template: MappingTemplate) -> void:
+	_template_manager.refresh()
 	_apply_template(template)
 
 
@@ -135,7 +157,7 @@ func _send_initial_status() -> void:
 	control_server.send_message({
 		"type": "hello_ack",
 		"backend": "linux",
-		"failsafe_timeout_ms": 200,
+		"failsafe_timeout_ms": _failsafe.timeout_usec / 1000,
 	})
 	control_server.send_message({
 		"type": "template_catalog",
@@ -154,7 +176,7 @@ func _send_status_update() -> void:
 	control_server.send_message({
 		"type": "status",
 		"failsafe_active": _failsafe.is_active(),
-		"packets_received": telemetry_receiver.get_stats()["packets_received"],
+		"packets_received": telemetry_receiver.packets_received,
 		"backend_available": backend.is_available(),
 		"last_outputs": _last_outputs,
 	})
