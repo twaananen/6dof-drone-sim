@@ -1,11 +1,13 @@
 extends Node
 
 @export var listen_port: int = 9100
+@export var restart_gap_usec: int = 100000
 
 signal state_received(state)
 
 var _peer: PacketPeerUDP = PacketPeerUDP.new()
 var _last_sequence: int = -1
+var _last_packet_local_usec: int = -1
 var latest_state: Dictionary = RawControllerState.default_state()
 var packets_received: int = 0
 var packets_dropped: int = 0
@@ -24,13 +26,14 @@ func _process(_delta: float) -> void:
         if not unpacked.get("valid", false):
             continue
 
-        var sequence := int(unpacked.get("sequence", -1))
-        if _last_sequence >= 0:
-            if sequence <= _last_sequence and (_last_sequence - sequence) < 1000:
-                continue
+        var now_usec: int = Time.get_ticks_usec()
+        var sequence: int = int(unpacked.get("sequence", -1))
+        if not _should_accept_sequence(sequence, now_usec):
+            continue
         if _last_sequence >= 0 and sequence > _last_sequence + 1:
             packets_dropped += sequence - _last_sequence - 1
         _last_sequence = sequence
+        _last_packet_local_usec = now_usec
 
         packets_received += 1
         latest_state = unpacked
@@ -47,3 +50,13 @@ func get_stats() -> Dictionary:
 
 func _exit_tree() -> void:
     _peer.close()
+
+
+func _should_accept_sequence(sequence: int, now_usec: int) -> bool:
+    if _last_sequence < 0:
+        return true
+    if sequence > _last_sequence:
+        return true
+    if _last_packet_local_usec < 0:
+        return false
+    return (now_usec - _last_packet_local_usec) > restart_gap_usec

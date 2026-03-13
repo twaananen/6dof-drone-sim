@@ -62,6 +62,7 @@ func _process(_delta: float) -> void:
 
 
 func _on_state_received(state: Dictionary) -> void:
+	var now_usec: int = Time.get_ticks_usec()
 	if state.get("event_flags", 0) & RawControllerState.EVENT_CALIBRATE:
 		_source_deriver.calibrate_from_state(state)
 		_mapping_engine.clear_integrators()
@@ -69,7 +70,7 @@ func _on_state_received(state: Dictionary) -> void:
 		_source_deriver.reset_calibration()
 		_mapping_engine.clear_integrators()
 
-	_failsafe.note_state(state)
+	_failsafe.note_state(state, now_usec)
 	var dt: float = 0.0
 	var timestamp_usec := int(state.get("timestamp_usec", 0))
 	if _last_timestamp_usec > 0 and timestamp_usec > _last_timestamp_usec:
@@ -78,7 +79,7 @@ func _on_state_received(state: Dictionary) -> void:
 
 	var derived: Dictionary = _source_deriver.derive_sources(state)
 	var outputs: Dictionary
-	if not _failsafe.update():
+	if not _failsafe.update(now_usec):
 		if _was_failsafe_active:
 			_mapping_engine.clear_integrators()
 			_was_failsafe_active = false
@@ -96,7 +97,6 @@ func _on_state_received(state: Dictionary) -> void:
 	_pending_outputs = outputs
 	_ui_dirty = true
 
-	var now_usec := Time.get_ticks_usec()
 	if now_usec - _last_status_send_usec > 100000:
 		_send_status_update()
 		_last_status_send_usec = now_usec

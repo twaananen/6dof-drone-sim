@@ -6,17 +6,17 @@ var _last_valid_local_usec: int = -1
 var _active: bool = true
 
 
-func note_state(state: Dictionary) -> void:
+func note_state(state: Dictionary, now_usec: int = -1) -> void:
 	if not state.get("tracking_valid", false):
 		return
-	_last_valid_local_usec = Time.get_ticks_usec()
+	_last_valid_local_usec = _resolve_now_usec(now_usec)
 
 
-func update() -> bool:
+func update(now_usec: int = -1) -> bool:
 	if _last_valid_local_usec < 0:
 		_active = true
 		return _active
-	_active = (Time.get_ticks_usec() - _last_valid_local_usec) > timeout_usec
+	_active = (_resolve_now_usec(now_usec) - _last_valid_local_usec) > timeout_usec
 	return _active
 
 
@@ -30,3 +30,9 @@ func clear() -> void:
 
 func is_active() -> bool:
 	return _active
+
+
+func _resolve_now_usec(now_usec: int) -> int:
+	if now_usec >= 0:
+		return now_usec
+	return Time.get_ticks_usec()
