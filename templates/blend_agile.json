@@ -1,0 +1,96 @@
+{
+  "template_name": "blend_agile",
+  "description": "Higher-gain blended mapping for aggressive acro experiments.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "absolute",
+          "range_min": -95.0,
+          "range_max": 95.0,
+          "weight": 0.4,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        },
+        {
+          "source": "angvel_y_rad_s",
+          "mode": "absolute",
+          "range_min": -4.0,
+          "range_max": 4.0,
+          "weight": 0.8,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        }
+      ],
+      "sensitivity": 1.2
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "pose_pitch_deg",
+          "mode": "absolute",
+          "range_min": -45.0,
+          "range_max": 45.0,
+          "weight": 0.4,
+          "invert": true,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        },
+        {
+          "source": "angvel_x_rad_s",
+          "mode": "absolute",
+          "range_min": -4.0,
+          "range_max": 4.0,
+          "weight": 0.8,
+          "invert": true,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        }
+      ],
+      "sensitivity": 1.25
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "pose_roll_deg",
+          "mode": "absolute",
+          "range_min": -45.0,
+          "range_max": 45.0,
+          "weight": 0.4,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        },
+        {
+          "source": "angvel_z_rad_s",
+          "mode": "absolute",
+          "range_min": -4.0,
+          "range_max": 4.0,
+          "weight": 0.8,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "expo_hard"
+        }
+      ],
+      "sensitivity": 1.25
+    }
+  }
+}
+

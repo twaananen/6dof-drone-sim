@@ -1,0 +1,63 @@
+{
+  "template_name": "rate_direct",
+  "description": "Benchmark direct-rate embodied mapping with trigger throttle.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.03,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "absolute",
+          "range_min": -80.0,
+          "range_max": 80.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        }
+      ]
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "angvel_x_rad_s",
+          "mode": "absolute",
+          "range_min": -3.5,
+          "range_max": 3.5,
+          "weight": 1.0,
+          "invert": true,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        }
+      ]
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "angvel_z_rad_s",
+          "mode": "absolute",
+          "range_min": -3.5,
+          "range_max": 3.5,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        }
+      ]
+    }
+  }
+}
+

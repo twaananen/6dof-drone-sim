@@ -1,0 +1,63 @@
+{
+  "template_name": "hold_adjust",
+  "description": "Set-and-hold template using integrator bindings for relaxed hand repositioning.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "integrator",
+          "range_min": -45.0,
+          "range_max": 45.0,
+          "weight": 0.9,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "pose_pitch_deg",
+          "mode": "integrator",
+          "range_min": -35.0,
+          "range_max": 35.0,
+          "weight": 0.9,
+          "invert": true,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "pose_roll_deg",
+          "mode": "integrator",
+          "range_min": -35.0,
+          "range_max": 35.0,
+          "weight": 0.9,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    }
+  }
+}
+

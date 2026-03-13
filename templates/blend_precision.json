@@ -1,0 +1,101 @@
+{
+  "template_name": "blend_precision",
+  "description": "Low-noise blended mapping tuned for deliberate movements.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.05,
+          "curve": "linear"
+        }
+      ],
+      "deadzone": 0.03,
+      "expo": 0.2
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "absolute",
+          "range_min": -55.0,
+          "range_max": 55.0,
+          "weight": 0.7,
+          "invert": false,
+          "smoothing": 0.05,
+          "curve": "expo_soft"
+        },
+        {
+          "source": "angvel_y_rad_s",
+          "mode": "delta",
+          "range_min": -1.5,
+          "range_max": 1.5,
+          "weight": 0.3,
+          "invert": false,
+          "smoothing": 0.05,
+          "curve": "linear"
+        }
+      ],
+      "deadzone": 0.05,
+      "expo": 0.25
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "pose_pitch_deg",
+          "mode": "absolute",
+          "range_min": -28.0,
+          "range_max": 28.0,
+          "weight": 0.7,
+          "invert": true,
+          "smoothing": 0.05,
+          "curve": "expo_soft"
+        },
+        {
+          "source": "linvel_z_m_s",
+          "mode": "delta",
+          "range_min": -0.5,
+          "range_max": 0.5,
+          "weight": 0.3,
+          "invert": true,
+          "smoothing": 0.05,
+          "curve": "linear"
+        }
+      ],
+      "deadzone": 0.05,
+      "expo": 0.25
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "pose_roll_deg",
+          "mode": "absolute",
+          "range_min": -28.0,
+          "range_max": 28.0,
+          "weight": 0.7,
+          "invert": false,
+          "smoothing": 0.05,
+          "curve": "expo_soft"
+        },
+        {
+          "source": "linvel_x_m_s",
+          "mode": "delta",
+          "range_min": -0.5,
+          "range_max": 0.5,
+          "weight": 0.3,
+          "invert": false,
+          "smoothing": 0.05,
+          "curve": "linear"
+        }
+      ],
+      "deadzone": 0.05,
+      "expo": 0.25
+    }
+  }
+}
+

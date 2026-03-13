@@ -1,0 +1,63 @@
+{
+  "template_name": "attitude_tilt",
+  "description": "Simple embodied tilt mapping for intuitive angle-style flight.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "absolute",
+          "range_min": -70.0,
+          "range_max": 70.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "linear"
+        }
+      ]
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "pose_pitch_deg",
+          "mode": "absolute",
+          "range_min": -45.0,
+          "range_max": 45.0,
+          "weight": 1.0,
+          "invert": true,
+          "smoothing": 0.01,
+          "curve": "expo_soft"
+        }
+      ]
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "pose_roll_deg",
+          "mode": "absolute",
+          "range_min": -45.0,
+          "range_max": 45.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "expo_soft"
+        }
+      ]
+    }
+  }
+}
+

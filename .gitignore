@@ -1,0 +1,21 @@
+# Godot
+.godot/
+export_presets.cfg
+*.translation
+
+# Tests
+test_results.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+tools/linux_gamepad_helper
+*.o
+*.so
+*.dylib
+
+# Android
+android/build/
+

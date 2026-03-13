@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bs3erxrfklcbd"]
+
+[ext_resource type="Script" uid="uid://dgt6uuwbdgsex" path="res://scripts/ui/output_panel.gd" id="1"]
+
+[node name="OutputPanel" type="PanelContainer" unique_id=1385667563]
+custom_minimum_size = Vector2(320, 220)
+script = ExtResource("1")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=741689040]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox" unique_id=615574098]
+layout_mode = 2
+text = "Output"
+
+[node name="Payload" type="RichTextLabel" parent="VBox" unique_id=1897258323]
+layout_mode = 2
+size_flags_vertical = 3

@@ -1,0 +1,63 @@
+{
+  "template_name": "impulse_flick",
+  "description": "Impulse-style control using angular-velocity spikes and integrator hold.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "trigger",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.01,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "angvel_y_rad_s",
+          "mode": "integrator",
+          "range_min": -3.0,
+          "range_max": 3.0,
+          "weight": 1.2,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "angvel_x_rad_s",
+          "mode": "integrator",
+          "range_min": -3.0,
+          "range_max": 3.0,
+          "weight": 1.2,
+          "invert": true,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "angvel_z_rad_s",
+          "mode": "integrator",
+          "range_min": -3.0,
+          "range_max": 3.0,
+          "weight": 1.2,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    }
+  }
+}
+

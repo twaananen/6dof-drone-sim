@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://dmxakfj7kniox"]
+
+[ext_resource type="Script" uid="uid://cvxam0o78v87d" path="res://scripts/quest_main.gd" id="1"]
+[ext_resource type="Script" uid="uid://doi4pe7omne2b" path="res://scripts/input/xr_telemetry_reader.gd" id="2"]
+[ext_resource type="Script" uid="uid://bjjf34u78p6ae" path="res://scripts/network/telemetry_sender.gd" id="3"]
+[ext_resource type="Script" uid="uid://gr8vnn8xys1x" path="res://scripts/network/control_client.gd" id="4"]
+
+[node name="QuestMain" type="Node3D" unique_id=150193282]
+script = ExtResource("1")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=480752656]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=991840752]
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1210063516]
+tracker = &"right_hand"
+
+[node name="ControllerReader" type="Node" parent="." unique_id=105418232]
+script = ExtResource("2")
+controller = NodePath("../XROrigin3D/RightHand")
+
+[node name="TelemetrySender" type="Node" parent="." unique_id=751792479]
+script = ExtResource("3")
+
+[node name="ControlClient" type="Node" parent="." unique_id=2070513302]
+script = ExtResource("4")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1956173677]
+
+[node name="Panel" type="PanelContainer" parent="CanvasLayer" unique_id=1580774669]
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 520.0
+offset_bottom = 540.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=1852014369]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1369553672]
+layout_mode = 2
+text = "Connecting..."
+
+[node name="TemplateSelect" type="OptionButton" parent="CanvasLayer/Panel/VBox" unique_id=1561812530]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=187945770]
+layout_mode = 2
+
+[node name="CalibrateButton" type="Button" parent="CanvasLayer/Panel/VBox/Buttons" unique_id=1783082192]
+layout_mode = 2
+text = "Calibrate"
+
+[node name="RecenterButton" type="Button" parent="CanvasLayer/Panel/VBox/Buttons" unique_id=1426102242]
+layout_mode = 2
+text = "Recenter"
+
+[node name="Tuning" type="VBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=207690134]
+layout_mode = 2
+
+[node name="SensitivityLabel" type="Label" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=1864327039]
+layout_mode = 2
+text = "Sensitivity"
+
+[node name="SensitivitySlider" type="HSlider" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=607452464]
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0
+
+[node name="DeadzoneLabel" type="Label" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=1042237425]
+layout_mode = 2
+text = "Deadzone"
+
+[node name="DeadzoneSlider" type="HSlider" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=84901138]
+layout_mode = 2
+max_value = 0.4
+step = 0.01
+
+[node name="ExpoLabel" type="Label" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=1708747143]
+layout_mode = 2
+text = "Expo"
+
+[node name="ExpoSlider" type="HSlider" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=379529957]
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+
+[node name="IntegratorLabel" type="Label" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=801765060]
+layout_mode = 2
+text = "Integrator Gain"
+
+[node name="IntegratorSlider" type="HSlider" parent="CanvasLayer/Panel/VBox/Tuning" unique_id=2062588737]
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0

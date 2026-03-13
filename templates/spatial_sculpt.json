@@ -1,0 +1,103 @@
+{
+  "template_name": "spatial_sculpt",
+  "description": "Continuous 6DOF spatial shaping with position and orientation blended per axis.",
+  "outputs": {
+    "throttle": {
+      "bindings": [
+        {
+          "source": "pos_y_m",
+          "mode": "absolute",
+          "range_min": -0.3,
+          "range_max": 0.3,
+          "weight": 0.8,
+          "invert": false,
+          "smoothing": 0.03,
+          "curve": "linear"
+        },
+        {
+          "source": "linvel_y_m_s",
+          "mode": "delta",
+          "range_min": -0.5,
+          "range_max": 0.5,
+          "weight": 0.2,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "yaw": {
+      "bindings": [
+        {
+          "source": "pose_yaw_deg",
+          "mode": "absolute",
+          "range_min": -70.0,
+          "range_max": 70.0,
+          "weight": 0.6,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        },
+        {
+          "source": "angvel_y_rad_s",
+          "mode": "delta",
+          "range_min": -2.0,
+          "range_max": 2.0,
+          "weight": 0.4,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "linear"
+        }
+      ]
+    },
+    "pitch": {
+      "bindings": [
+        {
+          "source": "pos_z_m",
+          "mode": "absolute",
+          "range_min": -0.25,
+          "range_max": 0.25,
+          "weight": 0.5,
+          "invert": true,
+          "smoothing": 0.03,
+          "curve": "linear"
+        },
+        {
+          "source": "pose_pitch_deg",
+          "mode": "absolute",
+          "range_min": -30.0,
+          "range_max": 30.0,
+          "weight": 0.5,
+          "invert": true,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        }
+      ]
+    },
+    "roll": {
+      "bindings": [
+        {
+          "source": "pos_x_m",
+          "mode": "absolute",
+          "range_min": -0.25,
+          "range_max": 0.25,
+          "weight": 0.5,
+          "invert": false,
+          "smoothing": 0.03,
+          "curve": "linear"
+        },
+        {
+          "source": "pose_roll_deg",
+          "mode": "absolute",
+          "range_min": -30.0,
+          "range_max": 30.0,
+          "weight": 0.5,
+          "invert": false,
+          "smoothing": 0.02,
+          "curve": "expo_soft"
+        }
+      ]
+    }
+  }
+}
+

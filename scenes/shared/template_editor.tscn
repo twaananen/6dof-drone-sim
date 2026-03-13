@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://ckn3rr228clfw"]
+
+[ext_resource type="Script" uid="uid://dfs05ay1sb4va" path="res://scripts/ui/template_editor.gd" id="1"]
+
+[node name="TemplateEditor" type="Control" unique_id=1469276902]
+custom_minimum_size = Vector2(520, 400)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1023131322]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Toolbar" type="HBoxContainer" parent="VBox" unique_id=623009496]
+layout_mode = 2
+
+[node name="TemplateSelect" type="OptionButton" parent="VBox/Toolbar" unique_id=1461745861]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NewButton" type="Button" parent="VBox/Toolbar" unique_id=1445888719]
+layout_mode = 2
+text = "New"
+
+[node name="ApplyButton" type="Button" parent="VBox/Toolbar" unique_id=440234233]
+layout_mode = 2
+text = "Apply"
+
+[node name="SaveButton" type="Button" parent="VBox/Toolbar" unique_id=813073060]
+layout_mode = 2
+text = "Save"
+
+[node name="DeleteButton" type="Button" parent="VBox/Toolbar" unique_id=1298509895]
+layout_mode = 2
+text = "Delete"
+
+[node name="Editor" type="TextEdit" parent="VBox" unique_id=1963573218]
+layout_mode = 2
+size_flags_vertical = 3
