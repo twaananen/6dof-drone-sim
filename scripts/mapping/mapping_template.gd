@@ -68,6 +68,29 @@ func to_dict() -> Dictionary:
     }
 
 
+func duplicate_template() -> MappingTemplate:
+    var copy := MappingTemplate.new()
+    copy.from_dict(to_dict())
+    return copy
+
+
+func with_global_tuning(settings: Dictionary) -> MappingTemplate:
+    var tuned := duplicate_template()
+    for output_name in tuned.outputs.keys():
+        var output: Dictionary = tuned.outputs[output_name]
+        if "sensitivity" in settings:
+            output["sensitivity"] = settings["sensitivity"]
+        if "deadzone" in settings:
+            output["deadzone"] = settings["deadzone"]
+        if "expo" in settings:
+            output["expo"] = settings["expo"]
+        if "integrator_gain" in settings:
+            for binding in output["bindings"]:
+                if binding.get("mode", "") == "integrator":
+                    binding["weight"] = settings["integrator_gain"]
+    return tuned
+
+
 func from_dict(data: Dictionary) -> void:
     template_name = data.get("template_name", "untitled")
     description = data.get("description", "")

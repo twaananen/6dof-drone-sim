@@ -21,35 +21,92 @@ static void handle_signal(int sig) {
     running = 0;
 }
 
-static void emit_event(int fd, uint16_t type, uint16_t code, int32_t value) {
+static int emit_event(int fd, uint16_t type, uint16_t code, int32_t value) {
     struct input_event ev;
     memset(&ev, 0, sizeof(ev));
     ev.type = type;
     ev.code = code;
     ev.value = value;
-    write(fd, &ev, sizeof(ev));
+    ssize_t written = write(fd, &ev, sizeof(ev));
+    if (written < 0) {
+        perror("write(input_event)");
+        return -1;
+    }
+    if ((size_t)written != sizeof(ev)) {
+        fprintf(stderr, "write(input_event): short write\n");
+        return -1;
+    }
+    return 0;
+}
+
+static int ioctl_value(int fd, unsigned long request, unsigned long value, const char *label) {
+    if (ioctl(fd, request, value) < 0) {
+        perror(label);
+        return -1;
+    }
+    return 0;
+}
+
+static int ioctl_ptr(int fd, unsigned long request, void *value, const char *label) {
+    if (ioctl(fd, request, value) < 0) {
+        perror(label);
+        return -1;
+    }
+    return 0;
+}
+
+static int open_uinput_device(void) {
+    const char *paths[] = {"/dev/uinput", "/dev/input/uinput"};
+    int last_errno = 0;
+    for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); i++) {
+        int fd = open(paths[i], O_WRONLY | O_NONBLOCK);
+        if (fd >= 0) {
+            return fd;
+        }
+        last_errno = errno;
+    }
+    errno = last_errno;
+    perror("open(uinput)");
+    return -1;
+}
+
+static int scale_stick_axis(float axis) {
+    if (axis > 1.0f) axis = 1.0f;
+    if (axis < -1.0f) axis = -1.0f;
+    return (int)(axis * ABS_MAX_VAL);
+}
+
+static int scale_trigger_axis(float axis) {
+    if (axis < 0.0f) axis = 0.0f;
+    if (axis > 1.0f) axis = 1.0f;
+    return (int)(axis * ABS_MAX_VAL);
 }
 
 static int create_device(void) {
-    int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+    int fd = open_uinput_device();
     if (fd < 0) {
-        perror("open(/dev/uinput)");
         return -1;
     }
 
-    ioctl(fd, UI_SET_EVBIT, EV_ABS);
-    ioctl(fd, UI_SET_ABSBIT, ABS_X);
-    ioctl(fd, UI_SET_ABSBIT, ABS_Y);
-    ioctl(fd, UI_SET_ABSBIT, ABS_RX);
-    ioctl(fd, UI_SET_ABSBIT, ABS_RY);
-    ioctl(fd, UI_SET_ABSBIT, ABS_Z);
-    ioctl(fd, UI_SET_ABSBIT, ABS_RZ);
+    if (ioctl_value(fd, UI_SET_EVBIT, EV_ABS, "UI_SET_EVBIT EV_ABS") < 0) {
+        goto fail;
+    }
+    int abs_codes[] = {ABS_X, ABS_Y, ABS_RX, ABS_RY, ABS_Z, ABS_RZ};
+    for (size_t i = 0; i < sizeof(abs_codes) / sizeof(abs_codes[0]); i++) {
+        if (ioctl_value(fd, UI_SET_ABSBIT, (unsigned long)abs_codes[i], "UI_SET_ABSBIT") < 0) {
+            goto fail;
+        }
+    }
 
-    ioctl(fd, UI_SET_EVBIT, EV_KEY);
-    ioctl(fd, UI_SET_KEYBIT, BTN_SOUTH);
-    ioctl(fd, UI_SET_KEYBIT, BTN_EAST);
-    ioctl(fd, UI_SET_KEYBIT, BTN_WEST);
-    ioctl(fd, UI_SET_KEYBIT, BTN_NORTH);
+    if (ioctl_value(fd, UI_SET_EVBIT, EV_KEY, "UI_SET_EVBIT EV_KEY") < 0) {
+        goto fail;
+    }
+    int button_codes[] = {BTN_SOUTH, BTN_EAST, BTN_WEST, BTN_NORTH};
+    for (size_t i = 0; i < sizeof(button_codes) / sizeof(button_codes[0]); i++) {
+        if (ioctl_value(fd, UI_SET_KEYBIT, (unsigned long)button_codes[i], "UI_SET_KEYBIT") < 0) {
+            goto fail;
+        }
+    }
 
     struct uinput_setup setup;
     memset(&setup, 0, sizeof(setup));
@@ -58,27 +115,37 @@ static int create_device(void) {
     setup.id.vendor = 0x6D0F;
     setup.id.product = 0x0001;
     setup.id.version = 1;
-    ioctl(fd, UI_DEV_SETUP, &setup);
+    if (ioctl_ptr(fd, UI_DEV_SETUP, &setup, "UI_DEV_SETUP") < 0) {
+        goto fail;
+    }
 
     struct uinput_abs_setup abs_setup;
     memset(&abs_setup, 0, sizeof(abs_setup));
-    abs_setup.absinfo.minimum = -ABS_MAX_VAL;
-    abs_setup.absinfo.maximum = ABS_MAX_VAL;
     abs_setup.absinfo.fuzz = 0;
     abs_setup.absinfo.flat = 0;
 
-    int abs_codes[] = {ABS_X, ABS_Y, ABS_RX, ABS_RY, ABS_Z, ABS_RZ};
-    for (int i = 0; i < 6; i++) {
+    for (size_t i = 0; i < sizeof(abs_codes) / sizeof(abs_codes[0]); i++) {
         abs_setup.code = abs_codes[i];
-        ioctl(fd, UI_ABS_SETUP, &abs_setup);
+        if (abs_codes[i] == ABS_Z || abs_codes[i] == ABS_RZ) {
+            abs_setup.absinfo.minimum = 0;
+            abs_setup.absinfo.maximum = ABS_MAX_VAL;
+        } else {
+            abs_setup.absinfo.minimum = -ABS_MAX_VAL;
+            abs_setup.absinfo.maximum = ABS_MAX_VAL;
+        }
+        if (ioctl_ptr(fd, UI_ABS_SETUP, &abs_setup, "UI_ABS_SETUP") < 0) {
+            goto fail;
+        }
     }
 
-    if (ioctl(fd, UI_DEV_CREATE) < 0) {
-        perror("UI_DEV_CREATE");
-        close(fd);
-        return -1;
+    if (ioctl_value(fd, UI_DEV_CREATE, 0, "UI_DEV_CREATE") < 0) {
+        goto fail;
     }
     return fd;
+
+fail:
+    close(fd);
+    return -1;
 }
 
 static int create_socket(int port) {
@@ -101,7 +168,16 @@ static int create_socket(int port) {
     }
 
     int flags = fcntl(sockfd, F_GETFL, 0);
-    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+    if (flags < 0) {
+        perror("fcntl(F_GETFL)");
+        close(sockfd);
+        return -1;
+    }
+    if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0) {
+        perror("fcntl(F_SETFL)");
+        close(sockfd);
+        return -1;
+    }
     return sockfd;
 }
 
@@ -156,23 +232,38 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < 6; i++) {
             float axis = read_f32(packet, 4 + i * 4);
-            int value = (int)(axis * ABS_MAX_VAL);
-            if (value > ABS_MAX_VAL) value = ABS_MAX_VAL;
-            if (value < -ABS_MAX_VAL) value = -ABS_MAX_VAL;
-            emit_event(device_fd, EV_ABS, abs_codes[i], value);
+            int value = (i < 4) ? scale_stick_axis(axis) : scale_trigger_axis(axis);
+            if (emit_event(device_fd, EV_ABS, abs_codes[i], value) < 0) {
+                running = 0;
+                break;
+            }
+        }
+        if (!running) {
+            break;
         }
 
         uint16_t buttons = 0;
         memcpy(&buttons, packet + 28, sizeof(uint16_t));
         for (int i = 0; i < 4; i++) {
-            emit_event(device_fd, EV_KEY, button_codes[i], (buttons >> i) & 1);
+            if (emit_event(device_fd, EV_KEY, button_codes[i], (buttons >> i) & 1) < 0) {
+                running = 0;
+                break;
+            }
         }
-        emit_event(device_fd, EV_SYN, SYN_REPORT, 0);
+        if (!running) {
+            break;
+        }
+        if (emit_event(device_fd, EV_SYN, SYN_REPORT, 0) < 0) {
+            break;
+        }
     }
 
-    ioctl(device_fd, UI_DEV_DESTROY);
+    if (ioctl_value(device_fd, UI_DEV_DESTROY, 0, "UI_DEV_DESTROY") < 0) {
+        close(device_fd);
+        close(sockfd);
+        return 1;
+    }
     close(device_fd);
     close(sockfd);
     return 0;
 }
-

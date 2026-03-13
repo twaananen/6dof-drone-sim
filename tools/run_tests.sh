@@ -60,7 +60,8 @@ fi
 
 cd "$ROOT_DIR"
 if [[ $# -eq 0 && -f "${DEFAULT_GUT_CONFIG}" ]]; then
-  exec "$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd -gconfig="${DEFAULT_GUT_CONFIG}"
+  "$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd -gconfig="${DEFAULT_GUT_CONFIG}"
+  exit $?
 fi
 
-exec "$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd "$@"
+"$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd "$@"

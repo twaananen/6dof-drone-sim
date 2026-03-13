@@ -20,10 +20,12 @@ var _mapping_engine: MappingEngine = MappingEngine.new()
 var _failsafe: FailsafeSupervisor = FailsafeSupervisor.new()
 var _template_manager: TemplateManager = TemplateManager.new()
 var _active_template: MappingTemplate
+var _runtime_template: MappingTemplate
 var _last_timestamp_usec: int = 0
 var _last_outputs: Dictionary = {}
 var _was_failsafe_active: bool = true
 var _last_status_send_usec: int = 0
+var _live_tuning_settings: Dictionary = {}
 var _pending_raw_state: Dictionary
 var _pending_derived: Dictionary
 var _pending_outputs: Dictionary
@@ -104,7 +106,8 @@ func _on_state_received(state: Dictionary) -> void:
 
 func _apply_template(template: MappingTemplate) -> void:
 	_active_template = template
-	_mapping_engine.set_template(template)
+	_live_tuning_settings.clear()
+	_rebuild_runtime_template()
 	template_editor.set_template(template)
 	_send_initial_status()
 
@@ -135,20 +138,17 @@ func _on_control_message(message: Dictionary) -> void:
 func _apply_global_tuning(settings: Dictionary) -> void:
 	if _active_template == null:
 		return
-	for output_name in _active_template.outputs.keys():
-		var output: Dictionary = _active_template.outputs[output_name]
-		if "sensitivity" in settings:
-			output["sensitivity"] = settings["sensitivity"]
-		if "deadzone" in settings:
-			output["deadzone"] = settings["deadzone"]
-		if "expo" in settings:
-			output["expo"] = settings["expo"]
-		if "integrator_gain" in settings:
-			for binding in output["bindings"]:
-				if binding.get("mode", "") == "integrator":
-					binding["weight"] = settings["integrator_gain"]
-	_mapping_engine.set_template(_active_template)
+	_live_tuning_settings.merge(settings, true)
+	_rebuild_runtime_template()
 	_send_status_update()
+
+
+func _rebuild_runtime_template() -> void:
+	if _active_template == null:
+		_runtime_template = null
+		return
+	_runtime_template = _active_template.with_global_tuning(_live_tuning_settings)
+	_mapping_engine.set_template(_runtime_template)
 
 
 func _send_initial_status() -> void:
