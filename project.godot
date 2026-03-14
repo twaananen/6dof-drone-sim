@@ -12,7 +12,7 @@ config_version=5
 
 config/name="6DOF Drone Controller"
 run/main_scene="res://scenes/pc_main.tscn"
-config/features=PackedStringArray("4.6")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 run/main_scene.android="res://scenes/quest_main.tscn"
 
 [display]
@@ -27,11 +27,19 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 viewport/transparent_background.android=true
 
 [xr]
 
+openxr/enabled=true
 openxr/startup_alert=false
 openxr/enabled.android=true
+openxr/default_action_map="res://openxr_action_map.tres"
+openxr/reference_space=1
+openxr/environment_blend_mode=2
+openxr/extensions/meta/render_model=true
+openxr/extensions/meta/passthrough=true
+shaders/enabled=true
 shaders/enabled.android=true

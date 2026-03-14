@@ -3,15 +3,20 @@ extends Node
 @export var server_host: String = "127.0.0.1"
 @export var server_port: int = 9101
 @export var reconnect_delay_sec: float = 1.0
+@export var auto_connect_on_ready: bool = true
 
 signal connected()
 signal disconnected()
 signal message_received(message)
+signal connection_state_changed(state: String, error_code: int)
 
 var _client: StreamPeerTCP = StreamPeerTCP.new()
 var _buffer: String = ""
 var _was_connected: bool = false
 var _reconnect_timer_sec: float = 0.0
+var _last_connect_error: Error = OK
+var _last_attempt_time_usec: int = 0
+var _reported_state: String = ""
 
 
 func connect_to_server() -> void:
@@ -19,12 +24,24 @@ func connect_to_server() -> void:
 	var status := _client.get_status()
 	if status == StreamPeerTCP.STATUS_CONNECTED or status == StreamPeerTCP.STATUS_CONNECTING:
 		return
-	_client.connect_to_host(server_host, server_port)
+	if server_host.is_empty() or server_port <= 0:
+		_last_connect_error = ERR_INVALID_PARAMETER
+		_report_state("error", _last_connect_error)
+		return
+	_last_attempt_time_usec = Time.get_ticks_usec()
+	_last_connect_error = _client.connect_to_host(server_host, server_port)
+	if _last_connect_error != OK:
+		_report_state("error", _last_connect_error)
+		return
+	_report_state("connecting", OK)
 
 
 func _ready() -> void:
 	_reconnect_timer_sec = 0.0
-	connect_to_server()
+	if auto_connect_on_ready:
+		connect_to_server()
+	else:
+		_report_state("unconfigured", OK)
 
 
 func _process(delta: float) -> void:
@@ -34,14 +51,24 @@ func _process(delta: float) -> void:
 	if is_connected and not _was_connected:
 		_was_connected = true
 		_reconnect_timer_sec = reconnect_delay_sec
+		_report_state("connected", OK)
 		connected.emit()
 	elif not is_connected and _was_connected:
 		_was_connected = false
 		_buffer = ""
 		_reconnect_timer_sec = reconnect_delay_sec
+		_report_state("disconnected", OK)
 		disconnected.emit()
 
 	if not is_connected:
+		if status == StreamPeerTCP.STATUS_CONNECTING:
+			_report_state("connecting", OK)
+		elif status == StreamPeerTCP.STATUS_ERROR:
+			_report_state("error", _last_connect_error if _last_connect_error != OK else FAILED)
+		elif server_host.is_empty():
+			_report_state("unconfigured", OK)
+		else:
+			_report_state("disconnected", OK)
 		if status == StreamPeerTCP.STATUS_NONE or status == StreamPeerTCP.STATUS_ERROR:
 			_reconnect_timer_sec = maxf(_reconnect_timer_sec - delta, 0.0)
 			if is_zero_approx(_reconnect_timer_sec):
@@ -81,6 +108,8 @@ func is_socket_connected() -> bool:
 
 
 func get_connection_state() -> String:
+	if server_host.is_empty():
+		return "unconfigured"
 	match _client.get_status():
 		StreamPeerTCP.STATUS_CONNECTING:
 			return "connecting"
@@ -104,7 +133,39 @@ func set_server_host(host: String, port: int = -1) -> void:
 		disconnected.emit()
 	_buffer = ""
 	_reconnect_timer_sec = 0.0
+	if server_host.is_empty():
+		_report_state("unconfigured", OK)
+		return
 	connect_to_server()
+
+
+func disconnect_from_server(clear_host: bool = false) -> void:
+	_client.disconnect_from_host()
+	_buffer = ""
+	_was_connected = false
+	_reconnect_timer_sec = reconnect_delay_sec
+	if clear_host:
+		server_host = ""
+	_report_state("unconfigured" if server_host.is_empty() else "disconnected", OK)
+
+
+func get_diagnostics() -> Dictionary:
+	return {
+		"control_target_host": server_host,
+		"control_target_port": server_port,
+		"control_connection_state": get_connection_state(),
+		"control_last_error": error_string(_last_connect_error) if _last_connect_error != OK else "",
+		"control_last_error_code": int(_last_connect_error),
+		"control_last_attempt_usec": _last_attempt_time_usec,
+	}
+
+
+func _report_state(state: String, error_code: Error) -> void:
+	if state == _reported_state and error_code == _last_connect_error:
+		return
+	_reported_state = state
+	_last_connect_error = error_code
+	connection_state_changed.emit(state, int(error_code))
 
 
 func _exit_tree() -> void:

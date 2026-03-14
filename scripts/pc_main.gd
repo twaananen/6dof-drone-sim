@@ -16,6 +16,7 @@ const SessionRunStore = preload("res://scripts/workflow/session_run_store.gd")
 @onready var telemetry_receiver: Node = $TelemetryReceiver
 @onready var control_server: Node = $ControlServer
 @onready var backend: Node = $LinuxGamepadBackend
+@onready var discovery_beacon: Node = $DiscoveryBeacon
 @onready var quest_status_panel: QuestStatusPanel = $VBox/StatusPanel
 @onready var workflow_editor: WorkflowEditorPanel = $VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowEditorPanel
 @onready var workflow_run_panel: WorkflowRunPanel = $VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowRunPanel
@@ -46,12 +47,14 @@ var _pending_raw_state: Dictionary
 var _pending_derived: Dictionary
 var _pending_outputs: Dictionary
 var _ui_dirty: bool = false
+var _quest_runtime_diagnostics: Dictionary = {}
 
 
 func _ready() -> void:
 	telemetry_receiver.state_received.connect(_on_state_received)
 	control_server.message_received.connect(_on_control_message)
 	control_server.client_connected.connect(_send_initial_status)
+	control_server.client_disconnected.connect(_on_control_client_disconnected)
 	workflow_editor.profile_applied.connect(_on_session_profile_applied)
 	workflow_editor.reload_requested.connect(_reload_session_profile)
 	workflow_run_panel.snapshot_requested.connect(_on_snapshot_requested)
@@ -147,7 +150,11 @@ func _on_template_deleted(_template_name: String) -> void:
 func _on_control_message(message: Dictionary) -> void:
 	match str(message.get("type", "")):
 		"hello":
+			_quest_runtime_diagnostics = message.get("diagnostics", {}).duplicate(true)
 			_send_initial_status()
+		"quest_diagnostics":
+			_quest_runtime_diagnostics = message.get("diagnostics", {}).duplicate(true)
+			_send_status_update()
 		"select_template":
 			var name: String = str(message.get("template_name", ""))
 			var template: MappingTemplate = _template_manager.load_template(name)
@@ -190,6 +197,11 @@ func _on_control_message(message: Dictionary) -> void:
 			)
 		"export_session_report":
 			_export_session_report(str(message.get("note", "")))
+
+
+func _on_control_client_disconnected() -> void:
+	_quest_runtime_diagnostics = {}
+	_send_status_update()
 
 
 func _apply_global_tuning(settings: Dictionary) -> void:
@@ -300,7 +312,10 @@ func _build_status_payload() -> Dictionary:
 		"last_outputs": _last_outputs,
 		"last_report_export": _last_report_export.duplicate(true),
 		"recent_run_snapshots": SessionRunStore.recent_entries(_session_run_history, 3),
+		"quest_runtime_diagnostics": _quest_runtime_diagnostics.duplicate(true),
 	}
+	payload.merge(control_server.get_diagnostics(), true)
+	payload.merge(discovery_beacon.get_diagnostics(), true)
 	payload["session_diagnostics"] = _session_profile.build_diagnostics(payload)
 	payload["session_playbook"] = _session_profile.build_operator_playbook(payload)
 	payload["baseline_comparison"] = _session_baseline_comparator.build_comparison(

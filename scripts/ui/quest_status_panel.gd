@@ -18,7 +18,29 @@ func set_status(status: Dictionary) -> void:
 			int(status.get("packets_received", 0)),
 			int(status.get("packets_dropped", 0)),
 		],
+		"Beacon: %d broadcast(s)" % int(status.get("beacon_packets_sent", 0)),
 	])
+	var quest_runtime: Dictionary = status.get("quest_runtime_diagnostics", {})
+	if not quest_runtime.is_empty():
+		lines.append("Quest XR: %s" % str(quest_runtime.get("xr_state", "xr_starting")))
+		lines.append("Quest Connect: %s" % str(quest_runtime.get("discovery_state", "xr_starting")))
+		var quest_host := str(quest_runtime.get("control_target_host", ""))
+		if not quest_host.is_empty():
+			lines.append("Quest Target: %s" % quest_host)
+		lines.append("Quest Discovery: %d beacon(s), %d invalid" % [
+			int(quest_runtime.get("beacon_packets_received", 0)),
+			int(quest_runtime.get("discovery_invalid_packets", 0)),
+		])
+		lines.append("Quest Telemetry: %d sent / %d errors" % [
+			int(quest_runtime.get("telemetry_packets_sent", 0)),
+			int(quest_runtime.get("telemetry_send_errors", 0)),
+		])
+		var xr_error := str(quest_runtime.get("xr_error", ""))
+		if not xr_error.is_empty():
+			lines.append("Quest XR Error: %s" % xr_error)
+		var discovery_error := str(quest_runtime.get("discovery_error", ""))
+		if not discovery_error.is_empty():
+			lines.append("Quest Error: %s" % discovery_error)
 	var run_label: String = str(status.get("session_run_label", ""))
 	if not run_label.is_empty():
 		lines.append("Run: %s" % run_label)

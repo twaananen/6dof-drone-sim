@@ -86,6 +86,15 @@ func get_listen_error() -> Error:
 	return _listen_error
 
 
+func get_diagnostics() -> Dictionary:
+	return {
+		"control_listen_port": get_listen_port(),
+		"control_listen_error": int(_listen_error),
+		"control_listen_error_text": error_string(_listen_error) if _listen_error != OK else "",
+		"control_has_client": has_client(),
+	}
+
+
 func _uses_default_bind_host() -> bool:
 	return bind_host.is_empty() or bind_host == "*" or bind_host == "0.0.0.0"
 

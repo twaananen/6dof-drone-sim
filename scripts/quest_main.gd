@@ -1,37 +1,59 @@
 extends Node3D
 
 const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
+const QuestConnectionState = preload("res://scripts/network/quest_connection_state.gd")
+const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
+
+const DEFAULT_CONTROL_PORT := 9101
+const DEFAULT_TELEMETRY_PORT := 9100
+const CONNECTION_MODE_AUTO := "auto"
+const CONNECTION_MODE_MANUAL := "manual"
+const DIAGNOSTIC_PUSH_INTERVAL_USEC := 500000
 
 @onready var controller_reader: Node = $ControllerReader
 @onready var telemetry_sender: Node = $TelemetrySender
 @onready var control_client: Node = $ControlClient
 @onready var discovery_listener: Node = $DiscoveryListener
-@onready var preset_select: OptionButton = $CanvasLayer/Panel/VBox/PresetSelect
-@onready var template_select: OptionButton = $CanvasLayer/Panel/VBox/TemplateSelect
-@onready var status_label: Label = $CanvasLayer/Panel/VBox/StatusLabel
-@onready var workflow_mode_select: OptionButton = $CanvasLayer/Panel/VBox/WorkflowModeSelect
-@onready var workflow_details_label: Label = $CanvasLayer/Panel/VBox/WorkflowDetailsLabel
-@onready var checklist_box: VBoxContainer = $CanvasLayer/Panel/VBox/ChecklistBox
-@onready var stream_client_label: Label = $CanvasLayer/Panel/VBox/StreamClientLabel
-@onready var stream_client_select: OptionButton = $CanvasLayer/Panel/VBox/StreamClientSelect
-@onready var run_label_edit: LineEdit = $CanvasLayer/Panel/VBox/RunLabelEdit
-@onready var latency_budget_spin: SpinBox = $CanvasLayer/Panel/VBox/LatencyBudgetSpin
-@onready var observed_latency_spin: SpinBox = $CanvasLayer/Panel/VBox/ObservedLatencySpin
-@onready var focus_loss_spin: SpinBox = $CanvasLayer/Panel/VBox/FocusLossSpin
-@onready var operator_note_edit: TextEdit = $CanvasLayer/Panel/VBox/OperatorNoteEdit
-@onready var apply_session_details_button: Button = $CanvasLayer/Panel/VBox/ApplySessionDetailsButton
-@onready var calibrate_button: Button = $CanvasLayer/Panel/VBox/Buttons/CalibrateButton
-@onready var recenter_button: Button = $CanvasLayer/Panel/VBox/Buttons/RecenterButton
-@onready var snapshot_note_edit: TextEdit = $CanvasLayer/Panel/VBox/SnapshotNoteEdit
-@onready var capture_snapshot_button: Button = $CanvasLayer/Panel/VBox/SnapshotButtons/CaptureSnapshotButton
-@onready var report_issue_button: Button = $CanvasLayer/Panel/VBox/SnapshotButtons/ReportIssueButton
-@onready var export_report_button: Button = $CanvasLayer/Panel/VBox/SnapshotButtons/ExportReportButton
-@onready var sensitivity_slider: HSlider = $CanvasLayer/Panel/VBox/Tuning/SensitivitySlider
-@onready var deadzone_slider: HSlider = $CanvasLayer/Panel/VBox/Tuning/DeadzoneSlider
-@onready var expo_slider: HSlider = $CanvasLayer/Panel/VBox/Tuning/ExpoSlider
-@onready var integrator_slider: HSlider = $CanvasLayer/Panel/VBox/Tuning/IntegratorSlider
-@onready var output_preview_label: Label = $CanvasLayer/Panel/VBox/OutputPreviewLabel
-@onready var workflow_diagnostics_label: Label = $CanvasLayer/Panel/VBox/WorkflowDiagnosticsLabel
+@onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
+@onready var ui_pivot: Node3D = $XROrigin3D/UiPivot
+@onready var quest_ui_layer: Node = $XROrigin3D/UiPivot/QuestUiLayer
+@onready var left_hand: XRController3D = $XROrigin3D/LeftHand
+@onready var right_hand: XRController3D = $XROrigin3D/RightHand
+@onready var left_fallback_mesh: MeshInstance3D = $XROrigin3D/LeftHand/FallbackMesh
+@onready var right_fallback_mesh: MeshInstance3D = $XROrigin3D/RightHand/FallbackMesh
+
+var connect_mode_select: OptionButton
+var manual_server_host_label: Label
+var manual_server_host_edit: LineEdit
+var apply_connection_button: Button
+var retry_connect_button: Button
+var recenter_panel_button: Button
+var preset_select: OptionButton
+var template_select: OptionButton
+var status_label: Label
+var workflow_mode_select: OptionButton
+var workflow_details_label: Label
+var checklist_box: VBoxContainer
+var stream_client_label: Label
+var stream_client_select: OptionButton
+var run_label_edit: LineEdit
+var latency_budget_spin: SpinBox
+var observed_latency_spin: SpinBox
+var focus_loss_spin: SpinBox
+var operator_note_edit: TextEdit
+var apply_session_details_button: Button
+var calibrate_button: Button
+var recenter_button: Button
+var snapshot_note_edit: TextEdit
+var capture_snapshot_button: Button
+var report_issue_button: Button
+var export_report_button: Button
+var sensitivity_slider: HSlider
+var deadzone_slider: HSlider
+var expo_slider: HSlider
+var integrator_slider: HSlider
+var output_preview_label: Label
+var workflow_diagnostics_label: Label
 
 var _active_template_name: String = ""
 var _last_status: Dictionary = {}
@@ -40,12 +62,103 @@ var _updating_preset_select: bool = false
 var _updating_workflow_select: bool = false
 var _updating_stream_client_select: bool = false
 var _updating_session_detail_controls: bool = false
-var _server_ip: String = ""
+var _updating_connection_mode_select: bool = false
+var _connection_mode: String = CONNECTION_MODE_AUTO
+var _manual_server_host: String = ""
+var _discovered_server_ip: String = ""
+var _discovered_control_port: int = DEFAULT_CONTROL_PORT
+var _discovered_telemetry_port: int = DEFAULT_TELEMETRY_PORT
+var _connection_state: QuestConnectionState = QuestConnectionState.new()
+var _xr_bootstrap: OpenXRBootstrap = OpenXRBootstrap.new()
+var _xr_diagnostics: Dictionary = {}
+var _last_runtime_diagnostics_push_usec: int = 0
 
 
 func _ready() -> void:
+	_bind_ui_controls()
+	_wire_ui_signals()
+	control_client.connected.connect(_on_control_connected)
+	control_client.disconnected.connect(_on_control_disconnected)
+	control_client.message_received.connect(_on_control_message)
+	control_client.connection_state_changed.connect(_on_control_connection_state_changed)
+	discovery_listener.server_discovered.connect(_on_server_discovered)
+	discovery_listener.bind_failed.connect(_on_discovery_bind_failed)
+
+	_load_connection_modes()
+	_load_presets(_session_profile.get("presets", []))
+	_load_workflow_modes(_session_profile.get("available_modes", []))
+	_load_stream_clients(_session_profile.get("stream_clients", []))
+	_load_session_details()
+	_rebuild_manual_check_controls()
+
+	_connection_state.set_xr_starting()
+	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
+	if bool(_xr_diagnostics.get("ok", false)):
+		_set_auto_discovery_wait_state()
+	else:
+		_connection_state.set_error(str(_xr_diagnostics.get("error", "OpenXR initialization failed")))
+
+	_update_controller_visuals()
+	_recenter_ui_panel()
+	_update_workflow_controls()
+	_update_status_label()
+
+
+func _physics_process(_delta: float) -> void:
+	telemetry_sender.send_state(controller_reader.read_state())
+	_update_status_label()
+	_maybe_push_runtime_diagnostics()
+
+
+func _bind_ui_controls() -> void:
+	var quest_panel := quest_ui_layer.call("get_scene_root") as Control
+	if quest_panel == null:
+		push_error("Quest UI layer did not provide a Control root")
+		return
+
+	var base_path := "Panel/Margin/Scroll/VBox/"
+	status_label = quest_panel.get_node(base_path + "StatusLabel")
+	connect_mode_select = quest_panel.get_node(base_path + "ConnectModeSelect")
+	manual_server_host_label = quest_panel.get_node(base_path + "ManualServerHostLabel")
+	manual_server_host_edit = quest_panel.get_node(base_path + "ManualServerHostEdit")
+	apply_connection_button = quest_panel.get_node(base_path + "ConnectionButtons/ApplyConnectionButton")
+	retry_connect_button = quest_panel.get_node(base_path + "ConnectionButtons/RetryConnectButton")
+	recenter_panel_button = quest_panel.get_node(base_path + "ConnectionButtons/RecenterPanelButton")
+	preset_select = quest_panel.get_node(base_path + "PresetSelect")
+	template_select = quest_panel.get_node(base_path + "TemplateSelect")
+	workflow_mode_select = quest_panel.get_node(base_path + "WorkflowModeSelect")
+	workflow_details_label = quest_panel.get_node(base_path + "WorkflowDetailsLabel")
+	checklist_box = quest_panel.get_node(base_path + "ChecklistBox")
+	stream_client_label = quest_panel.get_node(base_path + "StreamClientLabel")
+	stream_client_select = quest_panel.get_node(base_path + "StreamClientSelect")
+	run_label_edit = quest_panel.get_node(base_path + "RunLabelEdit")
+	latency_budget_spin = quest_panel.get_node(base_path + "LatencyBudgetSpin")
+	observed_latency_spin = quest_panel.get_node(base_path + "ObservedLatencySpin")
+	focus_loss_spin = quest_panel.get_node(base_path + "FocusLossSpin")
+	operator_note_edit = quest_panel.get_node(base_path + "OperatorNoteEdit")
+	apply_session_details_button = quest_panel.get_node(base_path + "ApplySessionDetailsButton")
+	calibrate_button = quest_panel.get_node(base_path + "Buttons/CalibrateButton")
+	recenter_button = quest_panel.get_node(base_path + "Buttons/RecenterButton")
+	snapshot_note_edit = quest_panel.get_node(base_path + "SnapshotNoteEdit")
+	capture_snapshot_button = quest_panel.get_node(base_path + "SnapshotButtons/CaptureSnapshotButton")
+	report_issue_button = quest_panel.get_node(base_path + "SnapshotButtons/ReportIssueButton")
+	export_report_button = quest_panel.get_node(base_path + "SnapshotButtons/ExportReportButton")
+	sensitivity_slider = quest_panel.get_node(base_path + "Tuning/SensitivitySlider")
+	deadzone_slider = quest_panel.get_node(base_path + "Tuning/DeadzoneSlider")
+	expo_slider = quest_panel.get_node(base_path + "Tuning/ExpoSlider")
+	integrator_slider = quest_panel.get_node(base_path + "Tuning/IntegratorSlider")
+	output_preview_label = quest_panel.get_node(base_path + "OutputPreviewLabel")
+	workflow_diagnostics_label = quest_panel.get_node(base_path + "WorkflowDiagnosticsLabel")
+
+
+func _wire_ui_signals() -> void:
 	calibrate_button.pressed.connect(func(): controller_reader.request_calibration())
 	recenter_button.pressed.connect(func(): controller_reader.request_recenter())
+	recenter_panel_button.pressed.connect(_recenter_ui_panel)
+	connect_mode_select.item_selected.connect(_on_connect_mode_selected)
+	manual_server_host_edit.text_changed.connect(func(_new_text: String): _update_connection_controls())
+	apply_connection_button.pressed.connect(_on_apply_connection_pressed)
+	retry_connect_button.pressed.connect(_on_retry_connect_pressed)
 	preset_select.item_selected.connect(_on_preset_selected)
 	template_select.item_selected.connect(_on_template_selected)
 	workflow_mode_select.item_selected.connect(_on_workflow_mode_selected)
@@ -58,51 +171,185 @@ func _ready() -> void:
 	capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
 	report_issue_button.pressed.connect(_on_report_issue_pressed)
 	export_report_button.pressed.connect(_on_export_report_pressed)
-	control_client.connected.connect(_on_control_connected)
-	control_client.disconnected.connect(_on_control_disconnected)
-	control_client.message_received.connect(_on_control_message)
-	discovery_listener.server_discovered.connect(_on_server_discovered)
-	_load_presets(_session_profile.get("presets", []))
-	_load_workflow_modes(_session_profile.get("available_modes", []))
-	_load_stream_clients(_session_profile.get("stream_clients", []))
-	_load_session_details()
-	_rebuild_manual_check_controls()
-	_update_workflow_controls()
-	_init_xr()
 
 
-func _physics_process(_delta: float) -> void:
-	telemetry_sender.send_state(controller_reader.read_state())
+func _load_connection_modes() -> void:
+	_updating_connection_mode_select = true
+	connect_mode_select.clear()
+	connect_mode_select.add_item("Auto Discovery")
+	connect_mode_select.set_item_metadata(0, CONNECTION_MODE_AUTO)
+	connect_mode_select.add_item("Manual IP")
+	connect_mode_select.set_item_metadata(1, CONNECTION_MODE_MANUAL)
+	connect_mode_select.select(0)
+	_updating_connection_mode_select = false
+	_update_connection_controls()
+
+
+func _on_connect_mode_selected(index: int) -> void:
+	if _updating_connection_mode_select:
+		return
+	_connection_mode = str(connect_mode_select.get_item_metadata(index))
+	_manual_server_host = manual_server_host_edit.text.strip_edges()
+	if _connection_mode == CONNECTION_MODE_AUTO:
+		control_client.disconnect_from_server(true)
+		telemetry_sender.clear_target()
+		if _discovered_server_ip.is_empty():
+			_set_auto_discovery_wait_state()
+		else:
+			_apply_target_host(_discovered_server_ip, _discovered_control_port, _discovered_telemetry_port, false)
+	else:
+		control_client.disconnect_from_server(true)
+		telemetry_sender.clear_target()
+		_connection_state.set_manual_override(_manual_server_host, DEFAULT_CONTROL_PORT, DEFAULT_TELEMETRY_PORT)
+	_update_connection_controls()
 	_update_status_label()
 
 
-func _init_xr() -> void:
-	var xr_interface: XRInterface = XRServer.find_interface("OpenXR")
-	if xr_interface == null:
-		push_warning("OpenXR interface missing")
+func _on_apply_connection_pressed() -> void:
+	if _connection_mode == CONNECTION_MODE_MANUAL:
+		_manual_server_host = manual_server_host_edit.text.strip_edges()
+		if _manual_server_host.is_empty():
+			_connection_state.set_error("Enter a manual server IP before connecting")
+			_update_status_label()
+			return
+		_apply_target_host(_manual_server_host, DEFAULT_CONTROL_PORT, DEFAULT_TELEMETRY_PORT, true)
 		return
-	if not xr_interface.is_initialized():
-		xr_interface.initialize()
-	if xr_interface.is_initialized():
-		get_viewport().use_xr = true
-		get_viewport().transparent_bg = true
-		var modes := xr_interface.get_supported_environment_blend_modes()
-		if XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND in modes:
-			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND
+
+	if _discovered_server_ip.is_empty():
+		_set_auto_discovery_wait_state()
+	else:
+		_apply_target_host(_discovered_server_ip, _discovered_control_port, _discovered_telemetry_port, false)
+	_update_status_label()
+
+
+func _on_retry_connect_pressed() -> void:
+	control_client.disconnect_from_server(true)
+	telemetry_sender.clear_target()
+	if _connection_mode == CONNECTION_MODE_MANUAL:
+		_on_apply_connection_pressed()
+		return
+	if _discovered_server_ip.is_empty():
+		_set_auto_discovery_wait_state()
+	else:
+		_apply_target_host(_discovered_server_ip, _discovered_control_port, _discovered_telemetry_port, false)
+	_update_status_label()
 
 
 func _on_server_discovered(ip: String, control_port: int, telemetry_port: int) -> void:
-	_server_ip = ip
-	control_client.set_server_host(ip, control_port)
-	telemetry_sender.set_target_host(ip, telemetry_port)
+	_discovered_server_ip = ip
+	_discovered_control_port = control_port
+	_discovered_telemetry_port = telemetry_port
+	if _connection_mode == CONNECTION_MODE_AUTO:
+		_apply_target_host(ip, control_port, telemetry_port, false)
+		return
+	_update_status_label()
+
+
+func _apply_target_host(host: String, control_port: int, telemetry_port: int, manual_override: bool) -> void:
+	if host.is_empty():
+		_connection_state.set_error("Server host is empty")
+		return
+	if manual_override:
+		_connection_state.set_manual_override(host, control_port, telemetry_port)
+	else:
+		_connection_state.set_beacon_received(host, control_port, telemetry_port)
+	control_client.set_server_host(host, control_port)
+	telemetry_sender.set_target_host(host, telemetry_port)
+	_update_connection_controls()
+	_update_status_label()
+	_push_runtime_diagnostics(true)
+
+
+func _on_control_connection_state_changed(state: String, error_code: int) -> void:
+	match state:
+		"connecting":
+			_connection_state.set_tcp_connecting(
+				str(control_client.server_host),
+				int(control_client.server_port),
+				int(telemetry_sender.target_port)
+			)
+		"connected":
+			_connection_state.set_tcp_connected(
+				str(control_client.server_host),
+				int(control_client.server_port),
+				int(telemetry_sender.target_port)
+			)
+		"unconfigured":
+			if _connection_mode == CONNECTION_MODE_MANUAL:
+				_connection_state.set_manual_override(_manual_server_host, DEFAULT_CONTROL_PORT, DEFAULT_TELEMETRY_PORT)
+			else:
+				_set_auto_discovery_wait_state()
+		"error":
+			_connection_state.set_error("Control connection error: %s" % error_string(error_code))
+		_:
+			if _connection_mode == CONNECTION_MODE_MANUAL:
+				_connection_state.set_manual_override(_manual_server_host, DEFAULT_CONTROL_PORT, DEFAULT_TELEMETRY_PORT)
+			elif _discovered_server_ip.is_empty():
+				_set_auto_discovery_wait_state()
+			else:
+				_connection_state.set_beacon_received(_discovered_server_ip, _discovered_control_port, _discovered_telemetry_port)
+	_update_status_label()
+	_push_runtime_diagnostics(true)
+
+
+func _on_discovery_bind_failed(error_code: int) -> void:
+	if _connection_mode == CONNECTION_MODE_AUTO:
+		_connection_state.set_error("Discovery listener failed to bind: %s" % error_string(error_code))
+	_update_status_label()
+
+
+func _set_auto_discovery_wait_state() -> void:
+	var bind_error := int(discovery_listener.get_bind_error())
+	if bind_error != OK:
+		_connection_state.set_error("Discovery listener failed to bind: %s" % error_string(bind_error))
+		return
+	_connection_state.set_waiting_for_beacon()
+
+
+func _update_controller_visuals() -> void:
+	var render_models_enabled := bool(ProjectSettings.get_setting("xr/openxr/extensions/meta/render_model", false))
+	var render_models_available := render_models_enabled and bool(_xr_diagnostics.get("render_model_plugin_available", false))
+	if render_models_available:
+		_ensure_render_model(left_hand, false)
+		_ensure_render_model(right_hand, true)
+	left_fallback_mesh.visible = not render_models_available
+	right_fallback_mesh.visible = not render_models_available
+
+
+func _ensure_render_model(controller: XRController3D, use_alt_render_model: bool) -> void:
+	if controller.get_node_or_null("ControllerRenderModel") != null:
+		return
+	if not ClassDB.class_exists("OpenXRFbRenderModel"):
+		return
+	var render_model := ClassDB.instantiate("OpenXRFbRenderModel") as Node
+	if render_model == null:
+		return
+	render_model.name = "ControllerRenderModel"
+	if use_alt_render_model:
+		render_model.set("render_model_type", 1)
+	controller.add_child(render_model)
+	render_model.owner = self
+
+
+func _recenter_ui_panel() -> void:
+	var forward := -xr_camera.global_transform.basis.z
+	forward.y = 0.0
+	if is_zero_approx(forward.length_squared()):
+		forward = Vector3(0.0, 0.0, -1.0)
+	else:
+		forward = forward.normalized()
+	ui_pivot.global_position = xr_camera.global_position + (forward * 1.1) + Vector3(0.0, -0.12, 0.0)
+	ui_pivot.look_at(xr_camera.global_position, Vector3.UP, true)
 
 
 func _on_control_connected() -> void:
 	control_client.send_message({
 		"type": "hello",
 		"client": "quest",
+		"diagnostics": _build_runtime_diagnostics(),
 	})
 	_update_workflow_controls()
+	_push_runtime_diagnostics(true)
 
 
 func _on_control_disconnected() -> void:
@@ -116,6 +363,7 @@ func _on_control_message(message: Dictionary) -> void:
 		"template_catalog":
 			_load_catalog(message.get("templates", []))
 		"session_profile":
+			_connection_state.set_profile_synced()
 			_session_profile = message.get("profile", {})
 			_load_presets(_session_profile.get("presets", []))
 			_load_workflow_modes(_session_profile.get("available_modes", []))
@@ -126,6 +374,7 @@ func _on_control_message(message: Dictionary) -> void:
 			_select_stream_client(str(_session_profile.get("stream_client", SessionProfile.STREAM_CLIENT_NONE)))
 			_rebuild_manual_check_controls()
 			_update_workflow_controls()
+			_push_runtime_diagnostics(true)
 		"active_template":
 			_active_template_name = str(message.get("template_name", ""))
 		"status":
@@ -258,9 +507,26 @@ func _update_status_label() -> void:
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	var run_label := str(_session_profile.get("run_label", ""))
 	var preset_label := str(_session_profile.get("preset_label", ""))
+	var runtime_diagnostics := _build_runtime_diagnostics()
+	var current_host := str(runtime_diagnostics.get("control_target_host", ""))
+	if current_host.is_empty():
+		current_host = _discovered_server_ip if not _discovered_server_ip.is_empty() else "searching..."
 	var lines := PackedStringArray([
-		"Server: %s" % (_server_ip if not _server_ip.is_empty() else "searching..."),
+		"XR: %s" % str(runtime_diagnostics.get("xr_state", "xr_starting")),
+		"Connect: %s (%s)" % [
+			str(runtime_diagnostics.get("discovery_state", QuestConnectionState.STATE_XR_STARTING)),
+			_connection_mode,
+		],
+		"Server: %s" % current_host,
 		"Control: %s" % control_client.get_connection_state(),
+		"Discovery: %d beacon(s), %d invalid" % [
+			int(runtime_diagnostics.get("beacon_packets_received", 0)),
+			int(runtime_diagnostics.get("discovery_invalid_packets", 0)),
+		],
+		"Telemetry: %d sent / %d errors" % [
+			int(runtime_diagnostics.get("telemetry_packets_sent", 0)),
+			int(runtime_diagnostics.get("telemetry_send_errors", 0)),
+		],
 		"Workflow: %s" % mode_label,
 		"Preset: %s" % preset_label,
 		"Template: %s" % _active_template_name,
@@ -271,6 +537,14 @@ func _update_status_label() -> void:
 			str(_last_status.get("packets_dropped", 0)),
 		],
 	])
+	var xr_error := str(runtime_diagnostics.get("xr_error", ""))
+	if not xr_error.is_empty():
+		lines.append("XR Error: %s" % xr_error)
+	var discovery_error := str(runtime_diagnostics.get("discovery_error", ""))
+	if not discovery_error.is_empty():
+		lines.append("Connect Error: %s" % discovery_error)
+	if _connection_mode == CONNECTION_MODE_MANUAL and not _manual_server_host.is_empty():
+		lines.append("Manual Host: %s" % _manual_server_host)
 	if not run_label.is_empty():
 		lines.append("Run: %s" % run_label)
 	if stream_client_enabled:
@@ -325,6 +599,48 @@ func _update_status_label() -> void:
 		float(outputs.get("roll", 0.0)),
 	]
 	workflow_diagnostics_label.text = _format_session_diagnostics(_last_status.get("session_diagnostics", {}))
+
+
+func _build_runtime_diagnostics() -> Dictionary:
+	var diagnostics := _connection_state.to_dict()
+	diagnostics["connection_mode"] = _connection_mode
+	diagnostics["manual_server_host"] = _manual_server_host
+	diagnostics["discovery_state"] = _connection_state.state
+	diagnostics["discovery_error"] = _connection_state.last_error
+	diagnostics["xr_state"] = str(_xr_diagnostics.get("state", OpenXRBootstrap.STATE_XR_STARTING))
+	diagnostics["xr_error"] = str(_xr_diagnostics.get("error", ""))
+	diagnostics["xr_alpha_blend_supported"] = bool(_xr_diagnostics.get("alpha_blend_supported", false))
+	diagnostics["xr_passthrough_plugin_available"] = bool(_xr_diagnostics.get("passthrough_plugin_available", false))
+	diagnostics["xr_render_model_plugin_available"] = bool(_xr_diagnostics.get("render_model_plugin_available", false))
+	diagnostics["xr_passthrough_extension_available"] = bool(_xr_diagnostics.get("passthrough_extension_available", false))
+	var discovery: Dictionary = discovery_listener.get_diagnostics()
+	diagnostics.merge(discovery, true)
+	diagnostics["beacon_packets_received"] = int(discovery.get("discovery_packets_received", 0))
+	diagnostics.merge(control_client.get_diagnostics(), true)
+	diagnostics.merge(telemetry_sender.get_diagnostics(), true)
+	diagnostics["active_template_name"] = _active_template_name
+	return diagnostics
+
+
+func _maybe_push_runtime_diagnostics() -> void:
+	if not control_client.is_socket_connected():
+		return
+	var now_usec := Time.get_ticks_usec()
+	if now_usec - _last_runtime_diagnostics_push_usec < DIAGNOSTIC_PUSH_INTERVAL_USEC:
+		return
+	_push_runtime_diagnostics(false)
+
+
+func _push_runtime_diagnostics(force: bool) -> void:
+	if not force and not control_client.is_socket_connected():
+		return
+	if not control_client.is_socket_connected():
+		return
+	_last_runtime_diagnostics_push_usec = Time.get_ticks_usec()
+	control_client.send_message({
+		"type": "quest_diagnostics",
+		"diagnostics": _build_runtime_diagnostics(),
+	})
 
 
 func _load_workflow_modes(modes: Array) -> void:
@@ -406,7 +722,17 @@ func _rebuild_manual_check_controls() -> void:
 		checklist_box.add_child(checkbox)
 
 
+func _update_connection_controls() -> void:
+	var manual_mode := _connection_mode == CONNECTION_MODE_MANUAL
+	manual_server_host_label.visible = manual_mode
+	manual_server_host_edit.visible = manual_mode
+	manual_server_host_edit.editable = manual_mode
+	apply_connection_button.text = "Apply Manual Host" if manual_mode else "Use Auto Discovery"
+	retry_connect_button.disabled = manual_mode and manual_server_host_edit.text.strip_edges().is_empty()
+
+
 func _update_workflow_controls() -> void:
+	_update_connection_controls()
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	stream_client_label.visible = stream_client_enabled
 	stream_client_select.visible = stream_client_enabled
@@ -429,20 +755,27 @@ func _update_workflow_controls() -> void:
 
 
 func _format_session_diagnostics(diagnostics: Dictionary) -> String:
-	if diagnostics.is_empty():
-		return "Checklist: waiting for desktop status."
 	var lines := PackedStringArray()
-	var summary: String = str(diagnostics.get("summary", ""))
-	if not summary.is_empty():
-		lines.append("Checklist: %s" % summary)
-	for item in diagnostics.get("items", []):
-		var state := str(item.get("state", "ready"))
-		var prefix := "OK"
-		if state == "warning":
-			prefix = "Blocker"
-		elif state == "attention":
-			prefix = "Check"
-		lines.append("%s: %s" % [prefix, str(item.get("label", ""))])
+	if diagnostics.is_empty():
+		lines.append("Checklist: waiting for desktop status.")
+	else:
+		var summary: String = str(diagnostics.get("summary", ""))
+		if not summary.is_empty():
+			lines.append("Checklist: %s" % summary)
+		for item in diagnostics.get("items", []):
+			var state := str(item.get("state", "ready"))
+			var prefix := "OK"
+			if state == "warning":
+				prefix = "Blocker"
+			elif state == "attention":
+				prefix = "Check"
+			lines.append("%s: %s" % [prefix, str(item.get("label", ""))])
+	var runtime_diagnostics := _build_runtime_diagnostics()
+	lines.append("Quest XR: %s" % str(runtime_diagnostics.get("xr_state", "xr_starting")))
+	lines.append("Quest Connect: %s" % str(runtime_diagnostics.get("discovery_state", QuestConnectionState.STATE_XR_STARTING)))
+	var connect_error := str(runtime_diagnostics.get("discovery_error", ""))
+	if not connect_error.is_empty():
+		lines.append("Quest Error: %s" % connect_error)
 	var baseline_comparison: Dictionary = _last_status.get("baseline_comparison", {})
 	var comparison_summary := str(baseline_comparison.get("summary", ""))
 	if not comparison_summary.is_empty():

@@ -66,6 +66,7 @@ export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}}"
 mkdir -p "${HOME}" "${XDG_DATA_HOME}" "${XDG_CONFIG_HOME}"
 
 cd "$ROOT_DIR"
+timeout 120 "$GODOT_BIN" --headless --path "$ROOT_DIR" --import > /dev/null 2>&1 || true
 if [[ $# -eq 0 && -f "${DEFAULT_GUT_CONFIG}" ]]; then
   "$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd -gconfig="${DEFAULT_GUT_CONFIG}"
   exit $?
