@@ -32,9 +32,5 @@ func _process(_delta: float) -> void:
 			server_discovered.emit(sender_ip, control_port, telemetry_port)
 
 
-func get_discovered_ip() -> String:
-	return _discovered_ip
-
-
 func _exit_tree() -> void:
 	_peer.close()

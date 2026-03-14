@@ -40,6 +40,7 @@ var _updating_preset_select: bool = false
 var _updating_workflow_select: bool = false
 var _updating_stream_client_select: bool = false
 var _updating_session_detail_controls: bool = false
+var _server_ip: String = ""
 
 
 func _ready() -> void:
@@ -91,6 +92,7 @@ func _init_xr() -> void:
 
 
 func _on_server_discovered(ip: String, control_port: int, telemetry_port: int) -> void:
+	_server_ip = ip
 	control_client.set_server_host(ip, control_port)
 	telemetry_sender.set_target_host(ip, telemetry_port)
 
@@ -256,9 +258,8 @@ func _update_status_label() -> void:
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	var run_label := str(_session_profile.get("run_label", ""))
 	var preset_label := str(_session_profile.get("preset_label", ""))
-	var discovered_ip := discovery_listener.get_discovered_ip()
 	var lines := PackedStringArray([
-		"Server: %s" % (discovered_ip if not discovered_ip.is_empty() else "searching..."),
+		"Server: %s" % (_server_ip if not _server_ip.is_empty() else "searching..."),
 		"Control: %s" % control_client.get_connection_state(),
 		"Workflow: %s" % mode_label,
 		"Preset: %s" % preset_label,

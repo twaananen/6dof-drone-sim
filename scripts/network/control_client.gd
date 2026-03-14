@@ -93,11 +93,11 @@ func get_connection_state() -> String:
 
 
 func set_server_host(host: String, port: int = -1) -> void:
-	if port > 0:
-		server_port = port
-	if host == server_host:
+	var new_port := port if port > 0 else server_port
+	if host == server_host and new_port == server_port:
 		return
 	server_host = host
+	server_port = new_port
 	_client.disconnect_from_host()
 	if _was_connected:
 		_was_connected = false

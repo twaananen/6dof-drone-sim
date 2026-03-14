@@ -22,11 +22,11 @@ func send_state(state: Dictionary) -> void:
 
 
 func set_target_host(host: String, port: int = -1) -> void:
-    if port > 0:
-        target_port = port
-    if host == target_host:
+    var new_port := port if port > 0 else target_port
+    if host == target_host and new_port == target_port:
         return
     target_host = host
+    target_port = new_port
     _peer.close()
     _peer.set_dest_address(target_host, target_port)
 
