@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://diky2fj2g3w6a" path="res://scenes/shared/quest_status_panel.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
+[ext_resource type="Script" path="res://scripts/network/discovery_beacon.gd" id="11"]
 
 [node name="PcMain" type="Control" unique_id=1032354419]
 layout_mode = 3
@@ -30,6 +31,9 @@ script = ExtResource("3")
 
 [node name="LinuxGamepadBackend" type="Node" parent="." unique_id=1002458134]
 script = ExtResource("4")
+
+[node name="DiscoveryBeacon" type="Node" parent="."]
+script = ExtResource("11")
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=556399480]
 layout_mode = 1

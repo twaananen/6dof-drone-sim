@@ -21,5 +21,15 @@ func send_state(state: Dictionary) -> void:
     _sequence += 1
 
 
+func set_target_host(host: String, port: int = -1) -> void:
+    if port > 0:
+        target_port = port
+    if host == target_host:
+        return
+    target_host = host
+    _peer.close()
+    _peer.set_dest_address(target_host, target_port)
+
+
 func _exit_tree() -> void:
     _peer.close()

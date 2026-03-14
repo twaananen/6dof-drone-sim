@@ -5,6 +5,7 @@ const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
 @onready var controller_reader: Node = $ControllerReader
 @onready var telemetry_sender: Node = $TelemetrySender
 @onready var control_client: Node = $ControlClient
+@onready var discovery_listener: Node = $DiscoveryListener
 @onready var preset_select: OptionButton = $CanvasLayer/Panel/VBox/PresetSelect
 @onready var template_select: OptionButton = $CanvasLayer/Panel/VBox/TemplateSelect
 @onready var status_label: Label = $CanvasLayer/Panel/VBox/StatusLabel
@@ -59,6 +60,7 @@ func _ready() -> void:
 	control_client.connected.connect(_on_control_connected)
 	control_client.disconnected.connect(_on_control_disconnected)
 	control_client.message_received.connect(_on_control_message)
+	discovery_listener.server_discovered.connect(_on_server_discovered)
 	_load_presets(_session_profile.get("presets", []))
 	_load_workflow_modes(_session_profile.get("available_modes", []))
 	_load_stream_clients(_session_profile.get("stream_clients", []))
@@ -82,6 +84,15 @@ func _init_xr() -> void:
 		xr_interface.initialize()
 	if xr_interface.is_initialized():
 		get_viewport().use_xr = true
+		get_viewport().transparent_bg = true
+		var modes := xr_interface.get_supported_environment_blend_modes()
+		if XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND in modes:
+			xr_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND
+
+
+func _on_server_discovered(ip: String, control_port: int, telemetry_port: int) -> void:
+	control_client.set_server_host(ip, control_port)
+	telemetry_sender.set_target_host(ip, telemetry_port)
 
 
 func _on_control_connected() -> void:
@@ -245,7 +256,9 @@ func _update_status_label() -> void:
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	var run_label := str(_session_profile.get("run_label", ""))
 	var preset_label := str(_session_profile.get("preset_label", ""))
+	var discovered_ip := discovery_listener.get_discovered_ip()
 	var lines := PackedStringArray([
+		"Server: %s" % (discovered_ip if not discovered_ip.is_empty() else "searching..."),
 		"Control: %s" % control_client.get_connection_state(),
 		"Workflow: %s" % mode_label,
 		"Preset: %s" % preset_label,

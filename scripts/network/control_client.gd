@@ -92,5 +92,20 @@ func get_connection_state() -> String:
 			return "disconnected"
 
 
+func set_server_host(host: String, port: int = -1) -> void:
+	if port > 0:
+		server_port = port
+	if host == server_host:
+		return
+	server_host = host
+	_client.disconnect_from_host()
+	if _was_connected:
+		_was_connected = false
+		disconnected.emit()
+	_buffer = ""
+	_reconnect_timer_sec = 0.0
+	connect_to_server()
+
+
 func _exit_tree() -> void:
 	_client.disconnect_from_host()
