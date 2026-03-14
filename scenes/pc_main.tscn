@@ -46,17 +46,22 @@ layout_mode = 2
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LeftColumn" type="VBoxContainer" parent="VBox/MainSplit"]
+[node name="LeftColumnScroll" type="ScrollContainer" parent="VBox/MainSplit"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="WorkflowEditorPanel" parent="VBox/MainSplit/LeftColumn" instance=ExtResource("9")]
+[node name="LeftColumn" type="VBoxContainer" parent="VBox/MainSplit/LeftColumnScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WorkflowEditorPanel" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" instance=ExtResource("9")]
 layout_mode = 2
 
-[node name="WorkflowRunPanel" parent="VBox/MainSplit/LeftColumn" instance=ExtResource("10")]
+[node name="WorkflowRunPanel" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" instance=ExtResource("10")]
 layout_mode = 2
 
-[node name="TemplateEditor" parent="VBox/MainSplit/LeftColumn" unique_id=1996861880 instance=ExtResource("5")]
+[node name="TemplateEditor" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" unique_id=1996861880 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_vertical = 3
 
