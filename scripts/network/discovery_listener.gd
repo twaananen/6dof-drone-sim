@@ -11,6 +11,7 @@ var _discovered_ip: String = ""
 func _ready() -> void:
 	if _peer.bind(DISCOVERY_PORT) != OK:
 		push_warning("DiscoveryListener: failed to bind UDP port %d" % DISCOVERY_PORT)
+		set_process(false)
 
 
 func _process(_delta: float) -> void:

@@ -7,7 +7,7 @@ const BROADCAST_INTERVAL_SEC: float = 1.0
 @export var telemetry_port: int = 9100
 
 var _peer: PacketPeerUDP = PacketPeerUDP.new()
-var _timer: float = 0.0
+var _timer: float = BROADCAST_INTERVAL_SEC
 var _payload: PackedByteArray
 
 
