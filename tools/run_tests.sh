@@ -58,6 +58,13 @@ shaders/enabled=false
 EOF
 fi
 
+if [[ -z "${HOME:-}" || ! -w "${HOME}" ]]; then
+  export HOME="${TMPDIR:-/tmp}/6dof-drone-sim-test-home"
+fi
+export XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}}"
+mkdir -p "${HOME}" "${XDG_DATA_HOME}" "${XDG_CONFIG_HOME}"
+
 cd "$ROOT_DIR"
 if [[ $# -eq 0 && -f "${DEFAULT_GUT_CONFIG}" ]]; then
   "$GODOT_BIN" --headless --path "$ROOT_DIR" -s res://addons/gut/gut_cmdln.gd -gconfig="${DEFAULT_GUT_CONFIG}"

@@ -5,12 +5,21 @@ const MappingTemplate = preload("res://scripts/mapping/mapping_template.gd")
 const FailsafeSupervisor = preload("res://scripts/mapping/failsafe_supervisor.gd")
 const SourceDeriver = preload("res://scripts/telemetry/source_deriver.gd")
 const TemplateManager = preload("res://scripts/ui/template_manager.gd")
+const WorkflowEditorPanel = preload("res://scripts/ui/workflow_editor_panel.gd")
+const WorkflowRunPanel = preload("res://scripts/ui/workflow_run_panel.gd")
+const SessionBaselineComparator = preload("res://scripts/workflow/session_baseline_comparator.gd")
+const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
+const SessionProfileStore = preload("res://scripts/workflow/session_profile_store.gd")
+const SessionReportExporter = preload("res://scripts/workflow/session_report_exporter.gd")
+const SessionRunStore = preload("res://scripts/workflow/session_run_store.gd")
 
 @onready var telemetry_receiver: Node = $TelemetryReceiver
 @onready var control_server: Node = $ControlServer
 @onready var backend: Node = $LinuxGamepadBackend
 @onready var quest_status_panel: QuestStatusPanel = $VBox/StatusPanel
-@onready var template_editor: TemplateEditor = $VBox/MainSplit/TemplateEditor
+@onready var workflow_editor: WorkflowEditorPanel = $VBox/MainSplit/LeftColumn/WorkflowEditorPanel
+@onready var workflow_run_panel: WorkflowRunPanel = $VBox/MainSplit/LeftColumn/WorkflowRunPanel
+@onready var template_editor: TemplateEditor = $VBox/MainSplit/LeftColumn/TemplateEditor
 @onready var raw_panel: TelemetryPanel = $VBox/MainSplit/Panels/RawPanel
 @onready var derived_panel: TelemetryPanel = $VBox/MainSplit/Panels/DerivedPanel
 @onready var output_panel: TelemetryPanel = $VBox/MainSplit/Panels/OutputPanel
@@ -19,6 +28,13 @@ var _source_deriver: SourceDeriver = SourceDeriver.new()
 var _mapping_engine: MappingEngine = MappingEngine.new()
 var _failsafe: FailsafeSupervisor = FailsafeSupervisor.new()
 var _template_manager: TemplateManager = TemplateManager.new()
+var _session_baseline_comparator: SessionBaselineComparator = SessionBaselineComparator.new()
+var _session_store: SessionProfileStore = SessionProfileStore.new()
+var _session_report_exporter: SessionReportExporter = SessionReportExporter.new()
+var _session_run_store: SessionRunStore = SessionRunStore.new()
+var _session_profile: SessionProfile = SessionProfile.new()
+var _session_run_history: Array = []
+var _last_report_export: Dictionary = {}
 var _active_template: MappingTemplate
 var _runtime_template: MappingTemplate
 var _last_timestamp_usec: int = 0
@@ -36,9 +52,17 @@ func _ready() -> void:
 	telemetry_receiver.state_received.connect(_on_state_received)
 	control_server.message_received.connect(_on_control_message)
 	control_server.client_connected.connect(_send_initial_status)
+	workflow_editor.profile_applied.connect(_on_session_profile_applied)
+	workflow_editor.reload_requested.connect(_reload_session_profile)
+	workflow_run_panel.snapshot_requested.connect(_on_snapshot_requested)
+	workflow_run_panel.export_requested.connect(_on_export_requested)
 	template_editor.template_applied.connect(_apply_template)
 	template_editor.template_saved.connect(_on_template_saved)
 	template_editor.template_deleted.connect(_on_template_deleted)
+	_session_run_history = _session_run_store.load_history()
+	workflow_run_panel.set_history(_session_run_history)
+	workflow_run_panel.set_last_report_export(_last_report_export)
+	_reload_session_profile()
 
 	var template_names: PackedStringArray = _template_manager.list_names()
 	if template_names.size() > 0:
@@ -50,12 +74,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _active_template == null:
 		return
-	quest_status_panel.set_status(
-		control_server.has_client(),
-		_active_template.template_name,
-		_failsafe.is_active(),
-		telemetry_receiver.packets_received
-	)
+	var status_payload := _build_status_payload()
+	quest_status_panel.set_status(status_payload)
+	workflow_editor.set_runtime_status(status_payload)
+	workflow_run_panel.set_runtime_status(status_payload)
 	if _ui_dirty:
 		_ui_dirty = false
 		raw_panel.set_payload("Raw Telemetry", _serialize_state_for_ui(_pending_raw_state))
@@ -133,6 +155,41 @@ func _on_control_message(message: Dictionary) -> void:
 				_apply_template(template)
 		"apply_tuning":
 			_apply_global_tuning(message.get("settings", {}))
+		"set_session_mode":
+			_session_profile.set_mode(str(message.get("mode", "")))
+			_session_profile.set_preset(SessionProfile.PRESET_CUSTOM)
+			_persist_and_broadcast_session_profile()
+		"set_session_preset":
+			_session_profile.apply_preset(str(message.get("preset_id", "")))
+			_persist_and_broadcast_session_profile()
+		"set_session_details":
+			_session_profile.apply_session_details(
+				str(message.get("run_label", "")),
+				int(message.get("latency_budget_ms", 0)),
+				str(message.get("operator_note", "")),
+				int(message.get("observed_latency_ms", 0)),
+				int(message.get("focus_loss_events", 0))
+			)
+			_session_profile.set_preset(SessionProfile.PRESET_CUSTOM)
+			_persist_and_broadcast_session_profile()
+		"set_stream_client":
+			_session_profile.set_stream_client(str(message.get("stream_client", "")))
+			_session_profile.set_preset(SessionProfile.PRESET_CUSTOM)
+			_persist_and_broadcast_session_profile()
+		"set_manual_check":
+			_session_profile.set_manual_check(
+				str(message.get("check_id", "")),
+				bool(message.get("checked", false))
+			)
+			_persist_and_broadcast_session_profile()
+		"capture_run_snapshot":
+			_capture_run_snapshot(
+				str(message.get("kind", SessionRunStore.KIND_CHECKPOINT)),
+				str(message.get("note", "")),
+				str(message.get("origin", SessionRunStore.ORIGIN_QUEST))
+			)
+		"export_session_report":
+			_export_session_report(str(message.get("note", "")))
 
 
 func _apply_global_tuning(settings: Dictionary) -> void:
@@ -163,7 +220,17 @@ func _send_initial_status() -> void:
 		"type": "template_catalog",
 		"templates": _template_manager.list_names(),
 	})
+	_send_session_profile()
 	_send_status_update()
+
+
+func _send_session_profile() -> void:
+	if not control_server.has_client():
+		return
+	control_server.send_message({
+		"type": "session_profile",
+		"profile": _session_profile.to_dict(),
+	})
 
 
 func _send_status_update() -> void:
@@ -173,13 +240,9 @@ func _send_status_update() -> void:
 		"type": "active_template",
 		"template_name": _active_template.template_name if _active_template != null else "",
 	})
-	control_server.send_message({
-		"type": "status",
-		"failsafe_active": _failsafe.is_active(),
-		"packets_received": telemetry_receiver.packets_received,
-		"backend_available": backend.is_available(),
-		"last_outputs": _last_outputs,
-	})
+	var status_payload := _build_status_payload()
+	status_payload["type"] = "status"
+	control_server.send_message(status_payload)
 
 
 func _serialize_state_for_ui(state: Dictionary) -> Dictionary:
@@ -197,3 +260,132 @@ func _serialize_state_for_ui(state: Dictionary) -> Dictionary:
 		"grip": state.get("grip", 0.0),
 		"thumbstick": str(state.get("thumbstick", Vector2.ZERO)),
 	}
+
+
+func _summarize_outputs(outputs: Dictionary) -> Dictionary:
+	return {
+		"throttle": snappedf(float(outputs.get("throttle", 0.0)), 0.01),
+		"yaw": snappedf(float(outputs.get("yaw", 0.0)), 0.01),
+		"pitch": snappedf(float(outputs.get("pitch", 0.0)), 0.01),
+		"roll": snappedf(float(outputs.get("roll", 0.0)), 0.01),
+	}
+
+
+func _build_status_payload() -> Dictionary:
+	var payload := {
+		"connected": control_server.has_client(),
+		"template_name": _active_template.template_name if _active_template != null else "",
+		"failsafe_active": _failsafe.is_active(),
+		"packets_received": telemetry_receiver.packets_received,
+		"packets_dropped": telemetry_receiver.packets_dropped,
+		"backend_available": backend.is_available(),
+		"backend_name": "linux_gamepad",
+		"session_preset_id": _session_profile.preset_id,
+		"session_preset_label": _session_profile.get_preset_label(),
+		"session_mode": _session_profile.mode,
+		"session_mode_label": _session_profile.get_mode_label(),
+		"session_stream_client": _session_profile.stream_client,
+		"session_stream_client_label": _session_profile.get_stream_client_label(),
+		"session_stream_client_enabled": _session_profile.supports_stream_client_selection(),
+		"session_run_label": _session_profile.run_label,
+		"session_latency_budget_ms": _session_profile.latency_budget_ms,
+		"session_observed_latency_ms": _session_profile.observed_latency_ms,
+		"session_focus_loss_events": _session_profile.focus_loss_events,
+		"session_operator_note": _session_profile.operator_note,
+		"session_manual_checks": _session_profile.manual_checks.duplicate(true),
+		"session_manual_check_items": _session_profile.manual_check_items(),
+		"session_manual_check_summary": _session_profile.get_manual_check_summary(),
+		"workflow_hint": _session_profile.get_workflow_hint(),
+		"output_summary": _summarize_outputs(_last_outputs),
+		"last_outputs": _last_outputs,
+		"last_report_export": _last_report_export.duplicate(true),
+		"recent_run_snapshots": SessionRunStore.recent_entries(_session_run_history, 3),
+	}
+	payload["session_diagnostics"] = _session_profile.build_diagnostics(payload)
+	payload["session_playbook"] = _session_profile.build_operator_playbook(payload)
+	payload["baseline_comparison"] = _session_baseline_comparator.build_comparison(
+		_session_profile,
+		payload,
+		_session_run_history
+	)
+	return payload
+
+
+func _on_session_profile_applied(profile: SessionProfile) -> void:
+	_session_profile = profile.duplicate_profile()
+	_persist_and_broadcast_session_profile()
+
+
+func _on_snapshot_requested(kind: String, note: String) -> void:
+	_capture_run_snapshot(kind, note, SessionRunStore.ORIGIN_PC)
+
+
+func _on_export_requested(note: String) -> void:
+	_export_session_report(note)
+
+
+func _reload_session_profile() -> void:
+	_session_profile = _session_store.load_profile()
+	workflow_editor.set_profile(_session_profile)
+	workflow_run_panel.set_profile(_session_profile)
+	workflow_run_panel.set_last_report_export(_last_report_export)
+	_send_session_profile()
+	_send_status_update()
+
+
+func _persist_and_broadcast_session_profile() -> void:
+	_session_store.save_profile(_session_profile)
+	workflow_editor.set_profile(_session_profile)
+	workflow_run_panel.set_profile(_session_profile)
+	_send_session_profile()
+	_send_status_update()
+
+
+func _capture_run_snapshot(kind: String, note: String, origin: String) -> void:
+	var status_payload := _build_status_payload()
+	_session_run_history = _session_run_store.append_snapshot(
+		_session_profile,
+		status_payload,
+		kind,
+		origin,
+		note
+	)
+	workflow_run_panel.set_history(_session_run_history)
+	_send_status_update()
+
+
+func _export_session_report(note: String = "") -> void:
+	var status_payload := _build_status_payload()
+	var export_info := _session_report_exporter.export_report(
+		_session_profile,
+		status_payload,
+		_session_run_history,
+		note
+	)
+	if bool(export_info.get("ok", false)):
+		_last_report_export = {
+			"report_name": export_info.get("report_name", ""),
+			"summary": export_info.get("summary", ""),
+			"severity": export_info.get("severity", "attention"),
+			"snapshot_count": export_info.get("snapshot_count", 0),
+			"exported_at_unix": export_info.get("exported_at_unix", 0),
+			"exported_at_text": export_info.get("exported_at_text", ""),
+			"markdown_user_path": export_info.get("markdown_user_path", ""),
+			"json_user_path": export_info.get("json_user_path", ""),
+			"markdown_path": export_info.get("markdown_path", ""),
+			"json_path": export_info.get("json_path", ""),
+		}
+	else:
+		_last_report_export = {
+			"report_name": export_info.get("report_name", ""),
+			"summary": "Export failed: %s" % error_string(int(export_info.get("error", ERR_CANT_CREATE))),
+			"severity": "warning",
+			"snapshot_count": 0,
+			"exported_at_unix": int(Time.get_unix_time_from_system()),
+			"exported_at_text": Time.get_datetime_string_from_unix_time(
+				int(Time.get_unix_time_from_system()),
+				false
+			),
+		}
+	workflow_run_panel.set_last_report_export(_last_report_export)
+	_send_status_update()

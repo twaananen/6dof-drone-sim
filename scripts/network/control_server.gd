@@ -1,6 +1,7 @@
 extends Node
 
 @export var listen_port: int = 9101
+@export var bind_host: String = "0.0.0.0"
 
 signal message_received(message)
 signal client_connected()
@@ -9,12 +10,16 @@ signal client_disconnected()
 var _server: TCPServer = TCPServer.new()
 var _client: StreamPeerTCP
 var _buffer: String = ""
+var _listen_error: Error = OK
 
 
 func _ready() -> void:
-	var err := _server.listen(listen_port)
-	if err != OK:
-		push_error("Failed to start control server: %s" % error_string(err))
+	if _uses_default_bind_host():
+		_listen_error = _server.listen(listen_port)
+	else:
+		_listen_error = _server.listen(listen_port, bind_host)
+	if _listen_error != OK:
+		push_error("Failed to start control server: %s" % error_string(_listen_error))
 
 
 func _process(_delta: float) -> void:
@@ -69,6 +74,20 @@ func send_message(message: Dictionary) -> void:
 
 func has_client() -> bool:
 	return _client != null
+
+
+func get_listen_port() -> int:
+	if _server.is_listening():
+		return _server.get_local_port()
+	return listen_port
+
+
+func get_listen_error() -> Error:
+	return _listen_error
+
+
+func _uses_default_bind_host() -> bool:
+	return bind_host.is_empty() or bind_host == "*" or bind_host == "0.0.0.0"
 
 
 func _exit_tree() -> void:
