@@ -1,0 +1,31 @@
+{
+  "name": "Godot Android Export",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "GODOT_VERSION": "4.6.1-stable",
+      "ANDROID_BUILD_TOOLS": "35.0.1",
+      "ANDROID_PLATFORM": "android-35",
+      "ANDROID_NDK": "25.2.9519653",
+      "ANDROID_CMAKE": "3.22.1"
+    }
+  },
+  "runArgs": ["--network=host"],
+  "mounts": [
+    "source=godot-export-templates,target=/home/vscode/.local/share/godot/export_templates,type=volume",
+    "source=godot-cache,target=/home/vscode/.cache/godot,type=volume",
+    "source=gradle-cache,target=/home/vscode/.gradle,type=volume"
+  ],
+  "remoteUser": "vscode",
+  "remoteEnv": {
+    "ANDROID_HOME": "/opt/android-sdk",
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "ANDROID_NDK_ROOT": "/opt/android-sdk/ndk/25.2.9519653"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["geequlim.godot-tools"]
+    }
+  }
+}
