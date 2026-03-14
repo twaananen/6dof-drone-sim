@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://doi4pe7omne2b" path="res://scripts/input/xr_telemetry_reader.gd" id="2"]
 [ext_resource type="Script" uid="uid://bjjf34u78p6ae" path="res://scripts/network/telemetry_sender.gd" id="3"]
 [ext_resource type="Script" uid="uid://gr8vnn8xys1x" path="res://scripts/network/control_client.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/network/discovery_listener.gd" id="5"]
+[ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_controller"]
 size = Vector3(0.05, 0.02, 0.1)
@@ -19,7 +19,7 @@ script = ExtResource("1")
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1210063516]
 tracker = &"right_hand"
 
-[node name="ControllerMesh" type="MeshInstance3D" parent="XROrigin3D/RightHand"]
+[node name="ControllerMesh" type="MeshInstance3D" parent="XROrigin3D/RightHand" unique_id=1661216268]
 mesh = SubResource("BoxMesh_controller")
 
 [node name="ControllerReader" type="Node" parent="." unique_id=105418232]

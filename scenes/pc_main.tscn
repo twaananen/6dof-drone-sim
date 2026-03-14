@@ -8,9 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://dx2ps12p7sds1" path="res://scenes/shared/telemetry_panel.tscn" id="6"]
 [ext_resource type="PackedScene" uid="uid://bs3erxrfklcbd" path="res://scenes/shared/output_panel.tscn" id="7"]
 [ext_resource type="PackedScene" uid="uid://diky2fj2g3w6a" path="res://scenes/shared/quest_status_panel.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
-[ext_resource type="PackedScene" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
-[ext_resource type="Script" path="res://scripts/network/discovery_beacon.gd" id="11"]
+[ext_resource type="PackedScene" uid="uid://d2x6u6k3dvl1e" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
+[ext_resource type="PackedScene" uid="uid://dxqlxmvy7kw7a" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
+[ext_resource type="Script" uid="uid://bue7lm3hjt4cm" path="res://scripts/network/discovery_beacon.gd" id="11"]
 
 [node name="PcMain" type="Control" unique_id=1032354419]
 layout_mode = 3
@@ -32,7 +32,7 @@ script = ExtResource("3")
 [node name="LinuxGamepadBackend" type="Node" parent="." unique_id=1002458134]
 script = ExtResource("4")
 
-[node name="DiscoveryBeacon" type="Node" parent="."]
+[node name="DiscoveryBeacon" type="Node" parent="." unique_id=1653645114]
 script = ExtResource("11")
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=556399480]

@@ -6,6 +6,5 @@ extends PanelContainer
 
 
 func set_payload(title: String, payload: Dictionary) -> void:
-    title_label.text = title
-    payload_label.text = JSON.stringify(payload, "\t")
-
+	title_label.text = title
+	payload_label.text = JSON.stringify(payload, "\t")

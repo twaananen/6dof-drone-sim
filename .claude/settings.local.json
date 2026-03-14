@@ -8,7 +8,9 @@
       "Read(//var/home/tommi/.cache/godot/**)",
       "Bash(which godot:*)",
       "WebFetch(domain:hub.docker.com)",
-      "WebFetch(domain:godotengine.org)"
+      "WebFetch(domain:godotengine.org)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

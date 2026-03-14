@@ -12,8 +12,8 @@ config_version=5
 
 config/name="6DOF Drone Controller"
 run/main_scene="res://scenes/pc_main.tscn"
-run/main_scene.android="res://scenes/quest_main.tscn"
 config/features=PackedStringArray("4.6")
+run/main_scene.android="res://scenes/quest_main.tscn"
 
 [display]
 
