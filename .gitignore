@@ -19,3 +19,6 @@ tools/linux_gamepad_helper
 # Android
 android/build/
 
+# Local binaries
+.local/
+
