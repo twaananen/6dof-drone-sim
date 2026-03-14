@@ -1,113 +1,107 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d2x6u6k3dvl1e"]
 
-[ext_resource type="Script" path="res://scripts/ui/workflow_editor_panel.gd" id="1"]
+[ext_resource type="Script" uid="uid://72iyh0qvdss7" path="res://scripts/ui/workflow_editor_panel.gd" id="1"]
 
-[node name="WorkflowEditorPanel" type="PanelContainer"]
+[node name="WorkflowEditorPanel" type="PanelContainer" unique_id=1665197073]
 custom_minimum_size = Vector2(520, 320)
 script = ExtResource("1")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1413324345]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="VBox"]
+[node name="Title" type="Label" parent="VBox" unique_id=1665267713]
 layout_mode = 2
 text = "Workflow Editor"
 
-[node name="Toolbar" type="HBoxContainer" parent="VBox"]
+[node name="Toolbar" type="HBoxContainer" parent="VBox" unique_id=2132919134]
 layout_mode = 2
 
-[node name="PresetSelect" type="OptionButton" parent="VBox/Toolbar"]
+[node name="PresetSelect" type="OptionButton" parent="VBox/Toolbar" unique_id=101221183]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ApplyPresetButton" type="Button" parent="VBox/Toolbar"]
+[node name="ApplyPresetButton" type="Button" parent="VBox/Toolbar" unique_id=108951497]
 layout_mode = 2
 text = "Load Preset"
 
-[node name="ReloadButton" type="Button" parent="VBox/Toolbar"]
+[node name="ReloadButton" type="Button" parent="VBox/Toolbar" unique_id=219530949]
 layout_mode = 2
 text = "Reload Saved"
 
-[node name="Form" type="GridContainer" parent="VBox"]
+[node name="Form" type="GridContainer" parent="VBox" unique_id=1771503863]
 layout_mode = 2
 columns = 2
 
-[node name="ModeLabel" type="Label" parent="VBox/Form"]
+[node name="ModeLabel" type="Label" parent="VBox/Form" unique_id=1588910606]
 layout_mode = 2
 text = "Workflow Mode"
 
-[node name="ModeSelect" type="OptionButton" parent="VBox/Form"]
+[node name="ModeSelect" type="OptionButton" parent="VBox/Form" unique_id=1385681522]
 layout_mode = 2
 
-[node name="StreamClientLabel" type="Label" parent="VBox/Form"]
+[node name="StreamClientLabel" type="Label" parent="VBox/Form" unique_id=165852226]
 layout_mode = 2
 text = "Stream App"
 
-[node name="StreamClientSelect" type="OptionButton" parent="VBox/Form"]
+[node name="StreamClientSelect" type="OptionButton" parent="VBox/Form" unique_id=27914603]
 layout_mode = 2
 
-[node name="RunLabel" type="Label" parent="VBox/Form"]
+[node name="RunLabel" type="Label" parent="VBox/Form" unique_id=667017751]
 layout_mode = 2
 text = "Run Label"
 
-[node name="RunLabelEdit" type="LineEdit" parent="VBox/Form"]
+[node name="RunLabelEdit" type="LineEdit" parent="VBox/Form" unique_id=1117804292]
 layout_mode = 2
 placeholder_text = "Describe this experiment run"
 
-[node name="LatencyBudgetLabel" type="Label" parent="VBox/Form"]
+[node name="LatencyBudgetLabel" type="Label" parent="VBox/Form" unique_id=1364892894]
 layout_mode = 2
 text = "Latency Budget (ms)"
 
-[node name="LatencyBudgetSpin" type="SpinBox" parent="VBox/Form"]
+[node name="LatencyBudgetSpin" type="SpinBox" parent="VBox/Form" unique_id=115869585]
 layout_mode = 2
-min_value = 0.0
 max_value = 200.0
-step = 1.0
 
-[node name="ObservedLatencyLabel" type="Label" parent="VBox/Form"]
+[node name="ObservedLatencyLabel" type="Label" parent="VBox/Form" unique_id=1459708351]
 layout_mode = 2
 text = "Observed Latency (ms)"
 
-[node name="ObservedLatencySpin" type="SpinBox" parent="VBox/Form"]
+[node name="ObservedLatencySpin" type="SpinBox" parent="VBox/Form" unique_id=524396520]
 layout_mode = 2
-min_value = 0.0
 max_value = 500.0
-step = 1.0
 
-[node name="FocusLossLabel" type="Label" parent="VBox/Form"]
+[node name="FocusLossLabel" type="Label" parent="VBox/Form" unique_id=701556566]
 layout_mode = 2
 text = "Focus Loss Events"
 
-[node name="FocusLossSpin" type="SpinBox" parent="VBox/Form"]
+[node name="FocusLossSpin" type="SpinBox" parent="VBox/Form" unique_id=1640336184]
 layout_mode = 2
-min_value = 0.0
 max_value = 20.0
-step = 1.0
 
-[node name="NoteLabel" type="Label" parent="VBox"]
+[node name="NoteLabel" type="Label" parent="VBox" unique_id=1445222300]
 layout_mode = 2
 text = "Operator Note"
 
-[node name="NoteEdit" type="TextEdit" parent="VBox"]
+[node name="NoteEdit" type="TextEdit" parent="VBox" unique_id=1832094859]
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 
-[node name="ChecklistLabel" type="Label" parent="VBox"]
+[node name="ChecklistLabel" type="Label" parent="VBox" unique_id=957666420]
 layout_mode = 2
 text = "Manual Checklist"
 
-[node name="ChecklistBox" type="VBoxContainer" parent="VBox"]
+[node name="ChecklistBox" type="VBoxContainer" parent="VBox" unique_id=916515291]
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="VBox"]
+[node name="Buttons" type="HBoxContainer" parent="VBox" unique_id=209696959]
 layout_mode = 2
 
-[node name="ApplyButton" type="Button" parent="VBox/Buttons"]
+[node name="ApplyButton" type="Button" parent="VBox/Buttons" unique_id=478197698]
 layout_mode = 2
 text = "Apply Workflow"
 
-[node name="SummaryLabel" type="Label" parent="VBox"]
+[node name="SummaryLabel" type="Label" parent="VBox" unique_id=1123170707]
 custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-autowrap_mode = 3
 text = "Checklist: waiting for workflow settings."
+autowrap_mode = 3

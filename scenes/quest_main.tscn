@@ -73,50 +73,47 @@ text = "Stream App"
 [node name="StreamClientSelect" type="OptionButton" parent="CanvasLayer/Panel/VBox" unique_id=663098151]
 layout_mode = 2
 
-[node name="RunLabelFieldLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="RunLabelFieldLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=692596208]
 layout_mode = 2
 text = "Run Label"
 
-[node name="RunLabelEdit" type="LineEdit" parent="CanvasLayer/Panel/VBox"]
+[node name="RunLabelEdit" type="LineEdit" parent="CanvasLayer/Panel/VBox" unique_id=928448555]
 layout_mode = 2
 placeholder_text = "Describe this Quest experiment pass"
 
-[node name="LatencyBudgetLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="LatencyBudgetLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=636328008]
 layout_mode = 2
 text = "Latency Budget (ms)"
 
-[node name="LatencyBudgetSpin" type="SpinBox" parent="CanvasLayer/Panel/VBox"]
+[node name="LatencyBudgetSpin" type="SpinBox" parent="CanvasLayer/Panel/VBox" unique_id=965862136]
 layout_mode = 2
 max_value = 200.0
-step = 1.0
 
-[node name="ObservedLatencyLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="ObservedLatencyLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=2075506626]
 layout_mode = 2
 text = "Observed Latency (ms)"
 
-[node name="ObservedLatencySpin" type="SpinBox" parent="CanvasLayer/Panel/VBox"]
+[node name="ObservedLatencySpin" type="SpinBox" parent="CanvasLayer/Panel/VBox" unique_id=1951533236]
 layout_mode = 2
 max_value = 500.0
-step = 1.0
 
-[node name="FocusLossLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="FocusLossLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1378643866]
 layout_mode = 2
 text = "Focus Loss Events"
 
-[node name="FocusLossSpin" type="SpinBox" parent="CanvasLayer/Panel/VBox"]
+[node name="FocusLossSpin" type="SpinBox" parent="CanvasLayer/Panel/VBox" unique_id=1969299526]
 layout_mode = 2
 max_value = 20.0
-step = 1.0
 
-[node name="OperatorNoteLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
+[node name="OperatorNoteLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1297690659]
 layout_mode = 2
 text = "Operator Note"
 
-[node name="OperatorNoteEdit" type="TextEdit" parent="CanvasLayer/Panel/VBox"]
+[node name="OperatorNoteEdit" type="TextEdit" parent="CanvasLayer/Panel/VBox" unique_id=1745006147]
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 
-[node name="ApplySessionDetailsButton" type="Button" parent="CanvasLayer/Panel/VBox"]
+[node name="ApplySessionDetailsButton" type="Button" parent="CanvasLayer/Panel/VBox" unique_id=545197466]
 layout_mode = 2
 text = "Apply Session Details"
 
@@ -134,28 +131,28 @@ text = "Calibrate"
 layout_mode = 2
 text = "Recenter"
 
-[node name="SnapshotButtons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox"]
+[node name="SnapshotButtons" type="HBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=329832062]
 layout_mode = 2
 
-[node name="SnapshotNoteLabel" type="Label" parent="CanvasLayer/Panel/VBox"]
-layout_mode = 2
-text = "Snapshot / Export Note"
-
-[node name="SnapshotNoteEdit" type="TextEdit" parent="CanvasLayer/Panel/VBox"]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-
-[node name="CaptureSnapshotButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons"]
+[node name="CaptureSnapshotButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons" unique_id=1749057654]
 layout_mode = 2
 text = "Capture Snapshot"
 
-[node name="ReportIssueButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons"]
+[node name="ReportIssueButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons" unique_id=1377264420]
 layout_mode = 2
 text = "Report Issue"
 
-[node name="ExportReportButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons"]
+[node name="ExportReportButton" type="Button" parent="CanvasLayer/Panel/VBox/SnapshotButtons" unique_id=1499348036]
 layout_mode = 2
 text = "Export Report"
+
+[node name="SnapshotNoteLabel" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1695285413]
+layout_mode = 2
+text = "Snapshot / Export Note"
+
+[node name="SnapshotNoteEdit" type="TextEdit" parent="CanvasLayer/Panel/VBox" unique_id=607617922]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
 
 [node name="Tuning" type="VBoxContainer" parent="CanvasLayer/Panel/VBox" unique_id=207690134]
 layout_mode = 2
