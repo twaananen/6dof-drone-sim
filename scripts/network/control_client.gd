@@ -2,6 +2,7 @@ extends Node
 
 @export var server_host: String = "127.0.0.1"
 @export var server_port: int = 9101
+@export var reconnect_delay_sec: float = 1.0
 
 signal connected()
 signal disconnected()
@@ -10,28 +11,42 @@ signal message_received(message)
 var _client: StreamPeerTCP = StreamPeerTCP.new()
 var _buffer: String = ""
 var _was_connected: bool = false
+var _reconnect_timer_sec: float = 0.0
 
 
 func connect_to_server() -> void:
+	_client.poll()
+	var status := _client.get_status()
+	if status == StreamPeerTCP.STATUS_CONNECTED or status == StreamPeerTCP.STATUS_CONNECTING:
+		return
 	_client.connect_to_host(server_host, server_port)
 
 
 func _ready() -> void:
+	_reconnect_timer_sec = 0.0
 	connect_to_server()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_client.poll()
 	var status := _client.get_status()
 	var is_connected := status == StreamPeerTCP.STATUS_CONNECTED
 	if is_connected and not _was_connected:
 		_was_connected = true
+		_reconnect_timer_sec = reconnect_delay_sec
 		connected.emit()
 	elif not is_connected and _was_connected:
 		_was_connected = false
+		_buffer = ""
+		_reconnect_timer_sec = reconnect_delay_sec
 		disconnected.emit()
 
 	if not is_connected:
+		if status == StreamPeerTCP.STATUS_NONE or status == StreamPeerTCP.STATUS_ERROR:
+			_reconnect_timer_sec = maxf(_reconnect_timer_sec - delta, 0.0)
+			if is_zero_approx(_reconnect_timer_sec):
+				connect_to_server()
+				_reconnect_timer_sec = reconnect_delay_sec
 		return
 
 	var available := _client.get_available_bytes()
@@ -63,6 +78,18 @@ func send_message(message: Dictionary) -> void:
 
 func is_socket_connected() -> bool:
 	return _client.get_status() == StreamPeerTCP.STATUS_CONNECTED
+
+
+func get_connection_state() -> String:
+	match _client.get_status():
+		StreamPeerTCP.STATUS_CONNECTING:
+			return "connecting"
+		StreamPeerTCP.STATUS_CONNECTED:
+			return "connected"
+		StreamPeerTCP.STATUS_ERROR:
+			return "error"
+		_:
+			return "disconnected"
 
 
 func _exit_tree() -> void:
