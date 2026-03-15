@@ -301,6 +301,7 @@ offset_left = -52.0
 offset_top = 96.0
 offset_right = -8.0
 offset_bottom = 140.0
+grow_horizontal = 0
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=12010]
 custom_minimum_size = Vector2(44, 44)
@@ -312,6 +313,7 @@ offset_left = 8.0
 offset_top = -52.0
 offset_right = 52.0
 offset_bottom = -8.0
+grow_vertical = 0
 
 [node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=12011]
 custom_minimum_size = Vector2(44, 44)
@@ -325,3 +327,5 @@ offset_left = -52.0
 offset_top = -52.0
 offset_right = -8.0
 offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0

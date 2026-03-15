@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://xbge5lt3v0cm"]
+
+[ext_resource type="Script" uid="uid://de2eivtwx4y1u" path="res://scripts/xr/quest_panel_layer_static.gd" id="1_quest_panel_layer_static"]
+[ext_resource type="PackedScene" uid="uid://b6uwdc0iplvvj" path="res://scenes/quest_panel_minimal.tscn" id="2_quest_panel_minimal"]
+
+[node name="QuestPanelLayerStatic" type="OpenXRCompositionLayerQuad" unique_id=1162516631 groups=["ui_layer"]]
+sort_order = -1
+quad_size = Vector2(0.6, 0.8)
+script = ExtResource("1_quest_panel_layer_static")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1289236141]
+disable_3d = true
+size = Vector2i(1536, 2048)
+render_target_update_mode = 4
+
+[node name="QuestPanel" parent="SubViewport" unique_id=471569841 instance=ExtResource("2_quest_panel_minimal")]

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://baovrx06hbi6s"]
+
+[ext_resource type="Script" uid="uid://cudiynhqyjqha" path="res://scripts/xr/quest_panel_layer_android_surface.gd" id="1_quest_panel_layer_android_surface"]
+[ext_resource type="PackedScene" uid="uid://b75ra01cc46nc" path="res://scenes/quest_panel.tscn" id="2_quest_panel"]
+
+[node name="QuestPanelLayerAndroidSurface" type="OpenXRCompositionLayerQuad" unique_id=1777693716 groups=["ui_layer"]]
+use_android_surface = true
+android_surface_size = Vector2i(1536, 2048)
+sort_order = -1
+quad_size = Vector2(0.6, 0.8)
+script = ExtResource("1_quest_panel_layer_android_surface")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1205334692]
+disable_3d = true
+size = Vector2i(1536, 2048)
+render_target_update_mode = 4
+
+[node name="QuestPanel" parent="SubViewport" unique_id=1768857822 instance=ExtResource("2_quest_panel")]

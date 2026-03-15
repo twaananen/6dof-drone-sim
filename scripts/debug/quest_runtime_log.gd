@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const LOG_PREFIX := "QUEST_LOG"

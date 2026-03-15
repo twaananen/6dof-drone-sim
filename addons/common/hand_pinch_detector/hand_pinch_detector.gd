@@ -45,16 +45,12 @@ var _controller: XRController3D
 
 
 func _enter_tree() -> void:
-	# NOTE: as of this writing, assume the immediate parent is the XRController3D
-	# Ideally this would be XRHelpers.get_xr_controller(self) like XRTools's
-	# function_pointer.gd (see
-	# https://github.com/GodotVR/godot-xr-tools/blob/master/addons/godot-xr-tools/functions/function_pointer.gd)
-	var parent_node = get_parent()
-	if !(parent_node is XRController3D):
-		push_error("Unable to find XRController3D; it must be the immediate parent of this node!")
+	_controller = _find_controller()
+	if _controller == null:
+		if not Engine.is_editor_hint():
+			push_error("Unable to find XRController3D in this node's parent chain!")
 		return
 
-	_controller = parent_node
 	_controller.input_float_changed.connect(_on_input_float_changed)
 
 
@@ -66,6 +62,15 @@ func _exit_tree() -> void:
 	if _controller:
 		_controller.input_float_changed.disconnect(_on_input_float_changed)
 		_controller = null
+
+
+func _find_controller() -> XRController3D:
+	var node := get_parent()
+	while node != null:
+		if node is XRController3D:
+			return node
+		node = node.get_parent()
+	return null
 
 
 func set_pinch_tap_duration(new_pinch_tap_duration: int) -> void:

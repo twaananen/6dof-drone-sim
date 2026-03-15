@@ -15,8 +15,8 @@ const DIAGNOSTIC_PUSH_INTERVAL_USEC := 500000
 @onready var control_client: Node = $ControlClient
 @onready var discovery_listener: Node = $DiscoveryListener
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
-@onready var ui_pivot: Node3D = $XROrigin3D/UiPivot
-@onready var quest_ui_layer: Node = $XROrigin3D/UiPivot/QuestUiLayer
+@onready var ui_pivot: Node3D = $XROrigin3D/QuestUiLayer
+@onready var quest_ui_layer: Node = $XROrigin3D/QuestUiLayer
 @onready var left_hand: XRController3D = $XROrigin3D/LeftHand
 @onready var right_hand: XRController3D = $XROrigin3D/RightHand
 @onready var left_fallback_mesh: MeshInstance3D = $XROrigin3D/LeftHand/FallbackMesh
@@ -74,6 +74,8 @@ var _xr_bootstrap: OpenXRBootstrap = OpenXRBootstrap.new()
 var _xr_diagnostics: Dictionary = {}
 var _last_runtime_diagnostics_push_usec: int = 0
 var _updating_passthrough_toggle: bool = false
+var _xr_interface: XRInterface
+var _panel_recentering_connected: bool = false
 
 
 func _ready() -> void:
@@ -104,6 +106,7 @@ func _ready() -> void:
 	_connection_state.set_xr_starting()
 	_log_boot("XR_INIT_BEGIN", {})
 	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
+	_xr_interface = XRServer.find_interface("OpenXR")
 	if bool(_xr_diagnostics.get("ok", false)):
 		_log_boot("XR_INIT_OK", {
 			"passthrough_enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
@@ -121,7 +124,6 @@ func _ready() -> void:
 	_log_boot("CONTROLLER_VISUALS_UPDATED", {
 		"render_model_plugin_available": bool(_xr_diagnostics.get("render_model_plugin_available", false)),
 	})
-	_recenter_ui_panel()
 	_sync_passthrough_toggle()
 	_log_boot("PASSTHROUGH_TOGGLE_SYNCED", {
 		"enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
@@ -216,6 +218,24 @@ func _wire_ui_signals() -> void:
 	capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
 	report_issue_button.pressed.connect(_on_report_issue_pressed)
 	export_report_button.pressed.connect(_on_export_report_pressed)
+
+
+func _schedule_startup_recenter() -> void:
+	if _xr_interface == null or not _xr_interface.has_signal("session_begun"):
+		_recenter_ui_panel()
+		return
+	if _panel_recentering_connected:
+		return
+	_panel_recentering_connected = true
+	if _xr_interface.session_begun.is_connected(_on_xr_session_begun):
+		return
+	_xr_interface.session_begun.connect(_on_xr_session_begun)
+	_log_boot("UI_PANEL_RECENTER_DEFERRED", {})
+
+
+func _on_xr_session_begun() -> void:
+	await get_tree().process_frame
+	_recenter_ui_panel()
 
 
 func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
@@ -478,6 +498,13 @@ func _ensure_render_model(controller: XRController3D, use_alt_render_model: bool
 
 
 func _recenter_ui_panel() -> void:
+	var camera_position := xr_camera.global_position
+	var camera_basis := xr_camera.global_transform.basis
+	if not camera_position.is_finite() or not camera_basis.is_finite():
+		_log_error("UI_PANEL_RECENTER_SKIPPED", {
+			"reason": "camera_pose_invalid",
+		})
+		return
 	var forward := -xr_camera.global_transform.basis.z
 	forward.y = 0.0
 	if is_zero_approx(forward.length_squared()):

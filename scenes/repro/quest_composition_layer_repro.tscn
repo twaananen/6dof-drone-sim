@@ -1,0 +1,153 @@
+[gd_scene format=3 uid="uid://c8ff61axhpesb"]
+
+[ext_resource type="Script" uid="uid://bjmbnobjk7aqi" path="res://scripts/xr/quest_composition_layer_repro.gd" id="1_repro"]
+[ext_resource type="Script" uid="uid://b5ccyb0sy2bbb" path="res://scripts/xr/quest_composition_layer_repro_quad.gd" id="2_repro_quad"]
+
+[sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="2_sky"]
+sky_material = SubResource("1_sky_material")
+
+[sub_resource type="Environment" id="3_environment"]
+background_mode = 2
+sky = SubResource("2_sky")
+tonemap_mode = 4
+
+[sub_resource type="StandardMaterial3D" id="4_controller_material"]
+shading_mode = 0
+albedo_color = Color(0.722656, 0.791992, 1, 1)
+
+[sub_resource type="BoxMesh" id="5_controller_mesh"]
+material = SubResource("4_controller_material")
+size = Vector3(0.05, 0.02, 0.1)
+
+[sub_resource type="BoxMesh" id="6_room_box"]
+size = Vector3(0.25, 0.25, 0.25)
+
+[node name="QuestCompositionLayerRepro" type="Node3D" unique_id=1262449321]
+script = ExtResource("1_repro")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=283629679]
+environment = SubResource("3_environment")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=2057583426]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1501810511]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=233086511]
+
+[node name="LeftController" type="XRController3D" parent="XROrigin3D" unique_id=236976080]
+tracker = &"left_hand"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/LeftController" unique_id=23210730]
+mesh = SubResource("5_controller_mesh")
+
+[node name="RightController" type="XRController3D" parent="XROrigin3D" unique_id=1809905492]
+tracker = &"right_hand"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="XROrigin3D/RightController" unique_id=1104210747]
+mesh = SubResource("5_controller_mesh")
+
+[node name="CompositionLayerQuad" type="OpenXRCompositionLayerQuad" parent="XROrigin3D" unique_id=982122464]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
+quad_size = Vector2(1, 0.5625)
+script = ExtResource("2_repro_quad")
+
+[node name="SubViewport" type="SubViewport" parent="XROrigin3D/CompositionLayerQuad" unique_id=2035760640]
+disable_3d = true
+gui_embed_subwindows = true
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="GUI" type="Control" parent="XROrigin3D/CompositionLayerQuad/SubViewport" unique_id=1194720790]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI" unique_id=205453992]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel" unique_id=580605481]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 640.0
+offset_bottom = -32.0
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel/VBoxContainer" unique_id=690889509]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+text = "OpenXR Composition Layer Repro"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="InfoLabel" type="Label" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel/VBoxContainer" unique_id=777620462]
+layout_mode = 2
+text = "This scene is based on the official composition-layer docs and gui_in_3d viewport demo."
+autowrap_mode = 2
+
+[node name="Button" type="Button" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel/VBoxContainer" unique_id=1758805793]
+layout_mode = 2
+text = "Minimal repro button"
+
+[node name="LineEdit" type="LineEdit" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel/VBoxContainer" unique_id=1918733494]
+layout_mode = 2
+placeholder_text = "Type into the viewport panel"
+
+[node name="HSlider" type="HSlider" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel/VBoxContainer" unique_id=473132810]
+layout_mode = 2
+step = 0.0
+value = 0.5
+ticks_on_borders = true
+
+[node name="ColorRect" type="ColorRect" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel" unique_id=1134555075]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 48.0
+offset_right = -80.0
+offset_bottom = 268.0
+grow_horizontal = 0
+color = Color(0.831373, 0.25098, 0.25098, 1)
+
+[node name="VSlider" type="VSlider" parent="XROrigin3D/CompositionLayerQuad/SubViewport/GUI/Panel" unique_id=820356048]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -48.0
+offset_top = 32.0
+offset_right = -16.0
+offset_bottom = -32.0
+grow_horizontal = 0
+grow_vertical = 2
+step = 0.0
+
+[node name="Background" type="Node3D" parent="." unique_id=1014181240]
+
+[node name="CubeA" type="MeshInstance3D" parent="Background" unique_id=1176165971]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 1.2, -2)
+mesh = SubResource("6_room_box")
+
+[node name="CubeB" type="MeshInstance3D" parent="Background" unique_id=978025042]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, 1.55, -1.8)
+mesh = SubResource("6_room_box")

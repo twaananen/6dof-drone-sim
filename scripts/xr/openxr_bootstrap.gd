@@ -9,13 +9,17 @@ var _interface: Variant
 var _viewport: Variant
 var _passthrough_extension: Variant
 var _diagnostics: Dictionary = _default_diagnostics()
+var _maximum_refresh_rate: float = DEFAULT_MAXIMUM_REFRESH_RATE
+var _runtime_settings_applied := false
 
 
 func initialize(interface: Variant, viewport: Variant, passthrough_extension: Variant = null, maximum_refresh_rate: float = DEFAULT_MAXIMUM_REFRESH_RATE) -> Dictionary:
 	_interface = interface
 	_viewport = viewport
 	_passthrough_extension = passthrough_extension if passthrough_extension != null else _resolve_passthrough_extension()
+	_maximum_refresh_rate = maximum_refresh_rate
 	_diagnostics = _default_diagnostics()
+	_runtime_settings_applied = false
 	_log_boot("XR_INIT_BEGIN", {
 		"maximum_refresh_rate": maximum_refresh_rate,
 	})
@@ -68,13 +72,7 @@ func initialize(interface: Variant, viewport: Variant, passthrough_extension: Va
 		"passthrough_supported": bool(_diagnostics["passthrough_supported"]),
 		"passthrough_preferred": bool(_diagnostics["passthrough_preferred"]),
 	})
-
-	_configure_refresh_rate(maximum_refresh_rate)
-	set_passthrough_enabled(
-		bool(_diagnostics.get("alpha_blend_supported", false))
-		and bool(_diagnostics.get("passthrough_supported", false))
-		and bool(_diagnostics.get("passthrough_preferred", false))
-	)
+	_connect_session_begun()
 
 	_diagnostics["ok"] = true
 	_diagnostics["state"] = STATE_XR_READY
@@ -82,6 +80,19 @@ func initialize(interface: Variant, viewport: Variant, passthrough_extension: Va
 		"display_refresh_rate": float(_diagnostics.get("display_refresh_rate", 0.0)),
 		"passthrough_enabled": bool(_diagnostics.get("passthrough_enabled", false)),
 	})
+	return get_diagnostics()
+
+
+func on_session_begun() -> Dictionary:
+	if _runtime_settings_applied:
+		return get_diagnostics()
+	_runtime_settings_applied = true
+
+	_configure_refresh_rate(_maximum_refresh_rate)
+	if bool(_diagnostics.get("alpha_blend_supported", false)) \
+		and bool(_diagnostics.get("passthrough_supported", false)) \
+		and bool(_diagnostics.get("passthrough_preferred", false)):
+		set_passthrough_enabled(true)
 	return get_diagnostics()
 
 
@@ -93,7 +104,10 @@ func set_passthrough_enabled(enabled: bool) -> Dictionary:
 	allow_passthrough = allow_passthrough and bool(_diagnostics.get("passthrough_supported", false))
 
 	_viewport.transparent_bg = allow_passthrough
-	_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND if allow_passthrough else XRInterface.XR_ENV_BLEND_MODE_OPAQUE
+	if allow_passthrough:
+		_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND
+	elif int(_diagnostics.get("environment_blend_mode", XRInterface.XR_ENV_BLEND_MODE_OPAQUE)) == XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND:
+		_interface.environment_blend_mode = XRInterface.XR_ENV_BLEND_MODE_OPAQUE
 	_diagnostics["passthrough_enabled"] = allow_passthrough
 	_diagnostics["environment_blend_mode"] = int(_interface.environment_blend_mode)
 	_log_info("XR_PASSTHROUGH_STATE", {
@@ -102,6 +116,18 @@ func set_passthrough_enabled(enabled: bool) -> Dictionary:
 		"environment_blend_mode": int(_diagnostics["environment_blend_mode"]),
 	})
 	return get_diagnostics()
+
+
+func _connect_session_begun() -> void:
+	if _interface == null or not _interface.has_signal("session_begun"):
+		return
+	if _interface.session_begun.is_connected(_on_openxr_session_begun):
+		return
+	_interface.session_begun.connect(_on_openxr_session_begun)
+
+
+func _on_openxr_session_begun() -> void:
+	on_session_begun()
 
 
 func get_diagnostics() -> Dictionary:

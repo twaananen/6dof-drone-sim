@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 			_report_state("unconfigured", OK)
 		else:
 			_report_state("disconnected", OK)
-		if status == StreamPeerTCP.STATUS_NONE or status == StreamPeerTCP.STATUS_ERROR:
+		if (status == StreamPeerTCP.STATUS_NONE or status == StreamPeerTCP.STATUS_ERROR) and not server_host.is_empty():
 			_reconnect_timer_sec = maxf(_reconnect_timer_sec - delta, 0.0)
 			if is_zero_approx(_reconnect_timer_sec):
 				connect_to_server()

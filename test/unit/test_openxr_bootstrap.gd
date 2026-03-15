@@ -93,6 +93,7 @@ func test_initialize_surfaces_missing_alpha_blend_support() -> void:
 	assert_true(viewport.use_xr)
 	assert_false(viewport.transparent_bg)
 	assert_true(_has_event("XR_BLEND_MODES"))
+	assert_false(_has_event("XR_REFRESH_RATE_CONFIGURED"))
 
 
 func test_initialize_enables_passthrough_when_preferred() -> void:
@@ -104,6 +105,7 @@ func test_initialize_enables_passthrough_when_preferred() -> void:
 	xr_interface.supported_modes = [XRInterface.XR_ENV_BLEND_MODE_OPAQUE, XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND]
 
 	var diagnostics := bootstrap.initialize(xr_interface, viewport, passthrough_extension)
+	diagnostics = bootstrap.on_session_begun()
 
 	assert_true(diagnostics["ok"])
 	assert_true(diagnostics["passthrough_enabled"])
@@ -123,6 +125,7 @@ func test_set_passthrough_enabled_switches_back_to_opaque() -> void:
 	xr_interface.supported_modes = [XRInterface.XR_ENV_BLEND_MODE_OPAQUE, XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND]
 
 	bootstrap.initialize(xr_interface, viewport, passthrough_extension)
+	bootstrap.on_session_begun()
 	var diagnostics := bootstrap.set_passthrough_enabled(false)
 
 	assert_false(diagnostics["passthrough_enabled"])

@@ -1,4 +1,3 @@
-@tool
 extends OpenXRCompositionLayerQuad
 
 const NO_INTERSECTION := Vector2(-1.0, -1.0)

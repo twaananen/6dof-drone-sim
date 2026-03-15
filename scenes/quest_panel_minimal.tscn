@@ -1,0 +1,177 @@
+[gd_scene format=3 uid="uid://b6uwdc0iplvvj"]
+
+[node name="QuestPanel" type="Control" unique_id=856540599]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="." unique_id=1965584933]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1953351541]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin" unique_id=998456734]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=132923620]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=819726774]
+layout_mode = 2
+text = "Minimal composition-layer panel"
+
+[node name="PassthroughToggle" type="CheckButton" parent="Panel/Margin/Scroll/VBox" unique_id=721717461]
+layout_mode = 2
+text = "Passthrough"
+
+[node name="ConnectModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1713094630]
+layout_mode = 2
+
+[node name="ManualServerHostLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=2006956449]
+visible = false
+layout_mode = 2
+text = "Manual Host"
+
+[node name="ManualServerHostEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=854673112]
+visible = false
+layout_mode = 2
+
+[node name="ConnectionButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1426790963]
+layout_mode = 2
+
+[node name="ApplyConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1086818160]
+layout_mode = 2
+text = "Apply"
+
+[node name="RetryConnectButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1006587303]
+layout_mode = 2
+text = "Retry"
+
+[node name="RecenterPanelButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=410390779]
+layout_mode = 2
+text = "Recenter Panel"
+
+[node name="PresetSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1474402470]
+layout_mode = 2
+
+[node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=363948245]
+layout_mode = 2
+
+[node name="WorkflowModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=920854467]
+layout_mode = 2
+
+[node name="WorkflowDetailsLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1694691799]
+layout_mode = 2
+text = "Minimal workflow details"
+
+[node name="ChecklistBox" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=2006788775]
+layout_mode = 2
+
+[node name="StreamClientLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=635192845]
+layout_mode = 2
+text = "Stream Client"
+
+[node name="StreamClientSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=436034221]
+layout_mode = 2
+
+[node name="RunLabelEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=2050543578]
+layout_mode = 2
+placeholder_text = "Run label"
+
+[node name="LatencyBudgetSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=1416952677]
+layout_mode = 2
+
+[node name="ObservedLatencySpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=398728804]
+layout_mode = 2
+
+[node name="FocusLossSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=1811902344]
+layout_mode = 2
+
+[node name="OperatorNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox" unique_id=537020698]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="ApplySessionDetailsButton" type="Button" parent="Panel/Margin/Scroll/VBox" unique_id=566694367]
+layout_mode = 2
+text = "Apply Session Details"
+
+[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=258554574]
+layout_mode = 2
+
+[node name="CalibrateButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1345631964]
+layout_mode = 2
+text = "Calibrate"
+
+[node name="RecenterButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=2073376723]
+layout_mode = 2
+text = "Recenter"
+
+[node name="SnapshotNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox" unique_id=96681554]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="SnapshotButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1585032016]
+layout_mode = 2
+
+[node name="CaptureSnapshotButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=1067304393]
+layout_mode = 2
+text = "Capture"
+
+[node name="ReportIssueButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=1889876739]
+layout_mode = 2
+text = "Report Issue"
+
+[node name="ExportReportButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=379239880]
+layout_mode = 2
+text = "Export"
+
+[node name="Tuning" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=898639129]
+layout_mode = 2
+
+[node name="SensitivitySlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1152956633]
+layout_mode = 2
+max_value = 2.0
+value = 1.0
+
+[node name="DeadzoneSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1910505904]
+layout_mode = 2
+max_value = 1.0
+
+[node name="ExpoSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=65635219]
+layout_mode = 2
+max_value = 2.0
+value = 1.0
+
+[node name="IntegratorSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1755258194]
+layout_mode = 2
+max_value = 2.0
+
+[node name="OutputPreviewLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1809504758]
+layout_mode = 2
+text = "Outputs: minimal"
+
+[node name="WorkflowDiagnosticsLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=2146280888]
+layout_mode = 2
+text = "Diagnostics: minimal"
