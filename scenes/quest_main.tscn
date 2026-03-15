@@ -5,8 +5,7 @@
 [ext_resource type="Script" uid="uid://bjjf34u78p6ae" path="res://scripts/network/telemetry_sender.gd" id="3_telemetry_sender"]
 [ext_resource type="Script" uid="uid://gr8vnn8xys1x" path="res://scripts/network/control_client.gd" id="4_control_client"]
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
-[ext_resource type="PackedScene" uid="uid://b75ra01cc46nc" path="res://scenes/quest_panel.tscn" id="6_quest_panel"]
-[ext_resource type="PackedScene" uid="uid://dcwibwtseri8h" path="res://addons/common/viewport_2d_in_3d/viewport_2d_in_3d.tscn" id="7_viewport_2d"]
+[ext_resource type="PackedScene" path="res://scenes/shared/quest_panel_layer.tscn" id="7_quest_panel_layer"]
 [ext_resource type="PackedScene" uid="uid://cqs8c3rq6cxvk" path="res://addons/common/viewport_2d_in_3d/function_pointer.tscn" id="8_function_pointer"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_controller"]
@@ -27,7 +26,11 @@ pose = &"grip"
 visible = false
 mesh = SubResource("BoxMesh_controller")
 
-[node name="LeftPointer" parent="XROrigin3D/LeftHand" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
+[node name="LeftAim" type="XRController3D" parent="XROrigin3D" unique_id=115001]
+tracker = &"left_hand"
+pose = &"aim"
+
+[node name="LeftPointer" parent="XROrigin3D/LeftAim" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
 
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1940137224]
 tracker = &"right_hand"
@@ -37,16 +40,16 @@ pose = &"grip"
 visible = false
 mesh = SubResource("BoxMesh_controller")
 
-[node name="RightPointer" parent="XROrigin3D/RightHand" unique_id=782013595 instance=ExtResource("8_function_pointer")]
+[node name="RightAim" type="XRController3D" parent="XROrigin3D" unique_id=115002]
+tracker = &"right_hand"
+pose = &"aim"
+
+[node name="RightPointer" parent="XROrigin3D/RightAim" unique_id=782013595 instance=ExtResource("8_function_pointer")]
 
 [node name="UiPivot" type="Node3D" parent="XROrigin3D" unique_id=864139913]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
 
-[node name="QuestUiLayer" parent="XROrigin3D/UiPivot" unique_id=1465962986 instance=ExtResource("7_viewport_2d")]
-scene = ExtResource("6_quest_panel")
-viewport_size = Vector2i(1280, 1700)
-pixel_size = 0.0006
-no_depth_test = true
+[node name="QuestUiLayer" parent="XROrigin3D/UiPivot" unique_id=1465962986 instance=ExtResource("7_quest_panel_layer")]
 
 [node name="ControllerReader" type="Node" parent="." unique_id=190442877]
 script = ExtResource("2_controller_reader")

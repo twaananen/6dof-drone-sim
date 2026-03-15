@@ -3,6 +3,10 @@ extends "res://addons/gut/test.gd"
 const DiscoveryListener = preload("res://scripts/network/discovery_listener.gd")
 
 
+func before_each() -> void:
+	_logger().clear_entries()
+
+
 func test_second_listener_reports_bind_failure_on_same_port() -> void:
 	var port := await _find_free_udp_port()
 	var first := DiscoveryListener.new()
@@ -17,6 +21,7 @@ func test_second_listener_reports_bind_failure_on_same_port() -> void:
 	await wait_process_frames(1)
 
 	assert_ne(second.get_bind_error(), OK)
+	assert_true(_has_event("DISCOVERY_BIND_FAILED"))
 
 
 func _find_free_udp_port() -> int:
@@ -33,3 +38,14 @@ func _find_free_udp_port() -> int:
 		await wait_process_frames(1)
 	fail_test("Could not find a free UDP port for discovery listener tests")
 	return 22100
+
+
+func _has_event(event_name: String) -> bool:
+	for entry in _logger().get_entries():
+		if str(entry.get("event", "")) == event_name:
+			return true
+	return false
+
+
+func _logger() -> Node:
+	return get_tree().root.get_node("QuestRuntimeLog")

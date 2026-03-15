@@ -1,11 +1,10 @@
 extends Node3D
 
-const Viewport2Din3D = preload("res://addons/common/viewport_2d_in_3d/viewport_2d_in_3d.gd")
-
 @export var enabled := true:
 	set = set_enabled
 
 @export var select_action := "trigger_click"
+@export var grab_action := "grip_click"
 @export var select_pressed_threshold := 0.9
 @export var select_release_threshold := 0.6
 
@@ -32,16 +31,21 @@ const Viewport2Din3D = preload("res://addons/common/viewport_2d_in_3d/viewport_2
 @onready var _mesh_instance: MeshInstance3D = %MeshInstance3D
 
 var _controller: XRController3D
-var _cur_layer: Viewport2Din3D = null
+var _cur_layer: Node = null
 var _pressed := false
+var _grab_pressed := false
 
 
 func set_enabled(p_enabled: bool) -> void:
 	enabled = p_enabled
 	set_process(enabled)
 	if not enabled and _cur_layer:
+		if _grab_pressed and _cur_layer.has_method("pointer_set_grab_pressed"):
+			_cur_layer.pointer_set_grab_pressed(self, false)
 		_cur_layer.pointer_leave(self)
 		_cur_layer = null
+	_pressed = false
+	_grab_pressed = false
 	_update_pointer_visibility()
 	_update_pointer_material()
 
@@ -84,7 +88,9 @@ func _exit_tree() -> void:
 # Note: this virtual method will only run if "enabled" is true.
 func _process(_delta: float) -> void:
 	for layer in _get_ui_layers():
-		if not layer is Viewport2Din3D or not layer.visible:
+		if not (layer is Node3D) or not layer.visible:
+			continue
+		if not layer.has_method("pointer_intersects") or not layer.has_method("pointer_leave") or not layer.has_method("pointer_set_pressed"):
 			continue
 		if layer.pointer_intersects(self):
 			if layer != _cur_layer:
@@ -144,7 +150,7 @@ func _update_pointer_length_for_intersection(p_intersection: Vector3) -> void:
 
 func _update_pointer_material() -> void:
 	if _mesh_instance:
-		_mesh_instance.set_surface_override_material(0, pressed_material if _pressed else released_material)
+		_mesh_instance.set_surface_override_material(0, pressed_material if (_pressed or _grab_pressed) else released_material)
 
 
 func _do_select(p_pressed: bool) -> void:
@@ -152,6 +158,13 @@ func _do_select(p_pressed: bool) -> void:
 	_update_pointer_material()
 	if _cur_layer:
 		_cur_layer.pointer_set_pressed(self, p_pressed)
+
+
+func _do_grab(p_pressed: bool) -> void:
+	_grab_pressed = p_pressed
+	_update_pointer_material()
+	if _cur_layer and _cur_layer.has_method("pointer_set_grab_pressed"):
+		_cur_layer.pointer_set_grab_pressed(self, p_pressed)
 
 
 func _on_controller_input_float_changed(p_name: String, p_value: float) -> void:
@@ -165,11 +178,15 @@ func _on_controller_input_float_changed(p_name: String, p_value: float) -> void:
 func _on_controller_button_pressed(p_name: String) -> void:
 	if p_name == select_action:
 		_do_select(true)
+	elif p_name == grab_action:
+		_do_grab(true)
 
 
 func _on_controller_button_released(p_name: String) -> void:
 	if p_name == select_action:
 		_do_select(false)
+	elif p_name == grab_action:
+		_do_grab(false)
 
 
 func _get_hand_index() -> int:

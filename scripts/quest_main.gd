@@ -28,6 +28,7 @@ var manual_server_host_edit: LineEdit
 var apply_connection_button: Button
 var retry_connect_button: Button
 var recenter_panel_button: Button
+var passthrough_toggle: BaseButton
 var preset_select: OptionButton
 var template_select: OptionButton
 var status_label: Label
@@ -72,11 +73,20 @@ var _connection_state: QuestConnectionState = QuestConnectionState.new()
 var _xr_bootstrap: OpenXRBootstrap = OpenXRBootstrap.new()
 var _xr_diagnostics: Dictionary = {}
 var _last_runtime_diagnostics_push_usec: int = 0
+var _updating_passthrough_toggle: bool = false
 
 
 func _ready() -> void:
-	_bind_ui_controls()
+	_log_boot("READY_BEGIN", {
+		"scene": "quest_main",
+	})
+	if not _bind_ui_controls():
+		_log_error("QUEST_READY_ABORTED", {
+			"reason": "ui_bind_failed",
+		})
+		return
 	_wire_ui_signals()
+	_log_boot("UI_SIGNALS_BOUND", {})
 	control_client.connected.connect(_on_control_connected)
 	control_client.disconnected.connect(_on_control_disconnected)
 	control_client.message_received.connect(_on_control_message)
@@ -92,16 +102,37 @@ func _ready() -> void:
 	_rebuild_manual_check_controls()
 
 	_connection_state.set_xr_starting()
+	_log_boot("XR_INIT_BEGIN", {})
 	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
 	if bool(_xr_diagnostics.get("ok", false)):
+		_log_boot("XR_INIT_OK", {
+			"passthrough_enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
+			"display_refresh_rate": float(_xr_diagnostics.get("display_refresh_rate", 0.0)),
+		})
 		_set_auto_discovery_wait_state()
 	else:
-		_connection_state.set_error(str(_xr_diagnostics.get("error", "OpenXR initialization failed")))
+		var xr_error := str(_xr_diagnostics.get("error", "OpenXR initialization failed"))
+		_connection_state.set_error(xr_error)
+		_log_error("XR_INIT_FAILED", {
+			"error": xr_error,
+		})
 
 	_update_controller_visuals()
+	_log_boot("CONTROLLER_VISUALS_UPDATED", {
+		"render_model_plugin_available": bool(_xr_diagnostics.get("render_model_plugin_available", false)),
+	})
 	_recenter_ui_panel()
+	_sync_passthrough_toggle()
+	_log_boot("PASSTHROUGH_TOGGLE_SYNCED", {
+		"enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
+		"toggle_disabled": passthrough_toggle.disabled,
+	})
 	_update_workflow_controls()
 	_update_status_label()
+	_log_boot("READY_COMPLETE", {
+		"xr_state": str(_xr_diagnostics.get("state", OpenXRBootstrap.STATE_XR_STARTING)),
+		"discovery_state": _connection_state.state,
+	})
 
 
 func _physics_process(_delta: float) -> void:
@@ -110,51 +141,65 @@ func _physics_process(_delta: float) -> void:
 	_maybe_push_runtime_diagnostics()
 
 
-func _bind_ui_controls() -> void:
+func _bind_ui_controls() -> bool:
+	_log_boot("UI_BIND_BEGIN", {})
 	var quest_panel := quest_ui_layer.call("get_scene_root") as Control
 	if quest_panel == null:
-		push_error("Quest UI layer did not provide a Control root")
-		return
+		var error_text := "Quest UI layer did not provide a Control root"
+		push_error(error_text)
+		_log_error("UI_BIND_FAILED", {
+			"error": error_text,
+		})
+		return false
 
 	var base_path := "Panel/Margin/Scroll/VBox/"
-	status_label = quest_panel.get_node(base_path + "StatusLabel")
-	connect_mode_select = quest_panel.get_node(base_path + "ConnectModeSelect")
-	manual_server_host_label = quest_panel.get_node(base_path + "ManualServerHostLabel")
-	manual_server_host_edit = quest_panel.get_node(base_path + "ManualServerHostEdit")
-	apply_connection_button = quest_panel.get_node(base_path + "ConnectionButtons/ApplyConnectionButton")
-	retry_connect_button = quest_panel.get_node(base_path + "ConnectionButtons/RetryConnectButton")
-	recenter_panel_button = quest_panel.get_node(base_path + "ConnectionButtons/RecenterPanelButton")
-	preset_select = quest_panel.get_node(base_path + "PresetSelect")
-	template_select = quest_panel.get_node(base_path + "TemplateSelect")
-	workflow_mode_select = quest_panel.get_node(base_path + "WorkflowModeSelect")
-	workflow_details_label = quest_panel.get_node(base_path + "WorkflowDetailsLabel")
-	checklist_box = quest_panel.get_node(base_path + "ChecklistBox")
-	stream_client_label = quest_panel.get_node(base_path + "StreamClientLabel")
-	stream_client_select = quest_panel.get_node(base_path + "StreamClientSelect")
-	run_label_edit = quest_panel.get_node(base_path + "RunLabelEdit")
-	latency_budget_spin = quest_panel.get_node(base_path + "LatencyBudgetSpin")
-	observed_latency_spin = quest_panel.get_node(base_path + "ObservedLatencySpin")
-	focus_loss_spin = quest_panel.get_node(base_path + "FocusLossSpin")
-	operator_note_edit = quest_panel.get_node(base_path + "OperatorNoteEdit")
-	apply_session_details_button = quest_panel.get_node(base_path + "ApplySessionDetailsButton")
-	calibrate_button = quest_panel.get_node(base_path + "Buttons/CalibrateButton")
-	recenter_button = quest_panel.get_node(base_path + "Buttons/RecenterButton")
-	snapshot_note_edit = quest_panel.get_node(base_path + "SnapshotNoteEdit")
-	capture_snapshot_button = quest_panel.get_node(base_path + "SnapshotButtons/CaptureSnapshotButton")
-	report_issue_button = quest_panel.get_node(base_path + "SnapshotButtons/ReportIssueButton")
-	export_report_button = quest_panel.get_node(base_path + "SnapshotButtons/ExportReportButton")
-	sensitivity_slider = quest_panel.get_node(base_path + "Tuning/SensitivitySlider")
-	deadzone_slider = quest_panel.get_node(base_path + "Tuning/DeadzoneSlider")
-	expo_slider = quest_panel.get_node(base_path + "Tuning/ExpoSlider")
-	integrator_slider = quest_panel.get_node(base_path + "Tuning/IntegratorSlider")
-	output_preview_label = quest_panel.get_node(base_path + "OutputPreviewLabel")
-	workflow_diagnostics_label = quest_panel.get_node(base_path + "WorkflowDiagnosticsLabel")
+	status_label = _require_panel_node(quest_panel, base_path + "StatusLabel") as Label
+	passthrough_toggle = _require_panel_node(quest_panel, base_path + "PassthroughToggle") as BaseButton
+	connect_mode_select = _require_panel_node(quest_panel, base_path + "ConnectModeSelect") as OptionButton
+	manual_server_host_label = _require_panel_node(quest_panel, base_path + "ManualServerHostLabel") as Label
+	manual_server_host_edit = _require_panel_node(quest_panel, base_path + "ManualServerHostEdit") as LineEdit
+	apply_connection_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/ApplyConnectionButton") as Button
+	retry_connect_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RetryConnectButton") as Button
+	recenter_panel_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RecenterPanelButton") as Button
+	preset_select = _require_panel_node(quest_panel, base_path + "PresetSelect") as OptionButton
+	template_select = _require_panel_node(quest_panel, base_path + "TemplateSelect") as OptionButton
+	workflow_mode_select = _require_panel_node(quest_panel, base_path + "WorkflowModeSelect") as OptionButton
+	workflow_details_label = _require_panel_node(quest_panel, base_path + "WorkflowDetailsLabel") as Label
+	checklist_box = _require_panel_node(quest_panel, base_path + "ChecklistBox") as VBoxContainer
+	stream_client_label = _require_panel_node(quest_panel, base_path + "StreamClientLabel") as Label
+	stream_client_select = _require_panel_node(quest_panel, base_path + "StreamClientSelect") as OptionButton
+	run_label_edit = _require_panel_node(quest_panel, base_path + "RunLabelEdit") as LineEdit
+	latency_budget_spin = _require_panel_node(quest_panel, base_path + "LatencyBudgetSpin") as SpinBox
+	observed_latency_spin = _require_panel_node(quest_panel, base_path + "ObservedLatencySpin") as SpinBox
+	focus_loss_spin = _require_panel_node(quest_panel, base_path + "FocusLossSpin") as SpinBox
+	operator_note_edit = _require_panel_node(quest_panel, base_path + "OperatorNoteEdit") as TextEdit
+	apply_session_details_button = _require_panel_node(quest_panel, base_path + "ApplySessionDetailsButton") as Button
+	calibrate_button = _require_panel_node(quest_panel, base_path + "Buttons/CalibrateButton") as Button
+	recenter_button = _require_panel_node(quest_panel, base_path + "Buttons/RecenterButton") as Button
+	snapshot_note_edit = _require_panel_node(quest_panel, base_path + "SnapshotNoteEdit") as TextEdit
+	capture_snapshot_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/CaptureSnapshotButton") as Button
+	report_issue_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/ReportIssueButton") as Button
+	export_report_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/ExportReportButton") as Button
+	sensitivity_slider = _require_panel_node(quest_panel, base_path + "Tuning/SensitivitySlider") as HSlider
+	deadzone_slider = _require_panel_node(quest_panel, base_path + "Tuning/DeadzoneSlider") as HSlider
+	expo_slider = _require_panel_node(quest_panel, base_path + "Tuning/ExpoSlider") as HSlider
+	integrator_slider = _require_panel_node(quest_panel, base_path + "Tuning/IntegratorSlider") as HSlider
+	output_preview_label = _require_panel_node(quest_panel, base_path + "OutputPreviewLabel") as Label
+	workflow_diagnostics_label = _require_panel_node(quest_panel, base_path + "WorkflowDiagnosticsLabel") as Label
+	if not _has_bound_ui_controls():
+		_log_error("UI_BIND_FAILED", {
+			"error": "Quest panel controls missing",
+		})
+		return false
+	_log_boot("UI_BIND_OK", {})
+	return true
 
 
 func _wire_ui_signals() -> void:
 	calibrate_button.pressed.connect(func(): controller_reader.request_calibration())
 	recenter_button.pressed.connect(func(): controller_reader.request_recenter())
 	recenter_panel_button.pressed.connect(_recenter_ui_panel)
+	passthrough_toggle.toggled.connect(_on_passthrough_toggled)
 	connect_mode_select.item_selected.connect(_on_connect_mode_selected)
 	manual_server_host_edit.text_changed.connect(func(_new_text: String): _update_connection_controls())
 	apply_connection_button.pressed.connect(_on_apply_connection_pressed)
@@ -171,6 +216,54 @@ func _wire_ui_signals() -> void:
 	capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
 	report_issue_button.pressed.connect(_on_report_issue_pressed)
 	export_report_button.pressed.connect(_on_export_report_pressed)
+
+
+func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
+	var node := quest_panel.get_node_or_null(node_path)
+	if node == null:
+		var error_text := "Quest panel missing node: %s" % node_path
+		push_error(error_text)
+		_log_error("UI_BIND_MISSING_NODE", {
+			"path": node_path,
+			"error": error_text,
+		})
+	return node
+
+
+func _has_bound_ui_controls() -> bool:
+	return status_label != null \
+		and passthrough_toggle != null \
+		and connect_mode_select != null \
+		and manual_server_host_label != null \
+		and manual_server_host_edit != null \
+		and apply_connection_button != null \
+		and retry_connect_button != null \
+		and recenter_panel_button != null \
+		and preset_select != null \
+		and template_select != null \
+		and workflow_mode_select != null \
+		and workflow_details_label != null \
+		and checklist_box != null \
+		and stream_client_label != null \
+		and stream_client_select != null \
+		and run_label_edit != null \
+		and latency_budget_spin != null \
+		and observed_latency_spin != null \
+		and focus_loss_spin != null \
+		and operator_note_edit != null \
+		and apply_session_details_button != null \
+		and calibrate_button != null \
+		and recenter_button != null \
+		and snapshot_note_edit != null \
+		and capture_snapshot_button != null \
+		and report_issue_button != null \
+		and export_report_button != null \
+		and sensitivity_slider != null \
+		and deadzone_slider != null \
+		and expo_slider != null \
+		and integrator_slider != null \
+		and output_preview_label != null \
+		and workflow_diagnostics_label != null
 
 
 func _load_connection_modes() -> void:
@@ -190,6 +283,10 @@ func _on_connect_mode_selected(index: int) -> void:
 		return
 	_connection_mode = str(connect_mode_select.get_item_metadata(index))
 	_manual_server_host = manual_server_host_edit.text.strip_edges()
+	_log_info("CONNECTION_MODE_CHANGED", {
+		"mode": _connection_mode,
+		"manual_server_host": _manual_server_host,
+	})
 	if _connection_mode == CONNECTION_MODE_AUTO:
 		control_client.disconnect_from_server(true)
 		telemetry_sender.clear_target()
@@ -210,11 +307,22 @@ func _on_apply_connection_pressed() -> void:
 		_manual_server_host = manual_server_host_edit.text.strip_edges()
 		if _manual_server_host.is_empty():
 			_connection_state.set_error("Enter a manual server IP before connecting")
+			_log_error("MANUAL_CONNECTION_REJECTED", {
+				"reason": "empty_host",
+			})
 			_update_status_label()
 			return
+		_log_info("MANUAL_CONNECTION_APPLIED", {
+			"host": _manual_server_host,
+			"control_port": DEFAULT_CONTROL_PORT,
+			"telemetry_port": DEFAULT_TELEMETRY_PORT,
+		})
 		_apply_target_host(_manual_server_host, DEFAULT_CONTROL_PORT, DEFAULT_TELEMETRY_PORT, true)
 		return
 
+	_log_info("AUTO_DISCOVERY_APPLY_REQUESTED", {
+		"discovered_server_ip": _discovered_server_ip,
+	})
 	if _discovered_server_ip.is_empty():
 		_set_auto_discovery_wait_state()
 	else:
@@ -223,6 +331,11 @@ func _on_apply_connection_pressed() -> void:
 
 
 func _on_retry_connect_pressed() -> void:
+	_log_info("CONNECTION_RETRY_REQUESTED", {
+		"mode": _connection_mode,
+		"manual_server_host": _manual_server_host,
+		"discovered_server_ip": _discovered_server_ip,
+	})
 	control_client.disconnect_from_server(true)
 	telemetry_sender.clear_target()
 	if _connection_mode == CONNECTION_MODE_MANUAL:
@@ -239,6 +352,12 @@ func _on_server_discovered(ip: String, control_port: int, telemetry_port: int) -
 	_discovered_server_ip = ip
 	_discovered_control_port = control_port
 	_discovered_telemetry_port = telemetry_port
+	_log_info("DISCOVERY_RESULT_RECEIVED", {
+		"ip": ip,
+		"control_port": control_port,
+		"telemetry_port": telemetry_port,
+		"mode": _connection_mode,
+	})
 	if _connection_mode == CONNECTION_MODE_AUTO:
 		_apply_target_host(ip, control_port, telemetry_port, false)
 		return
@@ -248,7 +367,17 @@ func _on_server_discovered(ip: String, control_port: int, telemetry_port: int) -
 func _apply_target_host(host: String, control_port: int, telemetry_port: int, manual_override: bool) -> void:
 	if host.is_empty():
 		_connection_state.set_error("Server host is empty")
+		_log_error("CONTROL_TARGET_REJECTED", {
+			"reason": "empty_host",
+			"manual_override": manual_override,
+		})
 		return
+	_log_info("CONTROL_TARGET_APPLIED", {
+		"host": host,
+		"control_port": control_port,
+		"telemetry_port": telemetry_port,
+		"manual_override": manual_override,
+	})
 	if manual_override:
 		_connection_state.set_manual_override(host, control_port, telemetry_port)
 	else:
@@ -261,6 +390,13 @@ func _apply_target_host(host: String, control_port: int, telemetry_port: int, ma
 
 
 func _on_control_connection_state_changed(state: String, error_code: int) -> void:
+	_log_info("CONTROL_CONNECTION_STATE_CHANGED", {
+		"state": state,
+		"error_code": error_code,
+		"host": str(control_client.server_host),
+		"server_port": int(control_client.server_port),
+		"telemetry_port": int(telemetry_sender.target_port),
+	})
 	match state:
 		"connecting":
 			_connection_state.set_tcp_connecting(
@@ -295,6 +431,11 @@ func _on_control_connection_state_changed(state: String, error_code: int) -> voi
 func _on_discovery_bind_failed(error_code: int) -> void:
 	if _connection_mode == CONNECTION_MODE_AUTO:
 		_connection_state.set_error("Discovery listener failed to bind: %s" % error_string(error_code))
+	_log_error("DISCOVERY_BIND_FAILED", {
+		"error_code": error_code,
+		"error": error_string(error_code),
+		"mode": _connection_mode,
+	})
 	_update_status_label()
 
 
@@ -302,7 +443,12 @@ func _set_auto_discovery_wait_state() -> void:
 	var bind_error := int(discovery_listener.get_bind_error())
 	if bind_error != OK:
 		_connection_state.set_error("Discovery listener failed to bind: %s" % error_string(bind_error))
+		_log_error("AUTO_DISCOVERY_WAIT_FAILED", {
+			"error_code": bind_error,
+			"error": error_string(bind_error),
+		})
 		return
+	_log_info("AUTO_DISCOVERY_WAITING", {})
 	_connection_state.set_waiting_for_beacon()
 
 
@@ -340,9 +486,40 @@ func _recenter_ui_panel() -> void:
 		forward = forward.normalized()
 	ui_pivot.global_position = xr_camera.global_position + (forward * 1.1) + Vector3(0.0, -0.12, 0.0)
 	ui_pivot.look_at(xr_camera.global_position, Vector3.UP, true)
+	_log_boot("UI_PANEL_RECENTERED", {
+		"position": [ui_pivot.global_position.x, ui_pivot.global_position.y, ui_pivot.global_position.z],
+	})
+
+
+func _sync_passthrough_toggle() -> void:
+	if passthrough_toggle == null:
+		return
+
+	_updating_passthrough_toggle = true
+	passthrough_toggle.button_pressed = bool(_xr_diagnostics.get("passthrough_enabled", false))
+	passthrough_toggle.disabled = not bool(_xr_diagnostics.get("alpha_blend_supported", false))
+	_updating_passthrough_toggle = false
+
+
+func _on_passthrough_toggled(enabled: bool) -> void:
+	if _updating_passthrough_toggle:
+		return
+
+	_xr_diagnostics = _xr_bootstrap.set_passthrough_enabled(enabled)
+	_log_info("PASSTHROUGH_TOGGLED", {
+		"requested": enabled,
+		"enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
+	})
+	_sync_passthrough_toggle()
+	_update_status_label()
+	_push_runtime_diagnostics(true)
 
 
 func _on_control_connected() -> void:
+	_log_info("CONTROL_CONNECTED", {
+		"host": str(control_client.server_host),
+		"port": int(control_client.server_port),
+	})
 	control_client.send_message({
 		"type": "hello",
 		"client": "quest",
@@ -353,6 +530,10 @@ func _on_control_connected() -> void:
 
 
 func _on_control_disconnected() -> void:
+	_log_warn("CONTROL_DISCONNECTED", {
+		"host": str(control_client.server_host),
+		"port": int(control_client.server_port),
+	})
 	_last_status = {}
 	_update_workflow_controls()
 	_update_status_label()
@@ -513,6 +694,8 @@ func _update_status_label() -> void:
 		current_host = _discovered_server_ip if not _discovered_server_ip.is_empty() else "searching..."
 	var lines := PackedStringArray([
 		"XR: %s" % str(runtime_diagnostics.get("xr_state", "xr_starting")),
+		"Passthrough: %s" % ("on" if bool(runtime_diagnostics.get("xr_passthrough_enabled", false)) else "off"),
+		"Refresh: %.0f Hz" % float(runtime_diagnostics.get("xr_display_refresh_rate", 0.0)),
 		"Connect: %s (%s)" % [
 			str(runtime_diagnostics.get("discovery_state", QuestConnectionState.STATE_XR_STARTING)),
 			_connection_mode,
@@ -540,6 +723,8 @@ func _update_status_label() -> void:
 	var xr_error := str(runtime_diagnostics.get("xr_error", ""))
 	if not xr_error.is_empty():
 		lines.append("XR Error: %s" % xr_error)
+	if bool(runtime_diagnostics.get("xr_passthrough_preferred", false)) and not bool(runtime_diagnostics.get("xr_passthrough_enabled", false)):
+		lines.append("XR Note: passthrough preferred but currently off")
 	var discovery_error := str(runtime_diagnostics.get("discovery_error", ""))
 	if not discovery_error.is_empty():
 		lines.append("Connect Error: %s" % discovery_error)
@@ -610,9 +795,14 @@ func _build_runtime_diagnostics() -> Dictionary:
 	diagnostics["xr_state"] = str(_xr_diagnostics.get("state", OpenXRBootstrap.STATE_XR_STARTING))
 	diagnostics["xr_error"] = str(_xr_diagnostics.get("error", ""))
 	diagnostics["xr_alpha_blend_supported"] = bool(_xr_diagnostics.get("alpha_blend_supported", false))
+	diagnostics["xr_passthrough_enabled"] = bool(_xr_diagnostics.get("passthrough_enabled", false))
+	diagnostics["xr_passthrough_preferred"] = bool(_xr_diagnostics.get("passthrough_preferred", false))
 	diagnostics["xr_passthrough_plugin_available"] = bool(_xr_diagnostics.get("passthrough_plugin_available", false))
 	diagnostics["xr_render_model_plugin_available"] = bool(_xr_diagnostics.get("render_model_plugin_available", false))
 	diagnostics["xr_passthrough_extension_available"] = bool(_xr_diagnostics.get("passthrough_extension_available", false))
+	diagnostics["xr_display_refresh_rate"] = float(_xr_diagnostics.get("display_refresh_rate", 0.0))
+	diagnostics["xr_target_refresh_rate"] = float(_xr_diagnostics.get("target_refresh_rate", 0.0))
+	diagnostics["xr_vrs_enabled"] = bool(_xr_diagnostics.get("vrs_enabled", false))
 	var discovery: Dictionary = discovery_listener.get_diagnostics()
 	diagnostics.merge(discovery, true)
 	diagnostics["beacon_packets_received"] = int(discovery.get("discovery_packets_received", 0))
@@ -744,6 +934,7 @@ func _update_workflow_controls() -> void:
 	observed_latency_spin.editable = control_client.is_socket_connected()
 	focus_loss_spin.editable = control_client.is_socket_connected()
 	operator_note_edit.editable = control_client.is_socket_connected()
+	passthrough_toggle.disabled = not bool(_xr_diagnostics.get("alpha_blend_supported", false))
 	apply_session_details_button.disabled = not control_client.is_socket_connected()
 	snapshot_note_edit.editable = control_client.is_socket_connected()
 	capture_snapshot_button.disabled = not control_client.is_socket_connected()
@@ -872,3 +1063,19 @@ func _snapshot_kind_label(kind: String) -> String:
 			return "ISSUE"
 		_:
 			return "CHECKPOINT"
+
+
+func _log_boot(phase: String, fields: Dictionary = {}) -> void:
+	QuestRuntimeLog.boot(phase, fields)
+
+
+func _log_info(event: String, fields: Dictionary = {}) -> void:
+	QuestRuntimeLog.info(event, fields)
+
+
+func _log_warn(event: String, fields: Dictionary = {}) -> void:
+	QuestRuntimeLog.warn(event, fields)
+
+
+func _log_error(event: String, fields: Dictionary = {}) -> void:
+	QuestRuntimeLog.error(event, fields)

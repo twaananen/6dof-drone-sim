@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 run/main_scene.android="res://scenes/quest_main.tscn"
 
+[autoload]
+
+QuestRuntimeLog="*res://scripts/debug/quest_runtime_log.gd"
+
 [display]
 
 window/size/viewport_width=1920

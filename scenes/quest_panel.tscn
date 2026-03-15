@@ -8,11 +8,38 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="Chrome" type="PanelContainer" parent="." unique_id=12001]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 88.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="Chrome" unique_id=12002]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Chrome/Margin" unique_id=12003]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=12004]
+layout_mode = 2
+text = "Quest Control Panel"
+
+[node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=12005]
+layout_mode = 2
+text = "Trigger drag here. Grip anywhere to move. Corner pads resize."
+autowrap_mode = 3
+
 [node name="Panel" type="PanelContainer" parent="." unique_id=1782684630]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 88.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -36,6 +63,16 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
 text = "Starting Quest runtime..."
+autowrap_mode = 3
+
+[node name="PassthroughToggle" type="CheckButton" parent="Panel/Margin/Scroll/VBox" unique_id=12006]
+layout_mode = 2
+text = "Enable passthrough when available"
+
+[node name="PassthroughHintLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=12007]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "If Quest starts opaque, this can still be normal depending on the headset home environment."
 autowrap_mode = 3
 
 [node name="ConnectionLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1709051927]
@@ -245,3 +282,46 @@ custom_minimum_size = Vector2(0, 180)
 layout_mode = 2
 text = "Checklist: waiting for desktop status."
 autowrap_mode = 3
+
+[node name="ResizeTopLeftHandle" type="PanelContainer" parent="." unique_id=12008]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+offset_left = 8.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 140.0
+
+[node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=12009]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -52.0
+offset_top = 96.0
+offset_right = -8.0
+offset_bottom = 140.0
+
+[node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=12010]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -52.0
+offset_right = 52.0
+offset_bottom = -8.0
+
+[node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=12011]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -52.0
+offset_top = -52.0
+offset_right = -8.0
+offset_bottom = -8.0

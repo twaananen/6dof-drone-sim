@@ -28,8 +28,17 @@ func _ready() -> void:
 			error_string(_bind_error),
 		]
 		push_warning("DiscoveryListener: %s" % _last_error)
+		QuestRuntimeLog.warn("DISCOVERY_BIND_FAILED", {
+			"listen_port": listen_port,
+			"error_code": int(_bind_error),
+			"error": _last_error,
+		})
 		set_process(false)
 		bind_failed.emit(int(_bind_error))
+		return
+	QuestRuntimeLog.info("DISCOVERY_BIND_OK", {
+		"listen_port": listen_port,
+	})
 
 
 func _process(_delta: float) -> void:
@@ -54,6 +63,11 @@ func _process(_delta: float) -> void:
 			_discovered_control_port = control_port
 			_discovered_telemetry_port = telemetry_port
 			_last_error = ""
+			QuestRuntimeLog.info("DISCOVERY_PACKET_ACCEPTED", {
+				"ip": sender_ip,
+				"control_port": control_port,
+				"telemetry_port": telemetry_port,
+			})
 			server_discovered.emit(sender_ip, control_port, telemetry_port)
 
 
