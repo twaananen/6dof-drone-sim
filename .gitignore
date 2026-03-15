@@ -1,6 +1,5 @@
 # Godot
 .godot/
-export_presets.cfg
 *.translation
 
 # Tests
@@ -21,4 +20,3 @@ android/build/
 
 # Local binaries
 .local/
-

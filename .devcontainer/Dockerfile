@@ -23,6 +23,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # System packages: JDK, build tools for C helper, utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openjdk-17-jdk-headless \
+        iproute2 usbutils \
         gcc make libc6-dev sudo fontconfig \
         wget unzip ca-certificates git \
     && rm -rf /var/lib/apt/lists/*

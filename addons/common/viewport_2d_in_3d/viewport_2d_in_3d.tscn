@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dcwibwtseri8h"]
 
-[ext_resource type="Script" path="res://addons/common/viewport_2d_in_3d/viewport_2d_in_3d.gd" id="1_cglsv"]
+[ext_resource type="Script" uid="uid://ch5we601n513i" path="res://addons/common/viewport_2d_in_3d/viewport_2d_in_3d.gd" id="1_cglsv"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_5sc1k"]
 size = Vector2(0.03, 0.03)

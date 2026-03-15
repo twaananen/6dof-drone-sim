@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://diky2fj2g3w6a" path="res://scenes/shared/quest_status_panel.tscn" id="8"]
 [ext_resource type="PackedScene" uid="uid://d2x6u6k3dvl1e" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
 [ext_resource type="PackedScene" uid="uid://dxqlxmvy7kw7a" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
-[ext_resource type="Script" path="res://scripts/network/discovery_beacon.gd" id="11"]
+[ext_resource type="Script" uid="uid://bue7lm3hjt4cm" path="res://scripts/network/discovery_beacon.gd" id="11"]
 
 [node name="PcMain" type="Control" unique_id=1032354419]
 layout_mode = 3

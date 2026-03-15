@@ -1,5 +1,6 @@
 {
   "name": "Godot Android Export",
+  "initializeCommand": "bash -lc 'mkdir -p \"$HOME/.android\"'",
   "build": {
     "dockerfile": "Dockerfile",
     "args": {
@@ -10,19 +11,35 @@
       "ANDROID_CMAKE": "3.22.1"
     }
   },
-  "runArgs": ["--network=host"],
+  "runArgs": ["--network=host", "--device=/dev/bus/usb:/dev/bus/usb"],
   "mounts": [
     "source=godot-export-templates,target=/home/vscode/.local/share/godot/export_templates,type=volume",
     "source=godot-cache,target=/home/vscode/.cache/godot,type=volume",
-    "source=gradle-cache,target=/home/vscode/.gradle,type=volume"
+    "source=gradle-cache,target=/home/vscode/.gradle,type=volume",
+    "source=${localEnv:HOME}/.android,target=/home/vscode/.android,type=bind"
   ],
+  "containerEnv": {
+    "ADB_VENDOR_KEYS": "/home/vscode/.android"
+  },
   "remoteUser": "vscode",
   "remoteEnv": {
     "ANDROID_HOME": "/opt/android-sdk",
     "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
-    "ANDROID_NDK_ROOT": "/opt/android-sdk/ndk/25.2.9519653"
+    "ANDROID_NDK_ROOT": "/opt/android-sdk/ndk/25.2.9519653",
+    "ADB_VENDOR_KEYS": "/home/vscode/.android"
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "portsAttributes": {
+    "5037": {
+      "label": "ADB server",
+      "onAutoForward": "ignore"
+    },
+    "5038": {
+      "label": "ADB server",
+      "onAutoForward": "ignore"
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": ["geequlim.godot-tools"]

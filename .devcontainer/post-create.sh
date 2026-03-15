@@ -9,6 +9,7 @@ GODOT_MAJOR_MINOR="${GODOT_VER_NUM%.*}"           # e.g. "4.6"
 
 TEMPLATES_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VER_NUM}.stable"
 EDITOR_SETTINGS="$HOME/.config/godot/editor_settings-${GODOT_MAJOR_MINOR}.tres"
+ADB_PORT="${ANDROID_ADB_SERVER_PORT:-5037}"
 
 # ── 0. Fix volume ownership ─────────────────────────────────────────
 # VS Code's updateUID remaps the container user's UID to match the host.
@@ -60,6 +61,11 @@ else
 fi
 
 # ── 3. Import pass ──────────────────────────────────────────────────
+echo "▸ Preparing Android build template…"
+bash tools/install-android-build-template.sh
+echo "  Android build template ready."
+
+# ── 4. Import pass ──────────────────────────────────────────────────
 echo "▸ Running Godot import pass (this may take a moment)…"
 timeout 120 godot --headless --import > /dev/null 2>&1 || true
 echo "  Import pass complete."
@@ -70,10 +76,21 @@ echo "=== Devcontainer ready ==="
 echo ""
 echo "Export a debug APK:"
 echo "  godot --headless --export-debug \"Android\" /tmp/6dof-drone-debug.apk"
+echo "  bash tools/quest-deploy.sh export"
 echo ""
-echo "Deploy to Quest (wireless ADB):"
-echo "  adb connect <quest-ip>:5555"
+echo "ADB in this container uses tcp:127.0.0.1:${ADB_PORT} by default."
+echo "USB-first Quest workflow:"
+echo "  bash tools/quest-adb.sh doctor"
+echo "  adb devices -l"
 echo "  adb install /tmp/6dof-drone-debug.apk"
+echo "  bash tools/quest-deploy.sh install"
+echo ""
+echo "Wireless fallback:"
+echo "  bash tools/quest-adb.sh tcpip"
+echo "  bash tools/quest-adb.sh wireless <quest-ip>:5555"
+echo ""
+echo "One-command export + install:"
+echo "  bash tools/quest-deploy.sh"
 echo ""
 echo "Smoke test:"
 echo "  bash tools/verify-export.sh"

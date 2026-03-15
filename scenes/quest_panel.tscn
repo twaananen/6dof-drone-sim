@@ -1,6 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://b75ra01cc46nc"]
 
-[node name="QuestPanel" type="Control"]
+[node name="QuestPanel" type="Control" unique_id=909829894]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -8,7 +8,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1782684630]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,231 +16,231 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="Panel"]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1581820479]
 layout_mode = 2
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
 
-[node name="Scroll" type="ScrollContainer" parent="Panel/Margin"]
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin" unique_id=688588429]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll"]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=1455676462]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="StatusLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=632732306]
 custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
 text = "Starting Quest runtime..."
 autowrap_mode = 3
 
-[node name="ConnectionLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="ConnectionLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1709051927]
 layout_mode = 2
 text = "Connection"
 
-[node name="ConnectModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="ConnectModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1876003207]
 layout_mode = 2
 text = "Connect Mode"
 
-[node name="ConnectModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox"]
+[node name="ConnectModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1315474766]
 layout_mode = 2
 
-[node name="ManualServerHostLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="ManualServerHostLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=309019831]
 layout_mode = 2
 text = "Manual Server Host"
 
-[node name="ManualServerHostEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox"]
+[node name="ManualServerHostEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=14955874]
 layout_mode = 2
 placeholder_text = "192.168.1.42"
 
-[node name="ConnectionButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+[node name="ConnectionButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=282361996]
 layout_mode = 2
 
-[node name="ApplyConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons"]
+[node name="ApplyConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=639999390]
 layout_mode = 2
 text = "Apply Connection"
 
-[node name="RetryConnectButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons"]
+[node name="RetryConnectButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1976508280]
 layout_mode = 2
 text = "Retry Connect"
 
-[node name="RecenterPanelButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons"]
+[node name="RecenterPanelButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1388455621]
 layout_mode = 2
 text = "Recenter Panel"
 
-[node name="WorkflowPresetLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="WorkflowPresetLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=895976257]
 layout_mode = 2
 text = "Workflow Preset"
 
-[node name="PresetSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox"]
+[node name="PresetSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=610406650]
 layout_mode = 2
 
-[node name="WorkflowModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="WorkflowModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1982968606]
 layout_mode = 2
 text = "Workflow Mode"
 
-[node name="WorkflowModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox"]
+[node name="WorkflowModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1526860531]
 layout_mode = 2
 
-[node name="WorkflowDetailsLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="WorkflowDetailsLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1432641271]
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 text = "Recommended. Run the controller app on Quest and view the sim on a monitor through passthrough."
 autowrap_mode = 3
 
-[node name="ChecklistLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="ChecklistLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=2011840608]
 layout_mode = 2
 text = "Manual Checklist"
 
-[node name="ChecklistBox" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+[node name="ChecklistBox" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=987867716]
 layout_mode = 2
 
-[node name="StreamClientLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="StreamClientLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=423009774]
 layout_mode = 2
 text = "Stream App"
 
-[node name="StreamClientSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox"]
+[node name="StreamClientSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=809070357]
 layout_mode = 2
 
-[node name="RunLabelFieldLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="RunLabelFieldLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1909885245]
 layout_mode = 2
 text = "Run Label"
 
-[node name="RunLabelEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox"]
+[node name="RunLabelEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=186339241]
 layout_mode = 2
 placeholder_text = "Describe this Quest experiment pass"
 
-[node name="LatencyBudgetLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="LatencyBudgetLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=255393525]
 layout_mode = 2
 text = "Latency Budget (ms)"
 
-[node name="LatencyBudgetSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox"]
+[node name="LatencyBudgetSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=1830176817]
 layout_mode = 2
 max_value = 200.0
 
-[node name="ObservedLatencyLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="ObservedLatencyLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=618467615]
 layout_mode = 2
 text = "Observed Latency (ms)"
 
-[node name="ObservedLatencySpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox"]
+[node name="ObservedLatencySpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=1368022700]
 layout_mode = 2
 max_value = 500.0
 
-[node name="FocusLossLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="FocusLossLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=990774697]
 layout_mode = 2
 text = "Focus Loss Events"
 
-[node name="FocusLossSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox"]
+[node name="FocusLossSpin" type="SpinBox" parent="Panel/Margin/Scroll/VBox" unique_id=1457715412]
 layout_mode = 2
 max_value = 20.0
 
-[node name="OperatorNoteLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="OperatorNoteLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1912151298]
 layout_mode = 2
 text = "Operator Note"
 
-[node name="OperatorNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox"]
+[node name="OperatorNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox" unique_id=1926979188]
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 
-[node name="ApplySessionDetailsButton" type="Button" parent="Panel/Margin/Scroll/VBox"]
+[node name="ApplySessionDetailsButton" type="Button" parent="Panel/Margin/Scroll/VBox" unique_id=152936147]
 layout_mode = 2
 text = "Apply Session Details"
 
-[node name="TemplateLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="TemplateLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=284898810]
 layout_mode = 2
 text = "Template"
 
-[node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox"]
+[node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1822312014]
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=289983446]
 layout_mode = 2
 
-[node name="CalibrateButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons"]
+[node name="CalibrateButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1803669660]
 layout_mode = 2
 text = "Calibrate"
 
-[node name="RecenterButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons"]
+[node name="RecenterButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1854633834]
 layout_mode = 2
 text = "Recenter"
 
-[node name="SnapshotButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+[node name="SnapshotButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1188506792]
 layout_mode = 2
 
-[node name="CaptureSnapshotButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons"]
+[node name="CaptureSnapshotButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=66657626]
 layout_mode = 2
 text = "Capture Snapshot"
 
-[node name="ReportIssueButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons"]
+[node name="ReportIssueButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=218622532]
 layout_mode = 2
 text = "Report Issue"
 
-[node name="ExportReportButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons"]
+[node name="ExportReportButton" type="Button" parent="Panel/Margin/Scroll/VBox/SnapshotButtons" unique_id=651214799]
 layout_mode = 2
 text = "Export Report"
 
-[node name="SnapshotNoteLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="SnapshotNoteLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=853040523]
 layout_mode = 2
 text = "Snapshot / Export Note"
 
-[node name="SnapshotNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox"]
+[node name="SnapshotNoteEdit" type="TextEdit" parent="Panel/Margin/Scroll/VBox" unique_id=841304133]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 
-[node name="Tuning" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+[node name="Tuning" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1268318708]
 layout_mode = 2
 
-[node name="SensitivityLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="SensitivityLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1364594275]
 layout_mode = 2
 text = "Sensitivity"
 
-[node name="SensitivitySlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="SensitivitySlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=882662292]
 layout_mode = 2
 min_value = 0.1
 max_value = 3.0
 step = 0.05
 value = 1.0
 
-[node name="DeadzoneLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="DeadzoneLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1013261726]
 layout_mode = 2
 text = "Deadzone"
 
-[node name="DeadzoneSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="DeadzoneSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1137238741]
 layout_mode = 2
 max_value = 0.4
 step = 0.01
 
-[node name="ExpoLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="ExpoLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=467080141]
 layout_mode = 2
 text = "Expo"
 
-[node name="ExpoSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="ExpoSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=2133626549]
 layout_mode = 2
 max_value = 1.0
 step = 0.05
 
-[node name="IntegratorLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="IntegratorLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1400396685]
 layout_mode = 2
 text = "Integrator Gain"
 
-[node name="IntegratorSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning"]
+[node name="IntegratorSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1003872380]
 layout_mode = 2
 min_value = 0.1
 max_value = 3.0
 step = 0.05
 value = 1.0
 
-[node name="OutputPreviewLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="OutputPreviewLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=17217672]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 text = "Outputs: T 0.00 | Y 0.00 | P 0.00 | R 0.00"
 autowrap_mode = 3
 
-[node name="WorkflowDiagnosticsLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+[node name="WorkflowDiagnosticsLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=14811417]
 custom_minimum_size = Vector2(0, 180)
 layout_mode = 2
 text = "Checklist: waiting for desktop status."
