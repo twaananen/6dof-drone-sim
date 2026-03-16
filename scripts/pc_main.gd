@@ -41,11 +41,12 @@ var _runtime_template: MappingTemplate
 var _last_timestamp_usec: int = 0
 var _last_outputs: Dictionary = {}
 var _was_failsafe_active: bool = true
+var _last_control_active: bool = false
 var _last_status_send_usec: int = 0
 var _live_tuning_settings: Dictionary = {}
-var _pending_raw_state: Dictionary
-var _pending_derived: Dictionary
-var _pending_outputs: Dictionary
+var _pending_raw_state: Dictionary = {}
+var _pending_derived: Dictionary = {}
+var _pending_outputs: Dictionary = {}
 var _ui_dirty: bool = false
 var _quest_runtime_diagnostics: Dictionary = {}
 
@@ -90,12 +91,12 @@ func _process(_delta: float) -> void:
 
 func _on_state_received(state: Dictionary) -> void:
 	var now_usec: int = Time.get_ticks_usec()
-	if state.get("event_flags", 0) & RawControllerState.EVENT_CALIBRATE:
+	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN:
 		_source_deriver.calibrate_from_state(state)
-		_mapping_engine.clear_integrators()
-	if state.get("event_flags", 0) & RawControllerState.EVENT_RECENTER:
+		_mapping_engine.reset_state()
+	if state.get("event_flags", 0) & RawControllerState.EVENT_CLEAR_ORIGIN:
 		_source_deriver.reset_calibration()
-		_mapping_engine.clear_integrators()
+		_mapping_engine.reset_state()
 
 	_failsafe.note_state(state, now_usec)
 	var dt: float = 0.0
@@ -105,17 +106,23 @@ func _on_state_received(state: Dictionary) -> void:
 	_last_timestamp_usec = timestamp_usec
 
 	var derived: Dictionary = _source_deriver.derive_sources(state)
+	var control_active := bool(state.get("control_active", false))
+	if not control_active and _last_control_active:
+		_mapping_engine.reset_state()
 	var outputs: Dictionary
 	if not _failsafe.update(now_usec):
 		if _was_failsafe_active:
-			_mapping_engine.clear_integrators()
+			_mapping_engine.reset_state()
 			_was_failsafe_active = false
 		outputs = _mapping_engine.process(derived, dt)
+		if not control_active:
+			outputs = _neutralize_motion_outputs(outputs)
 	else:
 		_was_failsafe_active = true
-		_mapping_engine.clear_integrators()
+		_mapping_engine.reset_state()
 		outputs = _mapping_engine.neutral_outputs()
 
+	_last_control_active = control_active
 	_last_outputs = outputs
 	backend.push_state(outputs)
 
@@ -262,6 +269,7 @@ func _serialize_state_for_ui(state: Dictionary) -> Dictionary:
 		"sequence": state.get("sequence", 0),
 		"timestamp_usec": state.get("timestamp_usec", 0),
 		"tracking_valid": state.get("tracking_valid", false),
+		"control_active": state.get("control_active", false),
 		"event_flags": state.get("event_flags", 0),
 		"buttons": state.get("buttons", 0),
 		"grip_position": str(state.get("grip_position", Vector3.ZERO)),
@@ -310,6 +318,7 @@ func _build_status_payload() -> Dictionary:
 		"workflow_hint": _session_profile.get_workflow_hint(),
 		"output_summary": _summarize_outputs(_last_outputs),
 		"last_outputs": _last_outputs,
+		"control_active": bool(_pending_raw_state.get("control_active", false)),
 		"last_report_export": _last_report_export.duplicate(true),
 		"recent_run_snapshots": SessionRunStore.recent_entries(_session_run_history, 3),
 		"quest_runtime_diagnostics": _quest_runtime_diagnostics.duplicate(true),
@@ -324,6 +333,13 @@ func _build_status_payload() -> Dictionary:
 		_session_run_history
 	)
 	return payload
+
+
+func _neutralize_motion_outputs(outputs: Dictionary) -> Dictionary:
+	var neutralized := outputs.duplicate(true)
+	for output_name in ["throttle", "yaw", "pitch", "roll"]:
+		neutralized[output_name] = 0.0
+	return neutralized
 
 
 func _on_session_profile_applied(profile: SessionProfile) -> void:

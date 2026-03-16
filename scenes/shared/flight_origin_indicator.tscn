@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/xr/flight_origin_indicator.gd" id="1_indicator"]
+
+[sub_resource type="Shader" id="1_indicator_shader"]
+code = "shader_type spatial;\nrender_mode unshaded, cull_disabled, blend_mix, depth_draw_never;\n\nuniform vec4 base_color : source_color = vec4(0.25, 0.65, 1.0, 0.18);\nuniform vec4 highlight_color : source_color = vec4(1.0, 0.18, 0.18, 0.7);\nuniform vec3 highlight_direction = vec3(0.0, 0.0, -1.0);\nuniform float highlight_strength : hint_range(0.0, 1.0) = 0.0;\n\nvoid fragment() {\n\tvec3 dir = normalize(highlight_direction);\n\tfloat lobe = pow(max(dot(normalize(NORMAL), dir), 0.0), 6.0) * highlight_strength;\n\tvec4 color = base_color + highlight_color * lobe;\n\tALBEDO = color.rgb;\n\tALPHA = clamp(color.a, 0.0, 1.0);\n}\n"
+
+[sub_resource type="ShaderMaterial" id="2_indicator_material"]
+shader = SubResource("1_indicator_shader")
+
+[sub_resource type="SphereMesh" id="3_indicator_mesh"]
+radius = 0.16
+height = 0.32
+radial_segments = 28
+rings = 14
+
+[node name="FlightOriginIndicator" type="Node3D"]
+visible = false
+script = ExtResource("1_indicator")
+
+[node name="Sphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("3_indicator_mesh")
+surface_material_override/0 = SubResource("2_indicator_material")

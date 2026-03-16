@@ -14,6 +14,8 @@ func test_quest_main_repro_startup_scene_binds_real_panel_with_quest_main_script
 	await wait_process_frames(1)
 
 	assert_not_null(repro.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestPanel/Panel/Margin/Scroll/VBox/RunLabelEdit"))
+	assert_true(_has_event("XR_INPUT_READER_READY"))
+	assert_false(_has_event("XR_INPUT_READER_UNBOUND"))
 	assert_true(_has_boot_phase("READY_BEGIN"))
 	assert_true(_has_boot_phase("UI_BIND_OK"))
 	assert_true(_has_boot_phase("XR_INIT_BEGIN"))

@@ -28,6 +28,7 @@ func derive_sources(state: Dictionary) -> Dictionary:
 	var linvel: Vector3 = state.get("linear_velocity", Vector3.ZERO)
 
 	return {
+		"control_active": 1.0 if bool(state.get("control_active", false)) else 0.0,
 		"pose_pitch_deg": rad_to_deg(euler.x),
 		"pose_yaw_deg": rad_to_deg(euler.y),
 		"pose_roll_deg": rad_to_deg(euler.z),

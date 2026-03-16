@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="1_handle_material"]
+shading_mode = 0
+albedo_color = Color(0.979, 0.965, 0.874, 1)
+metallic = 0.2
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="2_tip_material"]
+shading_mode = 0
+emission_enabled = true
+emission = Color(0.164706, 0.831373, 0.768627, 1)
+emission_energy_multiplier = 1.4
+albedo_color = Color(0.631373, 0.952941, 0.933333, 1)
+
+[sub_resource type="CylinderMesh" id="3_handle_mesh"]
+top_radius = 0.013
+bottom_radius = 0.02
+height = 0.19
+radial_segments = 18
+
+[sub_resource type="SphereMesh" id="4_tip_mesh"]
+radius = 0.025
+height = 0.05
+
+[sub_resource type="TorusMesh" id="5_ring_mesh"]
+inner_radius = 0.013
+outer_radius = 0.018
+rings = 24
+ring_segments = 14
+
+[node name="LeftWandController" type="Node3D"]
+
+[node name="Handle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.11)
+mesh = SubResource("3_handle_mesh")
+surface_material_override/0 = SubResource("1_handle_material")
+
+[node name="Tip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, -0.225)
+mesh = SubResource("4_tip_mesh")
+surface_material_override/0 = SubResource("2_tip_material")
+
+[node name="GuardRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.008, -0.055)
+mesh = SubResource("5_ring_mesh")
+surface_material_override/0 = SubResource("2_tip_material")

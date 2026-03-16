@@ -151,6 +151,10 @@ text = "Retry Connect"
 layout_mode = 2
 text = "Recenter Panel"
 
+[node name="ShowTutorialButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1388455622]
+layout_mode = 2
+text = "Show Tutorial"
+
 [node name="WorkflowPresetLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=895976257]
 layout_mode = 2
 text = "Workflow Preset"
@@ -241,11 +245,11 @@ layout_mode = 2
 
 [node name="CalibrateButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1803669660]
 layout_mode = 2
-text = "Calibrate"
+text = "Set Flight Origin"
 
 [node name="RecenterButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1854633834]
 layout_mode = 2
-text = "Recenter"
+text = "Clear Flight Origin"
 
 [node name="SnapshotButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1188506792]
 layout_mode = 2

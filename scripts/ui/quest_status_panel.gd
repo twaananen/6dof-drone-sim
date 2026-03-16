@@ -12,6 +12,7 @@ func set_status(status: Dictionary) -> void:
 		"Workflow: %s" % str(status.get("session_mode_label", "Passthrough Standalone")),
 		"Preset: %s" % str(status.get("session_preset_label", "Passthrough Baseline")),
 		"Template: %s" % str(status.get("template_name", "")),
+		"Control: %s" % ("active" if bool(status.get("control_active", false)) else "paused"),
 		"Failsafe: %s" % ("active" if status.get("failsafe_active", true) else "clear"),
 		"Backend: %s" % ("ready" if status.get("backend_available", false) else "offline"),
 		"Packets: %d received / %d dropped" % [
@@ -35,6 +36,21 @@ func set_status(status: Dictionary) -> void:
 			int(quest_runtime.get("telemetry_packets_sent", 0)),
 			int(quest_runtime.get("telemetry_send_errors", 0)),
 		])
+		lines.append("Quest Control: %s" % ("active" if bool(quest_runtime.get("control_active", false)) else "paused"))
+		lines.append("Quest Input: tracking %s | grip %.2f | trigger %.2f" % [
+			"ok" if bool(quest_runtime.get("tracking_valid", false)) else "lost",
+			float(quest_runtime.get("right_grip_value", 0.0)),
+			float(quest_runtime.get("right_trigger_value", 0.0)),
+		])
+		lines.append("Quest Buttons: %s | A %s | Stick %.2f, %.2f" % [
+			str(quest_runtime.get("right_buttons_hex", "0x0000")),
+			"down" if bool(quest_runtime.get("right_button_south_pressed", false)) else "up",
+			float(quest_runtime.get("right_thumbstick_x", 0.0)),
+			float(quest_runtime.get("right_thumbstick_y", 0.0)),
+		])
+		var origin_event := str(quest_runtime.get("last_origin_event", "none"))
+		if origin_event != "none":
+			lines.append("Quest Origin Event: %s" % origin_event)
 		var xr_error := str(quest_runtime.get("xr_error", ""))
 		if not xr_error.is_empty():
 			lines.append("Quest XR Error: %s" % xr_error)
@@ -93,10 +109,11 @@ func set_status(status: Dictionary) -> void:
 		lines.append("%s %s" % [marker, str(item.get("label", ""))])
 	var outputs: Dictionary = status.get("last_outputs", {})
 	if not outputs.is_empty():
-		lines.append("Outputs: T %.2f | Y %.2f | P %.2f | R %.2f" % [
+		lines.append("Outputs: T %.2f | Y %.2f | P %.2f | R %.2f | AUX1 %.0f" % [
 			float(outputs.get("throttle", 0.0)),
 			float(outputs.get("yaw", 0.0)),
 			float(outputs.get("pitch", 0.0)),
 			float(outputs.get("roll", 0.0)),
+			float(outputs.get("aux_button_1", 0.0)),
 		])
 	payload_label.text = "\n".join(lines)

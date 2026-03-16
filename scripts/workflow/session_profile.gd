@@ -62,8 +62,8 @@ const _MANUAL_CHECK_ENTRIES := {
 		},
 		{
 			"id": "controller_calibrated",
-			"label": "Calibration completed",
-			"detail": "Run calibrate and recenter for this session before evaluating mappings.",
+			"label": "Flight origin set",
+			"detail": "Set a fresh flight origin for this session before evaluating mappings.",
 		},
 		{
 			"id": "template_response_verified",
@@ -613,7 +613,7 @@ func _build_passthrough_steps(runtime_status: Dictionary) -> Array:
 		_playbook_step(
 			"Calibrate and restore a live control path",
 			"Quest",
-			"Run calibrate/recenter, clear failsafe, and confirm telemetry reaches the desktop runtime.",
+			"Set flight origin, clear failsafe, and confirm telemetry reaches the desktop runtime.",
 			_playbook_state(
 				(connected and backend_available and packets_received > 0) and not failsafe_active and bool(manual_checks.get("controller_calibrated", false)),
 				not connected or not backend_available or failsafe_active
@@ -741,7 +741,7 @@ func _build_next_actions(runtime_status: Dictionary) -> Array:
 			if not bool(manual_checks.get("passthrough_view_ready", false)):
 				_append_unique(actions, "Stage the passthrough view so the simulator monitor is visible from the headset.")
 			if not bool(manual_checks.get("controller_calibrated", false)):
-				_append_unique(actions, "Run calibrate and recenter before judging the current passthrough mapping.")
+				_append_unique(actions, "Set a fresh flight origin before judging the current passthrough mapping.")
 			if not bool(manual_checks.get("template_response_verified", false)):
 				_append_unique(actions, "Move the controller and confirm the active template responds as expected.")
 	if not connected:

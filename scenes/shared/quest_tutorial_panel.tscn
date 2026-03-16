@@ -1,0 +1,192 @@
+[gd_scene format=3]
+
+[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
+bg_color = Color(0.0862745, 0.141176, 0.215686, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.905882, 0.941176, 0.996078, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
+bg_color = Color(0.0705882, 0.117647, 0.180392, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.905882, 0.941176, 0.996078, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.26)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
+bg_color = Color(0.866667, 0.92549, 1, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0509804, 0.101961, 0.180392, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="QuestTutorialPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Chrome" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 82.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("1_panel_chrome_style")
+
+[node name="Margin" type="MarginContainer" parent="Chrome"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Chrome/Margin"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox"]
+layout_mode = 2
+text = "Quest Flight Tutorial"
+
+[node name="HintLabel" type="Label" parent="Chrome/Margin/VBox"]
+layout_mode = 2
+text = "Left trigger clicks. Left grip drags the panel. Corner pads resize."
+autowrap_mode = 3
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 82.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("2_panel_body_style")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="OverviewLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Use your left hand for UI and your right hand for flight motion."
+autowrap_mode = 3
+
+[node name="LeftHandLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Left hand"
+
+[node name="LeftHandDetails" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Trigger clicks buttons. Grip drags panels. Aim the wand at either panel to interact."
+autowrap_mode = 3
+
+[node name="RightHandLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Right hand"
+
+[node name="RightHandDetails" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Hold Grip to set a fresh flight origin and enable motion control. Release Grip to pause motion so you can relax or readjust."
+autowrap_mode = 3
+
+[node name="ArmLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Drone arm/disarm"
+
+[node name="ArmDetails" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Press the right A button to arm or disarm. Grip release does not disarm the drone."
+autowrap_mode = 3
+
+[node name="IndicatorLabel" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Origin indicator"
+
+[node name="IndicatorDetails" type="Label" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "The translucent blue sphere marks the current flight origin. The red lobe shows motion direction and grows stronger with input magnitude."
+autowrap_mode = 3
+
+[node name="HideTutorialButton" type="Button" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+text = "Hide Tutorial"
+
+[node name="ResizeTopLeftHandle" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 1
+offset_left = 12.0
+offset_top = 94.0
+offset_right = 44.0
+offset_bottom = 126.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeTopRightHandle" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -44.0
+offset_top = 94.0
+offset_right = -12.0
+offset_bottom = 126.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomLeftHandle" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -44.0
+offset_right = 44.0
+offset_bottom = -12.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomRightHandle" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -44.0
+offset_top = -44.0
+offset_right = -12.0
+offset_bottom = -12.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")

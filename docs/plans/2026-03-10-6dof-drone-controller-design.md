@@ -34,7 +34,8 @@ Quest 3 (Android / OpenXR / passthrough)
   │   ├─ Explicit OpenXR action map
   │   ├─ Local reference space
   │   ├─ Grip-pose telemetry reader
-  │   ├─ Calibration + recenter events
+  │   ├─ Flight-origin set / clear events
+  │   ├─ Grip clutch state (`control_active`)
   │   ├─ UDP raw telemetry sender (90 Hz target)
   │   └─ Small TCP control/status client
   │       ├─ Active template name
@@ -44,8 +45,10 @@ Quest 3 (Android / OpenXR / passthrough)
   │
   └─ Minimal Quest UI
       ├─ Template selector
-      ├─ Calibrate / recenter
+      ├─ Set / clear flight origin
       ├─ Status / packet health / failsafe state
+      ├─ Left-hand-only panel pointer
+      ├─ Tutorial panel + controller visuals
       └─ Limited tuning (sensitivity, deadzone, expo, integrator gain)
 
 LAN / Wi-Fi
@@ -72,10 +75,11 @@ Linux PC
 
 - **PC-side mapping for Phase 1a**. Quest sends raw controller telemetry; mapping, tuning, logs, and gamepad injection happen on the PC.
 - **Linux-first backend**. Build a backend interface now, but only implement the Linux uinput helper in Phase 1a.
-- **Grip pose for flight**. The primary motion source uses the controller grip pose. Aim pose is not exposed in Phase 1a.
+- **Grip pose for flight**. The primary motion source uses the controller grip pose. Aim pose is reserved for left-hand UI pointing.
 - **Local reference space**. This is the recommended OpenXR reference space for seated/vehicle experiences such as flight simulators.
 - **Two separate channels**. Raw telemetry uses UDP for low latency. Template/status uses a small reliable TCP channel.
-- **Failsafe is not hold mode**. Input loss enters a neutral + disarm-safe state after 200 ms. Hold/set-and-adjust behavior is provided through a mapping mode, not by connection-loss behavior.
+- **Grip is a clutch, not arm/disarm.** Holding right `grip_click` captures a fresh flight origin and enables motion control. Releasing it pauses motion outputs but keeps telemetry live. Right `A` is the default arm/disarm button path.
+- **Failsafe is not the clutch state.** Input loss enters a neutral + disarm-safe state after 200 ms. Grip release is a separate active-but-paused runtime state.
 
 ## Raw Telemetry Contract
 
@@ -89,7 +93,8 @@ Quest sends `RawControllerState` at a fixed target rate of **90 Hz**.
 | `sequence` | uint32 | Monotonic packet counter |
 | `timestamp_usec` | uint64 | Monotonic sender timestamp |
 | `tracking_valid` | uint8 | `0` or `1` |
-| `event_flags` | uint16 | Bit flags for calibrate/recenter requests |
+| `control_active` | uint8 | `1` while right grip is held, otherwise `0` |
+| `event_flags` | uint16 | Bit flags for flight-origin set / clear requests |
 | `buttons` | uint16 | Packed button state |
 | `grip_position` | float32 x3 | Meters, in local reference space |
 | `grip_orientation` | float32 x4 | Quaternion `x,y,z,w` |
@@ -101,8 +106,8 @@ Quest sends `RawControllerState` at a fixed target rate of **90 Hz**.
 
 ### Event Flags
 
-- `1 << 0`: calibrate requested
-- `1 << 1`: recenter detected
+- `1 << 0`: set flight origin requested
+- `1 << 1`: clear flight origin requested
 
 ## Control/Status Channel
 
@@ -113,7 +118,7 @@ The PC exposes a small TCP server. JSON lines are sufficient for Phase 1a.
 - `hello`
 - `select_template`
 - `apply_tuning`
-- `request_calibrate`
+- `request_set_origin`
 
 ### PC -> Quest Messages
 
@@ -203,7 +208,7 @@ Each binding normalizes its own source to `[-1, 1]` before mixing. Mixed values 
 
 - `absolute`: current normalized source value contributes directly.
 - `delta`: frame-to-frame normalized change, using packet timestamps.
-- `integrator`: accumulates normalized delta over time into a latched output, clamps it to the output range, and holds the value until counter-motion, template reset, calibration, recenter, or failsafe clears it.
+- `integrator`: accumulates normalized delta over time into a latched output, clamps it to the output range, and holds the value until counter-motion, template reset, flight-origin changes, clutch release, or failsafe clears it.
 
 ## Failsafe
 
@@ -246,9 +251,12 @@ The Quest app is intentionally small. It shows:
 - current connection state
 - active template name
 - telemetry health / packet rate
+- control active / paused state
 - failsafe state
 - template selector
-- calibrate and recenter controls
+- set flight origin and clear flight origin controls
+- left-hand-only pointer interaction
+- separate movable tutorial panel
 - limited live tuning controls
 
 It does **not** support full binding authoring or template structure changes.

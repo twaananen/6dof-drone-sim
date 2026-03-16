@@ -8,7 +8,8 @@ func test_roundtrip_packet() -> void:
     state["sequence"] = 5
     state["timestamp_usec"] = 42
     state["tracking_valid"] = true
-    state["event_flags"] = RawControllerState.EVENT_CALIBRATE
+    state["control_active"] = true
+    state["event_flags"] = RawControllerState.EVENT_SET_ORIGIN
     state["buttons"] = RawControllerState.BUTTON_SOUTH | RawControllerState.BUTTON_MENU
     state["grip_position"] = Vector3(1.0, 2.0, 3.0)
     state["grip_orientation"] = Quaternion(0.0, 0.0, 0.0, 1.0)
@@ -26,7 +27,8 @@ func test_roundtrip_packet() -> void:
     assert_eq(unpacked["sequence"], 5)
     assert_eq(unpacked["timestamp_usec"], 42)
     assert_true(unpacked["tracking_valid"])
-    assert_eq(unpacked["event_flags"], RawControllerState.EVENT_CALIBRATE)
+    assert_true(unpacked["control_active"])
+    assert_eq(unpacked["event_flags"], RawControllerState.EVENT_SET_ORIGIN)
     assert_eq(unpacked["buttons"], state["buttons"])
     assert_almost_eq(unpacked["grip_position"].x, 1.0, 0.001)
     assert_almost_eq(unpacked["trigger"], 0.75, 0.001)

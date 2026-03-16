@@ -2,16 +2,18 @@ class_name RawControllerState
 extends RefCounted
 
 const MAGIC_TEXT := "RCS1"
-const VERSION := 1
+const VERSION := 2
 const BUTTON_SOUTH := 1 << 0
 const BUTTON_EAST := 1 << 1
 const BUTTON_WEST := 1 << 2
 const BUTTON_NORTH := 1 << 3
 const BUTTON_THUMBSTICK := 1 << 4
 const BUTTON_MENU := 1 << 5
-const EVENT_CALIBRATE := 1 << 0
-const EVENT_RECENTER := 1 << 1
-const PACKET_SIZE := 90
+const EVENT_SET_ORIGIN := 1 << 0
+const EVENT_CLEAR_ORIGIN := 1 << 1
+const EVENT_CALIBRATE := EVENT_SET_ORIGIN
+const EVENT_RECENTER := EVENT_CLEAR_ORIGIN
+const PACKET_SIZE := 91
 
 
 static func default_state() -> Dictionary:
@@ -20,6 +22,7 @@ static func default_state() -> Dictionary:
         "sequence": 0,
         "timestamp_usec": 0,
         "tracking_valid": false,
+        "control_active": false,
         "event_flags": 0,
         "buttons": 0,
         "grip_position": Vector3.ZERO,
@@ -40,6 +43,7 @@ static func pack_state(state: Dictionary) -> PackedByteArray:
     buf.put_u32(int(state.get("sequence", 0)))
     buf.put_u64(int(state.get("timestamp_usec", 0)))
     buf.put_u8(1 if state.get("tracking_valid", false) else 0)
+    buf.put_u8(1 if state.get("control_active", false) else 0)
     buf.put_u16(int(state.get("event_flags", 0)))
     buf.put_u16(int(state.get("buttons", 0)))
 
@@ -84,6 +88,7 @@ static func unpack_state(packet: PackedByteArray) -> Dictionary:
     state["sequence"] = buf.get_u32()
     state["timestamp_usec"] = buf.get_u64()
     state["tracking_valid"] = buf.get_u8() == 1
+    state["control_active"] = buf.get_u8() == 1
     state["event_flags"] = buf.get_u16()
     state["buttons"] = buf.get_u16()
     state["grip_position"] = _get_vector3(buf)

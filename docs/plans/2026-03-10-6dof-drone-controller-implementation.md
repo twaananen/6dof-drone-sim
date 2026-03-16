@@ -47,7 +47,7 @@
 - Implement Quest-side OpenXR startup with explicit action map configuration.
 - Use `Local` reference space and grip pose telemetry.
 - Implement raw telemetry capture, event flag generation, UDP send, and TCP status client.
-- Implement the minimal Quest UI for template selection, calibrate/recenter, status, and limited tuning.
+- Implement the minimal Quest UI for template selection, set/clear flight origin, status, tutorial panel, and limited tuning.
 
 ### Milestone 6: Desktop Editor And Runtime
 
@@ -109,11 +109,13 @@ Use:
   - grip pose
   - velocities
   - trigger / grip / thumbstick / buttons
-  - calibration and recenter event flags
+  - `control_active` clutch state
+  - set / clear flight-origin event flags
 - `scripts/quest_main.gd`
   - XR init
   - sender / client lifecycle
-  - limited UI bindings
+  - left-hand-only UI bindings
+  - tutorial and origin-indicator bindings
 - `scenes/quest_main.tscn`
 
 ### PC Runtime
@@ -151,7 +153,9 @@ Desktop UI scope for Phase 1a:
 Quest UI scope for Phase 1a:
 
 - template selection
-- calibrate / recenter
+- set / clear flight origin
+- left-hand-only pointer interaction
+- separate tutorial panel
 - sensitivity / deadzone / expo / integrator gain
 - status only
 
@@ -178,15 +182,16 @@ Fixed packet order:
 3. sequence `u32`
 4. timestamp_usec `u64`
 5. tracking_valid `u8`
-6. event_flags `u16`
-7. buttons `u16`
-8. grip position `3 x f32`
-9. grip orientation `4 x f32`
-10. linear velocity `3 x f32`
-11. angular velocity `3 x f32`
-12. trigger `f32`
-13. grip `f32`
-14. thumbstick `2 x f32`
+6. control_active `u8`
+7. event_flags `u16`
+8. buttons `u16`
+9. grip position `3 x f32`
+10. grip orientation `4 x f32`
+11. linear velocity `3 x f32`
+12. angular velocity `3 x f32`
+13. trigger `f32`
+14. grip `f32`
+15. thumbstick `2 x f32`
 
 ### TCP control/status
 

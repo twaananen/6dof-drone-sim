@@ -76,7 +76,7 @@ render_target_update_mode = 4
 
 [node name="ControllerReader" type="Node" parent="."]
 script = ExtResource("2_controller_reader")
-controller = NodePath("../XROrigin3D/RightHand")
+controller_path = NodePath("../XROrigin3D/RightHand")
 
 [node name="TelemetrySender" type="Node" parent="."]
 script = ExtResource("3_telemetry_sender")

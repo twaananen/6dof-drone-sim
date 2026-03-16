@@ -95,7 +95,20 @@
       ],
       "deadzone": 0.05,
       "expo": 0.25
+    },
+    "aux_button_1": {
+      "bindings": [
+        {
+          "source": "button_south",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.0,
+          "curve": "linear"
+        }
+      ]
     }
   }
 }
-

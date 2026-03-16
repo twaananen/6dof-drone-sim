@@ -9,6 +9,7 @@ const DEFAULT_TELEMETRY_PORT := 9100
 const CONNECTION_MODE_AUTO := "auto"
 const CONNECTION_MODE_MANUAL := "manual"
 const DIAGNOSTIC_PUSH_INTERVAL_USEC := 500000
+const POSE_SNAPSHOT_INTERVAL_MSEC := 1000
 
 @onready var controller_reader: Node = $ControllerReader
 @onready var telemetry_sender: Node = $TelemetrySender
@@ -18,10 +19,12 @@ const DIAGNOSTIC_PUSH_INTERVAL_USEC := 500000
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
 @onready var ui_pivot: Node3D = $XROrigin3D/QuestUiLayer
 @onready var quest_ui_layer: Node = $XROrigin3D/QuestUiLayer
+@onready var tutorial_ui_layer: Node3D = get_node_or_null("XROrigin3D/TutorialUiLayer") as Node3D
 @onready var left_hand: XRController3D = $XROrigin3D/LeftHand
 @onready var right_hand: XRController3D = $XROrigin3D/RightHand
 @onready var left_fallback_mesh: MeshInstance3D = $XROrigin3D/LeftHand/FallbackMesh
 @onready var right_fallback_mesh: MeshInstance3D = $XROrigin3D/RightHand/FallbackMesh
+@onready var right_origin_indicator: Node3D = get_node_or_null("XROrigin3D/RightOriginIndicator") as Node3D
 
 var connect_mode_select: OptionButton
 var manual_server_host_label: Label
@@ -29,6 +32,7 @@ var manual_server_host_edit: LineEdit
 var apply_connection_button: Button
 var retry_connect_button: Button
 var recenter_panel_button: Button
+var show_tutorial_button: Button
 var passthrough_toggle: BaseButton
 var preset_select: OptionButton
 var template_select: OptionButton
@@ -56,9 +60,11 @@ var expo_slider: HSlider
 var integrator_slider: HSlider
 var output_preview_label: Label
 var workflow_diagnostics_label: Label
+var hide_tutorial_button: Button
 
 var _active_template_name: String = ""
 var _last_status: Dictionary = {}
+var _last_local_controller_state: Dictionary = {}
 var _session_profile: Dictionary = SessionProfile.new().to_dict()
 var _updating_preset_select: bool = false
 var _updating_workflow_select: bool = false
@@ -77,6 +83,7 @@ var _last_runtime_diagnostics_push_usec: int = 0
 var _updating_passthrough_toggle: bool = false
 var _xr_interface: XRInterface
 var _panel_recentering_connected: bool = false
+var _last_pose_snapshot_msec: int = 0
 
 
 func _ready() -> void:
@@ -116,6 +123,7 @@ func _ready() -> void:
 			"passthrough_enabled": bool(_xr_diagnostics.get("passthrough_enabled", false)),
 			"display_refresh_rate": float(_xr_diagnostics.get("display_refresh_rate", 0.0)),
 		})
+		_schedule_startup_recenter()
 		_set_auto_discovery_wait_state()
 	else:
 		var xr_error := str(_xr_diagnostics.get("error", "OpenXR initialization failed"))
@@ -142,7 +150,11 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	telemetry_sender.send_state(controller_reader.read_state())
+	var state: Dictionary = controller_reader.read_state()
+	_last_local_controller_state = state.duplicate(true)
+	telemetry_sender.send_state(state)
+	_sync_flight_origin_indicator(state)
+	_maybe_log_pose_snapshot(state)
 	_update_status_label()
 	_maybe_push_runtime_diagnostics()
 
@@ -167,6 +179,7 @@ func _bind_ui_controls() -> bool:
 	apply_connection_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/ApplyConnectionButton") as Button
 	retry_connect_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RetryConnectButton") as Button
 	recenter_panel_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RecenterPanelButton") as Button
+	show_tutorial_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/ShowTutorialButton") as Button
 	preset_select = _require_panel_node(quest_panel, base_path + "PresetSelect") as OptionButton
 	template_select = _require_panel_node(quest_panel, base_path + "TemplateSelect") as OptionButton
 	workflow_mode_select = _require_panel_node(quest_panel, base_path + "WorkflowModeSelect") as OptionButton
@@ -192,6 +205,14 @@ func _bind_ui_controls() -> bool:
 	integrator_slider = _require_panel_node(quest_panel, base_path + "Tuning/IntegratorSlider") as HSlider
 	output_preview_label = _require_panel_node(quest_panel, base_path + "OutputPreviewLabel") as Label
 	workflow_diagnostics_label = _require_panel_node(quest_panel, base_path + "WorkflowDiagnosticsLabel") as Label
+	if tutorial_ui_layer != null:
+		var tutorial_panel := tutorial_ui_layer.call("get_scene_root") as Control
+		if tutorial_panel == null:
+			_log_error("UI_BIND_FAILED", {
+				"error": "Tutorial UI layer did not provide a Control root",
+			})
+			return false
+		hide_tutorial_button = _require_panel_node(tutorial_panel, "Panel/Margin/Scroll/VBox/HideTutorialButton") as Button
 	if not _has_bound_ui_controls():
 		_log_error("UI_BIND_FAILED", {
 			"error": "Quest panel controls missing",
@@ -202,9 +223,13 @@ func _bind_ui_controls() -> bool:
 
 
 func _wire_ui_signals() -> void:
-	calibrate_button.pressed.connect(func(): controller_reader.request_calibration())
-	recenter_button.pressed.connect(func(): controller_reader.request_recenter())
+	calibrate_button.pressed.connect(func(): controller_reader.request_set_origin())
+	recenter_button.pressed.connect(func(): controller_reader.request_clear_origin())
 	recenter_panel_button.pressed.connect(_recenter_ui_panel)
+	if tutorial_ui_layer != null:
+		show_tutorial_button.pressed.connect(_show_tutorial_panel)
+	if hide_tutorial_button != null:
+		hide_tutorial_button.pressed.connect(_hide_tutorial_panel)
 	passthrough_toggle.toggled.connect(_on_passthrough_toggled)
 	connect_mode_select.item_selected.connect(_on_connect_mode_selected)
 	manual_server_host_edit.text_changed.connect(func(_new_text: String): _update_connection_controls())
@@ -227,6 +252,8 @@ func _wire_ui_signals() -> void:
 func _schedule_startup_recenter() -> void:
 	if _xr_interface == null or not _xr_interface.has_signal("session_begun"):
 		_recenter_ui_panel()
+		if tutorial_ui_layer != null:
+			_recenter_tutorial_panel()
 		return
 	if _panel_recentering_connected:
 		return
@@ -240,6 +267,8 @@ func _schedule_startup_recenter() -> void:
 func _on_xr_session_begun() -> void:
 	await get_tree().process_frame
 	_recenter_ui_panel()
+	if tutorial_ui_layer != null:
+		_recenter_tutorial_panel()
 
 
 func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
@@ -263,6 +292,7 @@ func _has_bound_ui_controls() -> bool:
 		and apply_connection_button != null \
 		and retry_connect_button != null \
 		and recenter_panel_button != null \
+		and show_tutorial_button != null \
 		and preset_select != null \
 		and template_select != null \
 		and workflow_mode_select != null \
@@ -477,28 +507,13 @@ func _set_auto_discovery_wait_state() -> void:
 
 
 func _update_controller_visuals() -> void:
-	var render_models_enabled := bool(ProjectSettings.get_setting("xr/openxr/extensions/meta/render_model", false))
-	var render_models_available := render_models_enabled and bool(_xr_diagnostics.get("render_model_plugin_available", false))
-	if render_models_available:
-		_ensure_render_model(left_hand, false)
-		_ensure_render_model(right_hand, true)
-	left_fallback_mesh.visible = not render_models_available
-	right_fallback_mesh.visible = not render_models_available
-
-
-func _ensure_render_model(controller: XRController3D, use_alt_render_model: bool) -> void:
-	if controller.get_node_or_null("ControllerRenderModel") != null:
-		return
-	if not ClassDB.class_exists("OpenXRFbRenderModel"):
-		return
-	var render_model := ClassDB.instantiate("OpenXRFbRenderModel") as Node
-	if render_model == null:
-		return
-	render_model.name = "ControllerRenderModel"
-	if use_alt_render_model:
-		render_model.set("render_model_type", 1)
-	controller.add_child(render_model)
-	render_model.owner = self
+	left_fallback_mesh.visible = false
+	right_fallback_mesh.visible = false
+	for controller in [left_hand, right_hand]:
+		var render_model: Node = controller.get_node_or_null("ControllerRenderModel")
+		var render_model_3d := render_model as Node3D
+		if render_model_3d != null:
+			render_model_3d.visible = false
 
 
 func _recenter_ui_panel() -> void:
@@ -520,6 +535,44 @@ func _recenter_ui_panel() -> void:
 	_log_boot("UI_PANEL_RECENTERED", {
 		"position": [ui_pivot.global_position.x, ui_pivot.global_position.y, ui_pivot.global_position.z],
 	})
+
+
+func _recenter_tutorial_panel() -> void:
+	if tutorial_ui_layer == null:
+		return
+	var camera_position := xr_camera.global_position
+	var camera_basis := xr_camera.global_transform.basis
+	if not camera_position.is_finite() or not camera_basis.is_finite():
+		return
+	var forward := -xr_camera.global_transform.basis.z
+	forward.y = 0.0
+	if is_zero_approx(forward.length_squared()):
+		forward = Vector3(0.0, 0.0, -1.0)
+	else:
+		forward = forward.normalized()
+	var right := xr_camera.global_transform.basis.x
+	right.y = 0.0
+	if is_zero_approx(right.length_squared()):
+		right = Vector3.RIGHT
+	else:
+		right = right.normalized()
+	tutorial_ui_layer.global_position = xr_camera.global_position + (forward * 0.95) - (right * 0.5) + Vector3(0.0, 0.02, 0.0)
+	tutorial_ui_layer.look_at(xr_camera.global_position, Vector3.UP, true)
+
+
+func _show_tutorial_panel() -> void:
+	if tutorial_ui_layer == null:
+		return
+	tutorial_ui_layer.visible = true
+	_recenter_tutorial_panel()
+	_refresh_tutorial_controls()
+
+
+func _hide_tutorial_panel() -> void:
+	if tutorial_ui_layer == null:
+		return
+	tutorial_ui_layer.visible = false
+	_refresh_tutorial_controls()
 
 
 func _sync_passthrough_toggle() -> void:
@@ -745,6 +798,18 @@ func _update_status_label() -> void:
 		"Workflow: %s" % mode_label,
 		"Preset: %s" % preset_label,
 		"Template: %s" % _active_template_name,
+		"Control: %s" % ("active" if bool(runtime_diagnostics.get("control_active", false)) else "paused"),
+		"Input: tracking %s | grip %.2f | trigger %.2f" % [
+			"ok" if bool(runtime_diagnostics.get("tracking_valid", false)) else "lost",
+			float(runtime_diagnostics.get("right_grip_value", 0.0)),
+			float(runtime_diagnostics.get("right_trigger_value", 0.0)),
+		],
+		"Buttons: %s | A %s | Stick %.2f, %.2f" % [
+			str(runtime_diagnostics.get("right_buttons_hex", "0x0000")),
+			"down" if bool(runtime_diagnostics.get("right_button_south_pressed", false)) else "up",
+			float(runtime_diagnostics.get("right_thumbstick_x", 0.0)),
+			float(runtime_diagnostics.get("right_thumbstick_y", 0.0)),
+		],
 		"Failsafe: %s" % ("active" if _last_status.get("failsafe_active", true) else "clear"),
 		"Backend: %s" % ("ready" if _last_status.get("backend_available", false) else "offline"),
 		"Packets: %s received / %s dropped" % [
@@ -760,6 +825,9 @@ func _update_status_label() -> void:
 	var passthrough_fallback_reason := str(runtime_diagnostics.get("xr_passthrough_fallback_reason", ""))
 	if not passthrough_fallback_reason.is_empty():
 		lines.append("XR Fallback: %s" % passthrough_fallback_reason)
+	var last_origin_event := str(runtime_diagnostics.get("last_origin_event", "none"))
+	if last_origin_event != "none":
+		lines.append("Origin Event: %s" % last_origin_event)
 	var discovery_error := str(runtime_diagnostics.get("discovery_error", ""))
 	if not discovery_error.is_empty():
 		lines.append("Connect Error: %s" % discovery_error)
@@ -812,11 +880,12 @@ func _update_status_label() -> void:
 	status_label.text = "\n".join(lines)
 	workflow_details_label.text = _format_session_playbook(playbook)
 	var outputs: Dictionary = _last_status.get("output_summary", {})
-	output_preview_label.text = "Outputs: T %.2f | Y %.2f | P %.2f | R %.2f" % [
+	output_preview_label.text = "Outputs: T %.2f | Y %.2f | P %.2f | R %.2f | AUX1 %.0f" % [
 		float(outputs.get("throttle", 0.0)),
 		float(outputs.get("yaw", 0.0)),
 		float(outputs.get("pitch", 0.0)),
 		float(outputs.get("roll", 0.0)),
+		float(outputs.get("aux_button_1", 0.0)),
 	]
 	workflow_diagnostics_label.text = _format_session_diagnostics(_last_status.get("session_diagnostics", {}))
 
@@ -843,6 +912,20 @@ func _build_runtime_diagnostics() -> Dictionary:
 	diagnostics["xr_display_refresh_rate"] = float(_xr_diagnostics.get("display_refresh_rate", 0.0))
 	diagnostics["xr_target_refresh_rate"] = float(_xr_diagnostics.get("target_refresh_rate", 0.0))
 	diagnostics["xr_vrs_enabled"] = bool(_xr_diagnostics.get("vrs_enabled", false))
+	diagnostics["control_active"] = bool(_last_local_controller_state.get("control_active", false))
+	diagnostics["tracking_valid"] = bool(_last_local_controller_state.get("tracking_valid", false))
+	diagnostics["right_trigger_value"] = float(_last_local_controller_state.get("trigger", 0.0))
+	diagnostics["right_grip_value"] = float(_last_local_controller_state.get("grip", 0.0))
+	var buttons := int(_last_local_controller_state.get("buttons", 0))
+	diagnostics["right_buttons"] = buttons
+	diagnostics["right_buttons_hex"] = "0x%04X" % buttons
+	diagnostics["right_button_south_pressed"] = RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_SOUTH)
+	var thumbstick: Vector2 = _last_local_controller_state.get("thumbstick", Vector2.ZERO)
+	diagnostics["right_thumbstick_x"] = float(thumbstick.x)
+	diagnostics["right_thumbstick_y"] = float(thumbstick.y)
+	diagnostics["last_origin_event"] = _describe_origin_event(int(_last_local_controller_state.get("event_flags", 0)))
+	diagnostics["tutorial_visible"] = tutorial_ui_layer.visible if tutorial_ui_layer != null else false
+	diagnostics["origin_indicator_visible"] = right_origin_indicator.visible if right_origin_indicator != null else false
 	var discovery: Dictionary = discovery_listener.get_diagnostics()
 	diagnostics.merge(discovery, true)
 	diagnostics["beacon_packets_received"] = int(discovery.get("discovery_packets_received", 0))
@@ -963,6 +1046,7 @@ func _update_connection_controls() -> void:
 
 func _update_workflow_controls() -> void:
 	_update_connection_controls()
+	_refresh_tutorial_controls()
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	stream_client_label.visible = stream_client_enabled
 	stream_client_select.visible = stream_client_enabled
@@ -983,6 +1067,111 @@ func _update_workflow_controls() -> void:
 	for child in checklist_box.get_children():
 		if child is CheckBox:
 			child.disabled = not control_client.is_socket_connected()
+
+
+func _refresh_tutorial_controls() -> void:
+	if show_tutorial_button != null:
+		show_tutorial_button.disabled = tutorial_ui_layer != null and tutorial_ui_layer.visible
+
+
+func _sync_flight_origin_indicator(state: Dictionary) -> void:
+	if right_origin_indicator == null:
+		return
+	var control_active := bool(state.get("control_active", false))
+	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN:
+		right_origin_indicator.call("show_from_transform", right_hand.global_transform)
+		_log_info("XR_FLIGHT_ORIGIN_ANCHOR", _build_origin_anchor_fields(right_origin_indicator.transform))
+	elif state.get("event_flags", 0) & RawControllerState.EVENT_CLEAR_ORIGIN and control_active:
+		right_origin_indicator.call("show_from_transform", right_hand.global_transform)
+		_log_info("XR_FLIGHT_ORIGIN_ANCHOR", _build_origin_anchor_fields(right_origin_indicator.transform))
+
+	if not control_active:
+		if right_origin_indicator.visible:
+			right_origin_indicator.call("hide_indicator")
+		return
+
+	if not right_origin_indicator.visible:
+		right_origin_indicator.call("show_from_transform", right_hand.global_transform)
+	right_origin_indicator.call("update_displacement", right_hand.global_position)
+
+
+func _maybe_log_pose_snapshot(state: Dictionary) -> void:
+	if not bool(state.get("tracking_valid", false)):
+		return
+	var now_msec := Time.get_ticks_msec()
+	if now_msec - _last_pose_snapshot_msec < POSE_SNAPSHOT_INTERVAL_MSEC:
+		return
+	_last_pose_snapshot_msec = now_msec
+	var origin_transform := Transform3D.IDENTITY
+	var origin_visible := right_origin_indicator != null and right_origin_indicator.visible
+	if origin_visible:
+		origin_transform = right_origin_indicator.transform
+	_log_info("XR_POSE_SNAPSHOT", _build_pose_log_fields(state, origin_transform, origin_visible))
+
+
+func _build_pose_log_fields(state: Dictionary, origin_transform: Transform3D, origin_visible: bool) -> Dictionary:
+	var grip_position: Vector3 = state.get("grip_position", Vector3.ZERO)
+	var grip_orientation: Quaternion = state.get("grip_orientation", Quaternion.IDENTITY)
+	var grip_euler_deg := _quaternion_to_euler_deg(grip_orientation)
+	var fields := {
+		"controller": "RightHand",
+		"tracking_valid": bool(state.get("tracking_valid", false)),
+		"control_active": bool(state.get("control_active", false)),
+		"grip_position_x": snappedf(grip_position.x, 0.001),
+		"grip_position_y": snappedf(grip_position.y, 0.001),
+		"grip_position_z": snappedf(grip_position.z, 0.001),
+		"grip_pitch_deg": snappedf(grip_euler_deg.x, 0.1),
+		"grip_yaw_deg": snappedf(grip_euler_deg.y, 0.1),
+		"grip_roll_deg": snappedf(grip_euler_deg.z, 0.1),
+		"origin_visible": origin_visible,
+	}
+	if not origin_visible:
+		return fields
+	var origin_position := origin_transform.origin
+	var displacement := grip_position - origin_position
+	var local_displacement := origin_transform.basis.inverse() * displacement
+	fields["origin_position_x"] = snappedf(origin_position.x, 0.001)
+	fields["origin_position_y"] = snappedf(origin_position.y, 0.001)
+	fields["origin_position_z"] = snappedf(origin_position.z, 0.001)
+	fields["displacement_x"] = snappedf(displacement.x, 0.001)
+	fields["displacement_y"] = snappedf(displacement.y, 0.001)
+	fields["displacement_z"] = snappedf(displacement.z, 0.001)
+	fields["displacement_local_x"] = snappedf(local_displacement.x, 0.001)
+	fields["displacement_local_y"] = snappedf(local_displacement.y, 0.001)
+	fields["displacement_local_z"] = snappedf(local_displacement.z, 0.001)
+	fields["displacement_magnitude"] = snappedf(displacement.length(), 0.001)
+	fields["displacement_xz_magnitude"] = snappedf(Vector2(displacement.x, displacement.z).length(), 0.001)
+	return fields
+
+
+func _build_origin_anchor_fields(origin_transform: Transform3D) -> Dictionary:
+	var origin_euler_deg := _quaternion_to_euler_deg(origin_transform.basis.get_rotation_quaternion())
+	return {
+		"controller": "RightHand",
+		"origin_position_x": snappedf(origin_transform.origin.x, 0.001),
+		"origin_position_y": snappedf(origin_transform.origin.y, 0.001),
+		"origin_position_z": snappedf(origin_transform.origin.z, 0.001),
+		"origin_pitch_deg": snappedf(origin_euler_deg.x, 0.1),
+		"origin_yaw_deg": snappedf(origin_euler_deg.y, 0.1),
+		"origin_roll_deg": snappedf(origin_euler_deg.z, 0.1),
+	}
+
+
+func _quaternion_to_euler_deg(rotation: Quaternion) -> Vector3:
+	var euler := Basis(rotation).get_euler(EULER_ORDER_YXZ)
+	return Vector3(
+		rad_to_deg(euler.x),
+		rad_to_deg(euler.y),
+		rad_to_deg(euler.z)
+	)
+
+
+func _describe_origin_event(event_flags: int) -> String:
+	if event_flags & RawControllerState.EVENT_SET_ORIGIN:
+		return "set"
+	if event_flags & RawControllerState.EVENT_CLEAR_ORIGIN:
+		return "clear"
+	return "none"
 
 
 func _format_session_diagnostics(diagnostics: Dictionary) -> String:

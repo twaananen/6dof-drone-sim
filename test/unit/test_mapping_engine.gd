@@ -49,3 +49,20 @@ func test_integrator_holds_state_until_reset() -> void:
     engine.clear_integrators()
     var reset := engine.process({"pose_roll_deg": 30.0}, 1.0 / 90.0)
     assert_lt(reset["roll"], held["roll"])
+
+
+func test_button_binding_maps_to_aux_button_output() -> void:
+    var template := MappingTemplate.new()
+    var binding := MappingTemplate.default_binding("button_south", "absolute")
+    binding["range_min"] = 0.0
+    binding["range_max"] = 1.0
+    template.add_binding("aux_button_1", binding)
+
+    var engine := MappingEngine.new()
+    engine.set_template(template)
+
+    var pressed := engine.process({"button_south": 1.0}, 1.0 / 90.0)
+    var released := engine.process({"button_south": 0.0}, 1.0 / 90.0)
+
+    assert_eq(pressed["aux_button_1"], 1.0)
+    assert_eq(released["aux_button_1"], 0.0)

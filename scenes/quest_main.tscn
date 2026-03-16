@@ -7,6 +7,10 @@
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
 [ext_resource type="PackedScene" uid="uid://bcev6uu7eo8vt" path="res://scenes/shared/quest_panel_layer.tscn" id="7_quest_panel_layer"]
 [ext_resource type="PackedScene" uid="uid://cqs8c3rq6cxvk" path="res://addons/common/viewport_2d_in_3d/function_pointer.tscn" id="8_function_pointer"]
+[ext_resource type="PackedScene" path="res://scenes/shared/left_wand_controller.tscn" id="9_left_wand"]
+[ext_resource type="PackedScene" path="res://scenes/shared/right_drone_controller.tscn" id="10_right_drone"]
+[ext_resource type="PackedScene" path="res://scenes/shared/flight_origin_indicator.tscn" id="11_origin_indicator"]
+[ext_resource type="PackedScene" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -60,6 +64,8 @@ pose = &"aim"
 
 [node name="LeftPointer" parent="XROrigin3D/LeftAim" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
 
+[node name="ControllerVisual" parent="XROrigin3D/LeftAim" instance=ExtResource("9_left_wand")]
+
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1940137224]
 tracker = &"right_hand"
 pose = &"grip"
@@ -72,14 +78,19 @@ mesh = SubResource("BoxMesh_controller")
 tracker = &"right_hand"
 pose = &"aim"
 
-[node name="RightPointer" parent="XROrigin3D/RightAim" unique_id=782013595 instance=ExtResource("8_function_pointer")]
+[node name="ControllerVisual" parent="XROrigin3D/RightHand" instance=ExtResource("10_right_drone")]
 
 [node name="QuestUiLayer" parent="XROrigin3D" unique_id=1465962986 instance=ExtResource("7_quest_panel_layer")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
 
+[node name="TutorialUiLayer" parent="XROrigin3D" instance=ExtResource("12_tutorial_layer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 1.32, -0.95)
+
+[node name="RightOriginIndicator" parent="XROrigin3D" instance=ExtResource("11_origin_indicator")]
+
 [node name="ControllerReader" type="Node" parent="." unique_id=190442877]
 script = ExtResource("2_controller_reader")
-controller = NodePath("../XROrigin3D/RightHand")
+controller_path = NodePath("../XROrigin3D/RightHand")
 
 [node name="TelemetrySender" type="Node" parent="." unique_id=2069513531]
 script = ExtResource("3_telemetry_sender")
