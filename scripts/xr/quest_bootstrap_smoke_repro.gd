@@ -2,6 +2,8 @@ extends Node3D
 
 const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
 
+@onready var world_environment: WorldEnvironment = $WorldEnvironment
+
 var _xr_bootstrap: OpenXRBootstrap = OpenXRBootstrap.new()
 var _xr_diagnostics: Dictionary = {}
 
@@ -11,6 +13,9 @@ func _ready() -> void:
 		"scene": "quest_bootstrap_smoke_repro",
 	})
 
+	_xr_bootstrap.world_environment = world_environment
+	_xr_bootstrap.prefer_passthrough_on_startup = true
+	_xr_bootstrap.fallback_to_opaque_on_passthrough_failure = true
 	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
 	if bool(_xr_diagnostics.get("ok", false)):
 		QuestRuntimeLog.boot("BOOTSTRAP_SMOKE_XR_INIT_OK", {

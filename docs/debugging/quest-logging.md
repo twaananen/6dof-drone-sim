@@ -28,6 +28,8 @@ The default filtered stream includes:
 - `androidruntime`
 - `com.fullpotatostudios`
 
+When both USB and wireless adb are connected, `quest_logcat.sh` prefers USB by default.
+
 ## Manual Commands
 
 Basic live log workflow:
@@ -59,11 +61,22 @@ The Quest app now emits structured startup markers with the `QUEST_LOG` prefix. 
 4. `UI_BIND_OK`
 5. `UI_SIGNALS_BOUND`
 6. `XR_INIT_BEGIN`
-7. `XR_INIT_OK` or `XR_INIT_FAILED`
-8. `CONTROLLER_VISUALS_UPDATED`
-9. `UI_PANEL_RECENTERED`
-10. `PASSTHROUGH_TOGGLE_SYNCED`
-11. `READY_COMPLETE`
+7. `XR_OPAQUE_BASELINE_APPLIED`
+8. `XR_INIT_OK` or `XR_INIT_FAILED`
+9. `CONTROLLER_VISUALS_UPDATED`
+10. `UI_PANEL_RECENTERED`
+11. `PASSTHROUGH_TOGGLE_SYNCED`
+12. `READY_COMPLETE`
+
+Passthrough recovery now emits additional `INFO` entries:
+- `XR_PASSTHROUGH_REQUESTED`
+- `XR_PASSTHROUGH_VERIFIED`
+- `XR_PASSTHROUGH_FALLBACK_TO_OPAQUE`
+- `XR_PASSTHROUGH_STOPPED`
+
+Expected post-startup paths:
+- passthrough works: `XR_PASSTHROUGH_REQUESTED` then `XR_PASSTHROUGH_VERIFIED`
+- passthrough fails or stops: `XR_PASSTHROUGH_REQUESTED` then `XR_PASSTHROUGH_FALLBACK_TO_OPAQUE`
 
 If the app stalls in the headset, the last `BOOT` phase in logcat is the first place to inspect.
 
@@ -96,4 +109,13 @@ bash tools/quest-adb.sh wireless <quest-ip>:5555
 bash tools/quest_logcat.sh --wireless <quest-ip>:5555 --launch
 ```
 
-Keep USB as the first-choice path for initial startup debugging and device trust issues.
+If the Quest is already paired for wireless debugging and exactly one discoverable endpoint is available, you can let the helper discover it:
+
+```bash
+bash tools/quest-adb.sh wireless --auto
+bash tools/quest_logcat.sh --wireless auto --launch
+```
+
+`bash tools/quest_logcat.sh --auto-wireless --launch` is equivalent to `--wireless auto`.
+
+Keep USB as the first-choice path for initial startup debugging and device trust issues, but wireless logging is now a first-class fallback when USB is unavailable.

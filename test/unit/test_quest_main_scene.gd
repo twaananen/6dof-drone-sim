@@ -29,6 +29,7 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_true(_has_boot_phase("XR_INIT_BEGIN"))
 	assert_true(_has_boot_phase("CONTROLLER_VISUALS_UPDATED"))
 	if _has_boot_phase("XR_INIT_OK"):
+		assert_true(_has_event("XR_OPAQUE_BASELINE_APPLIED"))
 		assert_true(_has_boot_phase("UI_PANEL_RECENTERED") or _has_boot_phase("UI_PANEL_RECENTER_DEFERRED"))
 	assert_true(_has_boot_phase("PASSTHROUGH_TOGGLE_SYNCED"))
 	assert_true(_has_boot_phase("READY_COMPLETE"))
@@ -37,6 +38,13 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 func _has_boot_phase(phase_name: String) -> bool:
 	for entry in _logger().get_entries():
 		if str(entry.get("event", "")) == "BOOT" and str(entry.get("phase", "")) == phase_name:
+			return true
+	return false
+
+
+func _has_event(event_name: String) -> bool:
+	for entry in _logger().get_entries():
+		if str(entry.get("event", "")) == event_name:
 			return true
 	return false
 

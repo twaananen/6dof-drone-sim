@@ -34,13 +34,13 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
-viewport/transparent_background.android=true
+viewport/transparent_background.android=false
 
 [xr]
 
 openxr/enabled=false
 openxr/reference_space=1
-openxr/environment_blend_mode=2
+openxr/environment_blend_mode=0
 openxr/startup_alert=false
 openxr/default_action_map="res://openxr_action_map.tres"
 shaders/enabled=true

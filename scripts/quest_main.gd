@@ -14,6 +14,7 @@ const DIAGNOSTIC_PUSH_INTERVAL_USEC := 500000
 @onready var telemetry_sender: Node = $TelemetrySender
 @onready var control_client: Node = $ControlClient
 @onready var discovery_listener: Node = $DiscoveryListener
+@onready var world_environment: WorldEnvironment = $WorldEnvironment
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
 @onready var ui_pivot: Node3D = $XROrigin3D/QuestUiLayer
 @onready var quest_ui_layer: Node = $XROrigin3D/QuestUiLayer
@@ -105,6 +106,9 @@ func _ready() -> void:
 
 	_connection_state.set_xr_starting()
 	_log_boot("XR_INIT_BEGIN", {})
+	_xr_bootstrap.world_environment = world_environment
+	_xr_bootstrap.prefer_passthrough_on_startup = true
+	_xr_bootstrap.fallback_to_opaque_on_passthrough_failure = true
 	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
 	_xr_interface = XRServer.find_interface("OpenXR")
 	if bool(_xr_diagnostics.get("ok", false)):
@@ -722,6 +726,7 @@ func _update_status_label() -> void:
 	var lines := PackedStringArray([
 		"XR: %s" % str(runtime_diagnostics.get("xr_state", "xr_starting")),
 		"Passthrough: %s" % ("on" if bool(runtime_diagnostics.get("xr_passthrough_enabled", false)) else "off"),
+		"XR Mode: %s" % str(runtime_diagnostics.get("xr_active_mode", OpenXRBootstrap.PRESENTATION_MODE_OPAQUE)),
 		"Refresh: %.0f Hz" % float(runtime_diagnostics.get("xr_display_refresh_rate", 0.0)),
 		"Connect: %s (%s)" % [
 			str(runtime_diagnostics.get("discovery_state", QuestConnectionState.STATE_XR_STARTING)),
@@ -752,6 +757,9 @@ func _update_status_label() -> void:
 		lines.append("XR Error: %s" % xr_error)
 	if bool(runtime_diagnostics.get("xr_passthrough_preferred", false)) and not bool(runtime_diagnostics.get("xr_passthrough_enabled", false)):
 		lines.append("XR Note: passthrough preferred but currently off")
+	var passthrough_fallback_reason := str(runtime_diagnostics.get("xr_passthrough_fallback_reason", ""))
+	if not passthrough_fallback_reason.is_empty():
+		lines.append("XR Fallback: %s" % passthrough_fallback_reason)
 	var discovery_error := str(runtime_diagnostics.get("discovery_error", ""))
 	if not discovery_error.is_empty():
 		lines.append("Connect Error: %s" % discovery_error)
@@ -824,6 +832,11 @@ func _build_runtime_diagnostics() -> Dictionary:
 	diagnostics["xr_alpha_blend_supported"] = bool(_xr_diagnostics.get("alpha_blend_supported", false))
 	diagnostics["xr_passthrough_enabled"] = bool(_xr_diagnostics.get("passthrough_enabled", false))
 	diagnostics["xr_passthrough_preferred"] = bool(_xr_diagnostics.get("passthrough_preferred", false))
+	diagnostics["xr_requested_mode"] = str(_xr_diagnostics.get("xr_requested_mode", OpenXRBootstrap.PRESENTATION_MODE_OPAQUE))
+	diagnostics["xr_active_mode"] = str(_xr_diagnostics.get("xr_active_mode", OpenXRBootstrap.PRESENTATION_MODE_OPAQUE))
+	diagnostics["xr_passthrough_started"] = bool(_xr_diagnostics.get("xr_passthrough_started", false))
+	diagnostics["xr_passthrough_fallback_reason"] = str(_xr_diagnostics.get("xr_passthrough_fallback_reason", ""))
+	diagnostics["xr_passthrough_state_event"] = str(_xr_diagnostics.get("xr_passthrough_state_event", ""))
 	diagnostics["xr_passthrough_plugin_available"] = bool(_xr_diagnostics.get("passthrough_plugin_available", false))
 	diagnostics["xr_render_model_plugin_available"] = bool(_xr_diagnostics.get("render_model_plugin_available", false))
 	diagnostics["xr_passthrough_extension_available"] = bool(_xr_diagnostics.get("passthrough_extension_available", false))

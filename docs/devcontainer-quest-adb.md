@@ -1,6 +1,6 @@
 # Devcontainer Quest ADB Workflow
 
-This repo's default devcontainer now treats Quest deployment as a USB-first workflow.
+This repo's default devcontainer now treats Quest deployment as a USB-first workflow with automatic wireless fallback.
 
 ## What the VS Code Ports view is showing
 
@@ -53,7 +53,7 @@ bash tools/quest-deploy.sh
 
 ## Wireless fallback
 
-Wireless ADB is supported, but it is intentionally a fallback path rather than the default.
+Wireless ADB is supported as the automatic fallback path when USB is unavailable.
 
 From a working USB session:
 
@@ -63,16 +63,28 @@ bash tools/quest-adb.sh wireless <quest-ip>:5555
 adb devices -l
 ```
 
-If the Quest only appears as `<ip>:5555 device`, the helper reports `STATUS: wireless_only`.
+If the Quest only appears as `<ip>:5555 device`, the helper still reports `STATUS: ready` and marks the preferred transport as `wireless`.
+
+If the Quest is already paired for wireless debugging and exactly one discoverable endpoint is present, the helper can connect automatically:
+
+```bash
+bash tools/quest-adb.sh wireless --auto
+bash tools/quest-adb.sh resolve-target --auto-wireless
+bash tools/quest-deploy.sh install
+```
+
+If both USB and wireless transports are available at the same time, the scripts prefer USB.
 
 ## Helper commands
 
 ```bash
 bash tools/quest-adb.sh doctor
+bash tools/quest-adb.sh resolve-target [--auto-wireless]
 bash tools/quest-adb.sh repair-usb
 bash tools/quest-adb.sh restart-server
 bash tools/quest-adb.sh tcpip [port]
 bash tools/quest-adb.sh wireless <ip[:port]>
+bash tools/quest-adb.sh wireless --auto
 bash tools/quest-deploy.sh
 bash tools/quest-deploy.sh export
 bash tools/quest-deploy.sh install
@@ -83,17 +95,25 @@ bash tools/quest-deploy.sh install
 - `ready`
 - `unauthorized`
 - `no_permissions`
-- `no_usb_device`
+- `no_device`
 - `server_conflict`
-- `wireless_only`
+- `ambiguous`
+
+`doctor` also prints:
+
+- connected USB adb serials
+- connected wireless adb serials
+- discoverable wireless adb endpoints
+- the preferred transport and serial
 
 ## Troubleshooting
 
-### `STATUS: no_usb_device`
+### `STATUS: no_device`
 
 - If `/dev/bus/usb` is missing, rebuild the devcontainer so the USB passthrough `runArgs` are applied.
 - If the Quest appears in `lsusb` but not in `adb devices -l`, confirm developer mode is enabled, the headset is unlocked, and the RSA prompt was accepted.
 - If the host cannot see the Quest in `lsusb`, fix the cable or host-side USB permissions first.
+- If USB is unavailable, enable wireless debugging or SideQuest wireless ADB and rerun `bash tools/quest-deploy.sh install`.
 
 ### `STATUS: unauthorized`
 
@@ -107,6 +127,11 @@ bash tools/quest-deploy.sh install
 - Run `bash tools/quest-adb.sh repair-usb`.
 - Rerun `bash tools/quest-adb.sh doctor`.
 - If the Quest was just unplugged and replugged, expect to rerun the repair because the kernel may have created a fresh USB device node.
+
+### `STATUS: ambiguous`
+
+- Disconnect extra Android devices or extra wireless adb connections.
+- Or connect the desired Quest target explicitly with `bash tools/quest-adb.sh wireless <ip[:port]>`.
 
 ### `STATUS: server_conflict`
 

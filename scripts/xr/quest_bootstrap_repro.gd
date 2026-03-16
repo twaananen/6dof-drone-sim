@@ -2,6 +2,7 @@ extends Node3D
 
 const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
 
+@onready var world_environment: WorldEnvironment = $WorldEnvironment
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
 @onready var ui_pivot: Node3D = $XROrigin3D/QuestUiLayer
 @onready var quest_ui_layer: Node = $XROrigin3D/QuestUiLayer
@@ -31,6 +32,9 @@ func _ready() -> void:
 	passthrough_toggle.toggled.connect(_on_passthrough_toggled)
 	QuestRuntimeLog.boot("BOOTSTRAP_REPRO_UI_SIGNALS_BOUND", {})
 
+	_xr_bootstrap.world_environment = world_environment
+	_xr_bootstrap.prefer_passthrough_on_startup = true
+	_xr_bootstrap.fallback_to_opaque_on_passthrough_failure = true
 	_xr_diagnostics = _xr_bootstrap.initialize(XRServer.find_interface("OpenXR"), get_viewport())
 	_xr_interface = XRServer.find_interface("OpenXR")
 	if bool(_xr_diagnostics.get("ok", false)):
@@ -141,5 +145,7 @@ func _update_status_label() -> void:
 	status_label.text = "\n".join([
 		"XR: %s" % str(_xr_diagnostics.get("state", OpenXRBootstrap.STATE_XR_STARTING)),
 		"Passthrough: %s" % ("on" if bool(_xr_diagnostics.get("passthrough_enabled", false)) else "off"),
+		"XR Mode: %s" % str(_xr_diagnostics.get("xr_active_mode", OpenXRBootstrap.PRESENTATION_MODE_OPAQUE)),
+		"Fallback: %s" % str(_xr_diagnostics.get("xr_passthrough_fallback_reason", "")),
 		"Refresh: %.0f Hz" % float(_xr_diagnostics.get("display_refresh_rate", 0.0)),
 	])
