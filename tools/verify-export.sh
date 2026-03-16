@@ -19,6 +19,20 @@ find_apksigner() {
     return 1
 }
 
+find_aapt() {
+    if command -v aapt > /dev/null 2>&1; then
+        command -v aapt
+        return 0
+    fi
+
+    if [ -n "${ANDROID_HOME:-}" ] && [ -d "${ANDROID_HOME}/build-tools" ]; then
+        find "${ANDROID_HOME}/build-tools" -path '*/aapt' -type f | sort -V | tail -n 1
+        return 0
+    fi
+
+    return 1
+}
+
 ensure_debug_signature() {
     local apksigner
     apksigner="$(find_apksigner)" || {
@@ -111,10 +125,42 @@ godot --headless --export-debug "Android" "${APK_OUT}"
 
 if [ -f "${APK_OUT}" ]; then
     ensure_debug_signature
+    AAPT_BIN="$(find_aapt || true)"
+    if [ -n "${AAPT_BIN}" ]; then
+        MANIFEST_DUMP="$("${AAPT_BIN}" dump xmltree "${APK_OUT}" AndroidManifest.xml 2>/dev/null || true)"
+        if printf '%s\n' "${MANIFEST_DUMP}" | grep -Fq 'com.oculus.feature.PASSTHROUGH'; then
+            echo "  [OK]   APK manifest declares com.oculus.feature.PASSTHROUGH"
+        else
+            echo "  [FAIL] APK manifest missing com.oculus.feature.PASSTHROUGH"
+            FAIL=1
+        fi
+        if printf '%s\n' "${MANIFEST_DUMP}" | grep -Fq 'com.oculus.feature.RENDER_MODEL'; then
+            echo "  [OK]   APK manifest declares com.oculus.feature.RENDER_MODEL"
+        else
+            echo "  [FAIL] APK manifest missing com.oculus.feature.RENDER_MODEL"
+            FAIL=1
+        fi
+    else
+        echo "  [WARN] Unable to locate aapt; skipping APK manifest feature verification"
+    fi
+
+    APK_CONTENTS="$(zipinfo -1 "${APK_OUT}" 2>/dev/null || true)"
+    if printf '%s\n' "${APK_CONTENTS}" | grep -Fq 'libgodotopenxrvendors.so'; then
+        echo "  [OK]   APK packages libgodotopenxrvendors.so"
+    else
+        echo "  [FAIL] APK missing libgodotopenxrvendors.so"
+        FAIL=1
+    fi
+
     SIZE=$(du -h "${APK_OUT}" | cut -f1)
     echo ""
-    echo "Export succeeded: ${APK_OUT} (${SIZE})"
-    exit 0
+    if [ "${FAIL}" -eq 0 ]; then
+        echo "Export succeeded: ${APK_OUT} (${SIZE})"
+        exit 0
+    fi
+
+    echo "Export produced ${APK_OUT} (${SIZE}) but Quest XR vendor validation failed."
+    exit 1
 else
     echo ""
     echo "Export failed — no APK produced."

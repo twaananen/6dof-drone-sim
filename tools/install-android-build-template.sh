@@ -9,6 +9,42 @@ VERSION_FILE="android/.build_version"
 EXPECTED_VERSION="${GODOT_VER_NUM}.stable"
 BUILD_FILE="${TARGET_DIR}/build.gradle"
 GODOT_IGNORE_FILE="${TARGET_DIR}/.gdignore"
+MAIN_MANIFEST="${TARGET_DIR}/src/main/AndroidManifest.xml"
+META_DEBUG_AAR="addons/godotopenxrvendors/.bin/android/debug/godotopenxr-meta-debug.aar"
+META_RELEASE_AAR="addons/godotopenxrvendors/.bin/android/release/godotopenxr-meta-release.aar"
+
+ensure_meta_vendor_aars() {
+    mkdir -p "${TARGET_DIR}/libs/debug" "${TARGET_DIR}/libs/release"
+
+    if [ -f "${META_DEBUG_AAR}" ]; then
+        cp "${META_DEBUG_AAR}" "${TARGET_DIR}/libs/debug/"
+    fi
+
+    if [ -f "${META_RELEASE_AAR}" ]; then
+        cp "${META_RELEASE_AAR}" "${TARGET_DIR}/libs/release/"
+    fi
+}
+
+ensure_meta_manifest_features() {
+    if [ ! -f "${MAIN_MANIFEST}" ]; then
+        return 0
+    fi
+
+    if ! grep -Fq 'com.oculus.feature.PASSTHROUGH' "${MAIN_MANIFEST}"; then
+        local tmp_manifest
+        tmp_manifest="$(mktemp)"
+        awk '
+            /<application/ && !injected {
+                print "    <uses-feature android:name=\"com.oculus.feature.PASSTHROUGH\" android:required=\"false\" />"
+                print "    <uses-feature android:name=\"com.oculus.feature.RENDER_MODEL\" android:required=\"false\" />"
+                print ""
+                injected = 1
+            }
+            { print }
+        ' "${MAIN_MANIFEST}" > "${tmp_manifest}"
+        mv "${tmp_manifest}" "${MAIN_MANIFEST}"
+    fi
+}
 
 sanitize_template_dir() {
     if [ ! -d "${TARGET_DIR}" ]; then
@@ -29,6 +65,9 @@ sanitize_template_dir() {
     if [ -f "${BUILD_FILE}" ]; then
         sed -i '/^\/\/ 6dof-drone-sim copyAndRenameBinary dependency fix:/,/^}/d' "${BUILD_FILE}"
     fi
+
+    ensure_meta_vendor_aars
+    ensure_meta_manifest_features
 }
 
 if [ -f "${TARGET_DIR}/build.gradle" ] && [ -f "${TARGET_DIR}/src/main/AndroidManifest.xml" ] && [ -f "${VERSION_FILE}" ]; then

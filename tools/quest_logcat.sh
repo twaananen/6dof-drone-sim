@@ -9,6 +9,8 @@ CLEAR_LOGCAT=0
 APP_ONLY=0
 FULL_LOGCAT=0
 WIRELESS_TARGET=""
+AUTO_WIRELESS=0
+TARGET_SERIAL=""
 
 usage() {
     cat <<'EOF'
@@ -23,6 +25,8 @@ Options:
   --full                Stream full logcat without filtering
   --wireless <host:port>
                         Connect adb over Wi-Fi before streaming
+  --wireless auto       Auto-discover a wireless adb endpoint before streaming
+  --auto-wireless       Same as --wireless auto
   -h, --help            Show this help message
 EOF
 }
@@ -34,61 +38,100 @@ require_adb() {
     fi
 }
 
+adb_target() {
+    adb -s "${TARGET_SERIAL}" "$@"
+}
+
+resolve_default_target() {
+    local resolve_output=""
+    local status=""
+    local serial=""
+    local message=""
+
+    resolve_output="$(bash tools/quest-adb.sh resolve-target "$@")"
+    while IFS='=' read -r key value; do
+        case "${key}" in
+            STATUS)
+                status="${value}"
+                ;;
+            TARGET_SERIAL)
+                serial="${value}"
+                ;;
+            MESSAGE)
+                message="${value}"
+                ;;
+        esac
+    done <<<"${resolve_output}"
+
+    if [ "${status}" != "ready" ] || [ -z "${serial}" ]; then
+        echo "${message}" >&2
+        exit 1
+    fi
+
+    TARGET_SERIAL="${serial}"
+}
+
 ensure_device() {
-    local state
-    state="$(adb get-state 2>/dev/null || true)"
+    local state=""
+
+    if [ -n "${WIRELESS_TARGET}" ]; then
+        adb connect "${WIRELESS_TARGET}" >/dev/null
+        TARGET_SERIAL="${WIRELESS_TARGET}"
+    elif [ "${AUTO_WIRELESS}" -eq 1 ]; then
+        resolve_default_target --auto-wireless
+    else
+        resolve_default_target
+    fi
+
+    state="$(adb_target get-state 2>/dev/null || true)"
     if [ "${state}" != "device" ]; then
         echo "No ready adb device found. Run 'bash tools/quest-adb.sh doctor' first." >&2
         exit 1
     fi
-}
 
-connect_wireless() {
-    local target="$1"
-    if [ -z "${target}" ]; then
-        echo "--wireless requires <host:port>." >&2
-        exit 1
-    fi
-    adb connect "${target}"
+    echo "Using adb target ${TARGET_SERIAL}." >&2
 }
 
 clear_logcat() {
-    adb logcat -c
+    adb_target logcat -c
 }
 
 launch_app() {
-    adb shell monkey -p "${PACKAGE_NAME}" -c android.intent.category.LAUNCHER 1 >/dev/null
+    adb_target shell monkey -p "${PACKAGE_NAME}" -c android.intent.category.LAUNCHER 1 >/dev/null
 }
 
 resolve_pid() {
     local pid=""
     local _attempt=0
+
     for _attempt in 1 2 3 4 5; do
-        pid="$(adb shell pidof -s "${PACKAGE_NAME}" 2>/dev/null | tr -d '\r' || true)"
+        pid="$(adb_target shell pidof -s "${PACKAGE_NAME}" 2>/dev/null | tr -d '\r' || true)"
         if [ -n "${pid}" ]; then
             printf '%s\n' "${pid}"
             return 0
         fi
         sleep 1
     done
+
     return 1
 }
 
 stream_full() {
-    adb logcat -v time
+    adb_target logcat -v time
 }
 
 stream_filtered() {
-    adb logcat -v time | grep -Ei --line-buffered "${FILTER_REGEX}"
+    adb_target logcat -v time | grep -Ei --line-buffered "${FILTER_REGEX}"
 }
 
 stream_app_only() {
     local pid="$1"
-    adb logcat --pid="${pid}" -v time
+    adb_target logcat --pid="${pid}" -v time
 }
 
 stream_logs() {
     local pid=""
+
     if [ "${FULL_LOGCAT}" -eq 1 ]; then
         if [ -n "${SAVE_PATH}" ]; then
             stream_full | tee "${SAVE_PATH}"
@@ -100,7 +143,7 @@ stream_logs() {
 
     if [ "${APP_ONLY}" -eq 1 ]; then
         if pid="$(resolve_pid)"; then
-            echo "Streaming pid-filtered logs for ${PACKAGE_NAME} (pid ${pid})." >&2
+            echo "Streaming pid-filtered logs for ${PACKAGE_NAME} (pid ${pid}) from ${TARGET_SERIAL}." >&2
             if [ -n "${SAVE_PATH}" ]; then
                 stream_app_only "${pid}" | tee "${SAVE_PATH}"
                 return
@@ -144,10 +187,17 @@ main() {
             --wireless)
                 shift
                 if [ $# -eq 0 ]; then
-                    echo "--wireless requires <host:port>." >&2
+                    echo "--wireless requires <host:port> or auto." >&2
                     exit 1
                 fi
-                WIRELESS_TARGET="$1"
+                if [ "$1" = "auto" ]; then
+                    AUTO_WIRELESS=1
+                else
+                    WIRELESS_TARGET="$1"
+                fi
+                ;;
+            --auto-wireless)
+                AUTO_WIRELESS=1
                 ;;
             -h|--help)
                 usage
@@ -163,9 +213,6 @@ main() {
     done
 
     require_adb
-    if [ -n "${WIRELESS_TARGET}" ]; then
-        connect_wireless "${WIRELESS_TARGET}"
-    fi
     ensure_device
 
     if [ "${CLEAR_LOGCAT}" -eq 1 ]; then
