@@ -1,5 +1,45 @@
 [gd_scene format=3 uid="uid://b75ra01cc46nc"]
 
+[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
+bg_color = Color(0.101563, 0.210938, 0.160156, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
+bg_color = Color(0.074219, 0.175781, 0.128906, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
+bg_color = Color(0.921875, 0.953125, 0.925781, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0507813, 0.136719, 0.101563, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [node name="QuestPanel" type="Control" unique_id=909829894]
 layout_mode = 3
 anchors_preset = 15
@@ -14,6 +54,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 88.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("1_panel_chrome_style")
 
 [node name="Margin" type="MarginContainer" parent="Chrome" unique_id=12002]
 layout_mode = 2
@@ -42,6 +83,7 @@ anchor_bottom = 1.0
 offset_top = 88.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("2_panel_body_style")
 
 [node name="Margin" type="MarginContainer" parent="Panel" unique_id=1581820479]
 layout_mode = 2
@@ -290,6 +332,7 @@ offset_left = 8.0
 offset_top = 96.0
 offset_right = 52.0
 offset_bottom = 140.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=12009]
 custom_minimum_size = Vector2(44, 44)
@@ -302,6 +345,7 @@ offset_top = 96.0
 offset_right = -8.0
 offset_bottom = 140.0
 grow_horizontal = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=12010]
 custom_minimum_size = Vector2(44, 44)
@@ -314,6 +358,7 @@ offset_top = -52.0
 offset_right = 52.0
 offset_bottom = -8.0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=12011]
 custom_minimum_size = Vector2(44, 44)
@@ -329,3 +374,4 @@ offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")

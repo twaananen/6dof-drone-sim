@@ -4,6 +4,7 @@
 
 # Tests
 test_results.xml
+quest-startup.log
 
 # OS
 .DS_Store

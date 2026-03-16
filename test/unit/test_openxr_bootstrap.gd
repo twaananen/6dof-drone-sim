@@ -134,6 +134,8 @@ func test_set_passthrough_enabled_switches_back_to_opaque() -> void:
 	assert_eq(_logger().get_entries()[-1]["event"], "XR_PASSTHROUGH_STATE")
 
 
+
+
 func _has_event(event_name: String) -> bool:
 	for entry in _logger().get_entries():
 		if str(entry.get("event", "")) == event_name:

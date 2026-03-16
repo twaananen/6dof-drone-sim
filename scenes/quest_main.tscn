@@ -9,10 +9,10 @@
 [ext_resource type="PackedScene" uid="uid://cqs8c3rq6cxvk" path="res://addons/common/viewport_2d_in_3d/function_pointer.tscn" id="8_function_pointer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
-sky_top_color = Color(0.980469, 0.570313, 0.285156, 1)
-sky_horizon_color = Color(0.996094, 0.757813, 0.457031, 1)
-ground_bottom_color = Color(0.480469, 0.277344, 0.160156, 1)
-ground_horizon_color = Color(0.902344, 0.617188, 0.328125, 1)
+sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
+sky_horizon_color = Color(0.8768179, 0.58100176, 0, 1)
+ground_bottom_color = Color(0.31608108, 0.17391503, 0.09163197, 1)
+ground_horizon_color = Color(0.70598644, 0.4519673, 0.18129522, 1)
 
 [sub_resource type="Sky" id="2_sky"]
 sky_material = SubResource("1_sky_material")
@@ -25,18 +25,21 @@ tonemap_mode = 4
 [sub_resource type="BoxMesh" id="BoxMesh_controller"]
 size = Vector3(0.05, 0.02, 0.1)
 
-[sub_resource type="StandardMaterial3D" id="4_scene_box_material"]
+[sub_resource type="StandardMaterial3D" id="5_floor_material"]
 shading_mode = 0
-albedo_color = Color(0.203125, 0.148438, 0.121094, 1)
+albedo_color = Color(0.738281, 0.5625, 0.363281, 1)
 
-[sub_resource type="BoxMesh" id="5_scene_box_mesh"]
-material = SubResource("4_scene_box_material")
-size = Vector3(0.25, 0.25, 0.25)
+[sub_resource type="CylinderMesh" id="7_floor_mesh"]
+material = SubResource("5_floor_material")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.03
+radial_segments = 48
 
 [node name="QuestMain" type="Node3D" unique_id=1992815131]
 script = ExtResource("1_quest_main")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=132191149]
 environment = SubResource("3_environment")
 
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1956195186]
@@ -90,12 +93,6 @@ auto_connect_on_ready = false
 [node name="DiscoveryListener" type="Node" parent="." unique_id=698745027]
 script = ExtResource("5_discovery_listener")
 
-[node name="Background" type="Node3D" parent="."]
-
-[node name="CubeA" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 1.2, -2)
-mesh = SubResource("5_scene_box_mesh")
-
-[node name="CubeB" type="MeshInstance3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, 1.55, -1.8)
-mesh = SubResource("5_scene_box_mesh")
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=1898980392]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.015, 0)
+mesh = SubResource("7_floor_mesh")
