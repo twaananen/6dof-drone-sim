@@ -11,6 +11,7 @@ FAKE_ADB_DEVICES_FILE="${STATE_DIR}/adb-devices.txt"
 FAKE_ADB_MDNS_FILE="${STATE_DIR}/adb-mdns.txt"
 FAKE_LSUSB_FILE="${STATE_DIR}/lsusb.txt"
 FAKE_APK="${STATE_DIR}/fake.apk"
+FAKE_EXPORT_SCRIPT="${STATE_DIR}/fake-verify-export.sh"
 
 mkdir -p "${FAKE_BIN}" "${STATE_DIR}"
 touch "${FAKE_ADB_LOG}" "${FAKE_ADB_CONNECT_LOG}" "${FAKE_ADB_DEVICES_FILE}" "${FAKE_ADB_MDNS_FILE}" "${FAKE_LSUSB_FILE}" "${FAKE_APK}"
@@ -27,6 +28,7 @@ export FAKE_ADB_CONNECT_LOG
 export FAKE_ADB_DEVICES_FILE
 export FAKE_ADB_MDNS_FILE
 export FAKE_LSUSB_FILE
+export FAKE_EXPORT_SCRIPT
 
 write_fake_tools() {
     cat > "${FAKE_BIN}/adb" <<'EOF'
@@ -78,6 +80,10 @@ case "${cmd}" in
     connect)
         target="${1:-}"
         printf '%s\n' "${target}" >> "${FAKE_ADB_CONNECT_LOG}"
+        if [ "${FAKE_ADB_CONNECT_ALWAYS_FAIL:-0}" = "1" ]; then
+            echo "failed to connect to ${target}" >&2
+            exit 1
+        fi
         if [ -n "${FAKE_ADB_CONNECT_SUCCESS_TARGET:-}" ] && [ "${target}" != "${FAKE_ADB_CONNECT_SUCCESS_TARGET}" ]; then
             echo "failed to connect to ${target}" >&2
             exit 1
@@ -115,7 +121,16 @@ case "${cmd}" in
     tcpip)
         echo "restarting in TCP mode port: ${1:-5555}"
         ;;
-    kill-server|start-server)
+    kill-server)
+        exit 0
+        ;;
+    start-server)
+        if [ -n "${FAKE_ADB_START_SERVER_DEVICES_FILE:-}" ]; then
+            cp "${FAKE_ADB_START_SERVER_DEVICES_FILE}" "${FAKE_ADB_DEVICES_FILE}"
+        fi
+        if [ -n "${FAKE_ADB_START_SERVER_MDNS_FILE:-}" ]; then
+            cp "${FAKE_ADB_START_SERVER_MDNS_FILE}" "${FAKE_ADB_MDNS_FILE}"
+        fi
         exit 0
         ;;
     *)
@@ -149,6 +164,26 @@ EOF
 echo "package: name='com.example.app' versionCode='1' versionName='1.0'"
 EOF
     chmod +x "${FAKE_BIN}/aapt"
+
+    cat > "${FAKE_EXPORT_SCRIPT}" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -n "${FAKE_EXPORT_POST_DEVICES_FILE:-}" ]; then
+    cp "${FAKE_EXPORT_POST_DEVICES_FILE}" "${FAKE_ADB_DEVICES_FILE}"
+else
+    printf 'List of devices attached\n' > "${FAKE_ADB_DEVICES_FILE}"
+fi
+
+if [ -n "${FAKE_EXPORT_POST_MDNS_FILE:-}" ]; then
+    cp "${FAKE_EXPORT_POST_MDNS_FILE}" "${FAKE_ADB_MDNS_FILE}"
+else
+    printf 'List of discovered mdns services\n' > "${FAKE_ADB_MDNS_FILE}"
+fi
+
+echo "Export succeeded: ${APK_OUT:-/tmp/6dof-drone-debug.apk} (83M)"
+EOF
+    chmod +x "${FAKE_EXPORT_SCRIPT}"
 }
 
 reset_state() {
@@ -158,9 +193,14 @@ reset_state() {
     printf 'List of discovered mdns services\n' > "${FAKE_ADB_MDNS_FILE}"
     : > "${FAKE_LSUSB_FILE}"
     unset FAKE_ADB_CONNECT_SUCCESS_TARGET || true
+    unset FAKE_ADB_CONNECT_ALWAYS_FAIL || true
     unset FAKE_ADB_CONNECTED_DEVICES_FILE || true
+    unset FAKE_ADB_START_SERVER_DEVICES_FILE || true
+    unset FAKE_ADB_START_SERVER_MDNS_FILE || true
     unset FAKE_ADB_GET_STATE || true
     unset FAKE_ADB_PID || true
+    unset FAKE_EXPORT_POST_DEVICES_FILE || true
+    unset FAKE_EXPORT_POST_MDNS_FILE || true
 }
 
 fail() {
@@ -220,6 +260,36 @@ List of devices attached
 $1
 EOF
     export FAKE_ADB_CONNECTED_DEVICES_FILE="${path}"
+}
+
+write_empty_devices_file() {
+    local path="${STATE_DIR}/empty-devices.txt"
+    printf 'List of devices attached\n' > "${path}"
+    printf '%s\n' "${path}"
+}
+
+write_empty_mdns_file() {
+    local path="${STATE_DIR}/empty-mdns.txt"
+    printf 'List of discovered mdns services\n' > "${path}"
+    printf '%s\n' "${path}"
+}
+
+write_devices_file() {
+    local path="$1"
+    local body="$2"
+    cat > "${path}" <<EOF
+List of devices attached
+${body}
+EOF
+}
+
+write_mdns_file() {
+    local path="$1"
+    local body="$2"
+    cat > "${path}" <<EOF
+List of discovered mdns services
+${body}
+EOF
 }
 
 test_resolve_usb_only() {
@@ -329,6 +399,87 @@ test_deploy_install_uses_wireless_fallback() {
     assert_file_contains "${FAKE_ADB_LOG}" "192.168.0.76:36139|install|-r ${FAKE_APK}"
 }
 
+test_deploy_recovers_with_cached_connected_wireless_target() {
+    local empty_devices=""
+    local empty_mdns=""
+
+    reset_state
+    write_devices "192.168.0.76:5555 device product:eureka model:Quest_3 device:eureka transport_id:1"
+    export FAKE_ADB_CONNECT_SUCCESS_TARGET="192.168.0.76:5555"
+    write_connected_devices_after_connect "192.168.0.76:5555 device product:eureka model:Quest_3 device:eureka transport_id:1"
+    empty_devices="$(write_empty_devices_file)"
+    empty_mdns="$(write_empty_mdns_file)"
+    export FAKE_EXPORT_POST_DEVICES_FILE="${empty_devices}"
+    export FAKE_EXPORT_POST_MDNS_FILE="${empty_mdns}"
+
+    run_and_capture env ANDROID_HOME= APK_OUT="${FAKE_APK}" QUEST_DEPLOY_EXPORT_SCRIPT="${FAKE_EXPORT_SCRIPT}" QUEST_DEPLOY_RECOVERY_DELAY_SECS=0 bash "${ROOT_DIR}/tools/quest-deploy.sh"
+    [ "${CMD_STATUS}" -eq 0 ] || fail "quest-deploy deploy recovery with cached target failed"
+    assert_contains "${CMD_OUTPUT}" "Quest deploy export likely reset the ADB session; attempting wireless recovery."
+    assert_file_contains "${FAKE_ADB_LOG}" "|start-server|"
+    assert_file_contains "${FAKE_ADB_CONNECT_LOG}" "192.168.0.76:5555"
+    assert_file_contains "${FAKE_ADB_LOG}" "192.168.0.76:5555|install|-r ${FAKE_APK}"
+}
+
+test_deploy_recovers_with_cached_discovered_endpoint() {
+    local empty_devices=""
+    local empty_mdns=""
+
+    reset_state
+    write_mdns "adb-quest _adb._tcp 192.168.0.76:5555"
+    export FAKE_ADB_CONNECT_SUCCESS_TARGET="192.168.0.76:5555"
+    write_connected_devices_after_connect "192.168.0.76:5555 device product:eureka model:Quest_3 device:eureka transport_id:1"
+    empty_devices="$(write_empty_devices_file)"
+    empty_mdns="$(write_empty_mdns_file)"
+    export FAKE_EXPORT_POST_DEVICES_FILE="${empty_devices}"
+    export FAKE_EXPORT_POST_MDNS_FILE="${empty_mdns}"
+
+    run_and_capture env ANDROID_HOME= APK_OUT="${FAKE_APK}" QUEST_DEPLOY_EXPORT_SCRIPT="${FAKE_EXPORT_SCRIPT}" QUEST_DEPLOY_RECOVERY_DELAY_SECS=0 bash "${ROOT_DIR}/tools/quest-deploy.sh"
+    [ "${CMD_STATUS}" -eq 0 ] || fail "quest-deploy deploy recovery with cached discovery failed"
+    assert_file_contains "${FAKE_ADB_CONNECT_LOG}" "192.168.0.76:5555"
+    assert_file_contains "${FAKE_ADB_LOG}" "192.168.0.76:5555|install|-r ${FAKE_APK}"
+}
+
+test_deploy_recovers_after_start_server_retry() {
+    local empty_devices=""
+    local empty_mdns=""
+    local start_mdns="${STATE_DIR}/start-mdns.txt"
+
+    reset_state
+    export FAKE_ADB_CONNECT_SUCCESS_TARGET="192.168.0.76:36139"
+    write_connected_devices_after_connect "192.168.0.76:36139 device product:eureka model:Quest_3 device:eureka transport_id:1"
+    empty_devices="$(write_empty_devices_file)"
+    empty_mdns="$(write_empty_mdns_file)"
+    write_mdns_file "${start_mdns}" "adb-quest _adb-tls-connect._tcp 192.168.0.76:36139"
+    export FAKE_EXPORT_POST_DEVICES_FILE="${empty_devices}"
+    export FAKE_EXPORT_POST_MDNS_FILE="${empty_mdns}"
+    export FAKE_ADB_START_SERVER_MDNS_FILE="${start_mdns}"
+
+    run_and_capture env ANDROID_HOME= APK_OUT="${FAKE_APK}" QUEST_DEPLOY_EXPORT_SCRIPT="${FAKE_EXPORT_SCRIPT}" QUEST_DEPLOY_RECOVERY_DELAY_SECS=0 bash "${ROOT_DIR}/tools/quest-deploy.sh"
+    [ "${CMD_STATUS}" -eq 0 ] || fail "quest-deploy deploy recovery after start-server failed"
+    assert_file_contains "${FAKE_ADB_LOG}" "|start-server|"
+    assert_file_contains "${FAKE_ADB_CONNECT_LOG}" "192.168.0.76:36139"
+    assert_file_contains "${FAKE_ADB_LOG}" "192.168.0.76:36139|install|-r ${FAKE_APK}"
+}
+
+test_deploy_recovery_failure_reports_guidance() {
+    local empty_devices=""
+    local empty_mdns=""
+
+    reset_state
+    write_devices "192.168.0.76:5555 device product:eureka model:Quest_3 device:eureka transport_id:1"
+    empty_devices="$(write_empty_devices_file)"
+    empty_mdns="$(write_empty_mdns_file)"
+    export FAKE_EXPORT_POST_DEVICES_FILE="${empty_devices}"
+    export FAKE_EXPORT_POST_MDNS_FILE="${empty_mdns}"
+    export FAKE_ADB_CONNECT_ALWAYS_FAIL=1
+
+    run_and_capture env ANDROID_HOME= APK_OUT="${FAKE_APK}" QUEST_DEPLOY_EXPORT_SCRIPT="${FAKE_EXPORT_SCRIPT}" QUEST_DEPLOY_RECOVERY_RETRIES=2 QUEST_DEPLOY_RECOVERY_DELAY_SECS=0 bash "${ROOT_DIR}/tools/quest-deploy.sh"
+    [ "${CMD_STATUS}" -ne 0 ] || fail "quest-deploy deploy failure test unexpectedly succeeded"
+    assert_contains "${CMD_OUTPUT}" "Quest deploy export likely reset the ADB session; attempting wireless recovery."
+    assert_contains "${CMD_OUTPUT}" "Export appears to have reset ADB and the recovery pass could not re-establish the Quest wireless target."
+    assert_contains "${CMD_OUTPUT}" "Next steps:"
+}
+
 test_deploy_reinstall_uses_same_serial() {
     reset_state
     write_devices "USB123 device product:eureka model:Quest_3 device:eureka transport_id:1"
@@ -362,6 +513,10 @@ main() {
     test_doctor_reports_wireless_ready
     test_wireless_auto_command
     test_deploy_install_uses_wireless_fallback
+    test_deploy_recovers_with_cached_connected_wireless_target
+    test_deploy_recovers_with_cached_discovered_endpoint
+    test_deploy_recovers_after_start_server_retry
+    test_deploy_recovery_failure_reports_guidance
     test_deploy_reinstall_uses_same_serial
     test_logcat_prefers_usb
 

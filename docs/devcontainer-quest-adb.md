@@ -51,6 +51,8 @@ For the full export-and-install flow in one command:
 bash tools/quest-deploy.sh
 ```
 
+If export temporarily resets ADB visibility, `bash tools/quest-deploy.sh` now retries wireless recovery before failing.
+
 ## Wireless fallback
 
 Wireless ADB is supported as the automatic fallback path when USB is unavailable.
@@ -73,6 +75,8 @@ bash tools/quest-adb.sh resolve-target --auto-wireless
 bash tools/quest-deploy.sh install
 ```
 
+The full `bash tools/quest-deploy.sh` flow now snapshots the current wireless target before export and attempts to recover it afterward if the export step resets the ADB daemon or drops device discovery.
+
 If both USB and wireless transports are available at the same time, the scripts prefer USB.
 
 ## Helper commands
@@ -89,6 +93,11 @@ bash tools/quest-deploy.sh
 bash tools/quest-deploy.sh export
 bash tools/quest-deploy.sh install
 ```
+
+Optional deploy recovery tuning:
+
+- `QUEST_DEPLOY_RECOVERY_RETRIES` defaults to `3`
+- `QUEST_DEPLOY_RECOVERY_DELAY_SECS` defaults to `1`
 
 `doctor` distinguishes between:
 
@@ -114,6 +123,7 @@ bash tools/quest-deploy.sh install
 - If the Quest appears in `lsusb` but not in `adb devices -l`, confirm developer mode is enabled, the headset is unlocked, and the RSA prompt was accepted.
 - If the host cannot see the Quest in `lsusb`, fix the cable or host-side USB permissions first.
 - If USB is unavailable, enable wireless debugging or SideQuest wireless ADB and rerun `bash tools/quest-deploy.sh install`.
+- If `bash tools/quest-deploy.sh` fails immediately after export, rerun `bash tools/quest-adb.sh wireless --auto` to confirm the endpoint is visible, then increase `QUEST_DEPLOY_RECOVERY_RETRIES` if discovery is just slow.
 
 ### `STATUS: unauthorized`
 
