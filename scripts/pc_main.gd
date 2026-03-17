@@ -91,7 +91,7 @@ func _process(_delta: float) -> void:
 
 func _on_state_received(state: Dictionary) -> void:
 	var now_usec: int = Time.get_ticks_usec()
-	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN:
+	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN and bool(state.get("tracking_valid", false)):
 		_source_deriver.calibrate_from_state(state)
 		_mapping_engine.reset_state()
 	if state.get("event_flags", 0) & RawControllerState.EVENT_CLEAR_ORIGIN:
@@ -288,6 +288,7 @@ func _summarize_outputs(outputs: Dictionary) -> Dictionary:
 		"yaw": snappedf(float(outputs.get("yaw", 0.0)), 0.01),
 		"pitch": snappedf(float(outputs.get("pitch", 0.0)), 0.01),
 		"roll": snappedf(float(outputs.get("roll", 0.0)), 0.01),
+		"aux_button_1": float(outputs.get("aux_button_1", 0.0)),
 	}
 
 

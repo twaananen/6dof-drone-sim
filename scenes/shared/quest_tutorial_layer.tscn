@@ -1,6 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d4nncnpji5kaq"]
 
-[ext_resource type="Script" path="res://scripts/xr/quest_panel_layer.gd" id="1_quest_panel_layer"]
+[ext_resource type="Script" uid="uid://devixte28xcgr" path="res://scripts/xr/quest_panel_layer.gd" id="1_quest_panel_layer"]
 [ext_resource type="PackedScene" path="res://scenes/shared/quest_tutorial_panel.tscn" id="2_tutorial_panel"]
 
 [sub_resource type="SphereMesh" id="1_cursor_mesh"]
@@ -15,18 +15,18 @@ disable_ambient_light = true
 disable_fog = true
 albedo_color = Color(0.917647, 0.956863, 1, 0.92)
 
-[node name="QuestTutorialLayer" type="OpenXRCompositionLayerQuad" groups=["ui_layer"]]
+[node name="QuestTutorialLayer" type="OpenXRCompositionLayerQuad" unique_id=684606926 groups=["ui_layer"]]
 sort_order = 0
 quad_size = Vector2(0.56, 0.62)
 script = ExtResource("1_quest_panel_layer")
 scene = ExtResource("2_tutorial_panel")
 
-[node name="Cursor" type="MeshInstance3D" parent="."]
+[node name="Cursor" type="MeshInstance3D" parent="." unique_id=995104753]
 visible = false
 mesh = SubResource("1_cursor_mesh")
 surface_material_override/0 = SubResource("2_cursor_material")
 
-[node name="SubViewport" type="SubViewport" parent="."]
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1223172813]
 disable_3d = true
 size = Vector2i(1280, 1440)
 render_target_update_mode = 4

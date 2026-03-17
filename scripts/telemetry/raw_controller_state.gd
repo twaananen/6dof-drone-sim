@@ -2,7 +2,7 @@ class_name RawControllerState
 extends RefCounted
 
 const MAGIC_TEXT := "RCS1"
-const VERSION := 2
+const VERSION := 3
 const BUTTON_SOUTH := 1 << 0
 const BUTTON_EAST := 1 << 1
 const BUTTON_WEST := 1 << 2
@@ -68,7 +68,7 @@ static func pack_state(state: Dictionary) -> PackedByteArray:
 
 
 static func unpack_state(packet: PackedByteArray) -> Dictionary:
-    if packet.size() != PACKET_SIZE:
+    if packet.size() < 5:
         return {"valid": false, "error": "invalid_size"}
 
     var buf := StreamPeerBuffer.new()
@@ -83,6 +83,8 @@ static func unpack_state(packet: PackedByteArray) -> Dictionary:
     var version := buf.get_u8()
     if version != VERSION:
         return {"valid": false, "error": "invalid_version", "version": version}
+    if packet.size() != PACKET_SIZE:
+        return {"valid": false, "error": "invalid_size", "version": version}
 
     var state: Dictionary = {"version": version}
     state["sequence"] = buf.get_u32()

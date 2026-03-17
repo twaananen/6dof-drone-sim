@@ -38,3 +38,22 @@ func test_pc_runtime_pauses_motion_outputs_but_preserves_aux_button_when_control
 	assert_eq(pc_main._last_outputs["pitch"], 0.0)
 	assert_eq(pc_main._last_outputs["roll"], 0.0)
 	assert_eq(pc_main._last_outputs["aux_button_1"], 1.0)
+	assert_eq(pc_main._build_status_payload()["output_summary"]["aux_button_1"], 1.0)
+
+
+func test_pc_runtime_ignores_origin_capture_when_tracking_is_invalid() -> void:
+	var scene: PackedScene = load("res://scenes/pc_main.tscn")
+	assert_not_null(scene)
+
+	var pc_main := scene.instantiate()
+	add_child_autofree(pc_main)
+	await wait_process_frames(1)
+
+	var state := RawControllerState.default_state()
+	state["tracking_valid"] = false
+	state["event_flags"] = RawControllerState.EVENT_SET_ORIGIN
+	state["grip_position"] = Vector3(2.0, 3.0, 4.0)
+
+	pc_main._on_state_received(state)
+
+	assert_false(pc_main._source_deriver.calibration.is_calibrated())

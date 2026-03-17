@@ -64,7 +64,7 @@ pose = &"aim"
 
 [node name="LeftPointer" parent="XROrigin3D/LeftAim" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
 
-[node name="ControllerVisual" parent="XROrigin3D/LeftAim" instance=ExtResource("9_left_wand")]
+[node name="ControllerVisual" parent="XROrigin3D/LeftAim" unique_id=545737677 instance=ExtResource("9_left_wand")]
 
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1940137224]
 tracker = &"right_hand"
@@ -74,19 +74,19 @@ pose = &"grip"
 visible = false
 mesh = SubResource("BoxMesh_controller")
 
+[node name="ControllerVisual" parent="XROrigin3D/RightHand" unique_id=2004967626 instance=ExtResource("10_right_drone")]
+
 [node name="RightAim" type="XRController3D" parent="XROrigin3D" unique_id=115002]
 tracker = &"right_hand"
 pose = &"aim"
 
-[node name="ControllerVisual" parent="XROrigin3D/RightHand" instance=ExtResource("10_right_drone")]
-
 [node name="QuestUiLayer" parent="XROrigin3D" unique_id=1465962986 instance=ExtResource("7_quest_panel_layer")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
+transform = Transform3D(0.79277927, 0, 0.6095089, 0, 1, 0, -0.6095089, 0, 0.79277927, -1.2115452, 1.4, -0.66928256)
 
-[node name="TutorialUiLayer" parent="XROrigin3D" instance=ExtResource("12_tutorial_layer")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 1.32, -0.95)
+[node name="TutorialUiLayer" parent="XROrigin3D" unique_id=278361188 instance=ExtResource("12_tutorial_layer")]
+transform = Transform3D(0.14563411, 0, 0.9893385, 0, 1, 0, -0.9893385, 0, 0.14563411, -1.5112035, 1.3963404, -0.17230761)
 
-[node name="RightOriginIndicator" parent="XROrigin3D" instance=ExtResource("11_origin_indicator")]
+[node name="RightOriginIndicator" parent="XROrigin3D" unique_id=570705658 instance=ExtResource("11_origin_indicator")]
 
 [node name="ControllerReader" type="Node" parent="." unique_id=190442877]
 script = ExtResource("2_controller_reader")

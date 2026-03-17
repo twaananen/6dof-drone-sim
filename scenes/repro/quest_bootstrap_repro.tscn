@@ -1,6 +1,6 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://cg33snklgyp10"]
 
-[ext_resource type="Script" path="res://scripts/xr/quest_bootstrap_repro.gd" id="1_bootstrap_repro"]
+[ext_resource type="Script" uid="uid://ddc3i16rhwqu5" path="res://scripts/xr/quest_bootstrap_repro.gd" id="1_bootstrap_repro"]
 [ext_resource type="Script" uid="uid://b5ccyb0sy2bbb" path="res://scripts/xr/quest_composition_layer_repro_quad.gd" id="2_repro_quad"]
 [ext_resource type="PackedScene" uid="uid://b75ra01cc46nc" path="res://scenes/quest_panel.tscn" id="3_quest_panel"]
 
@@ -27,55 +27,55 @@ size = Vector3(0.05, 0.02, 0.1)
 [sub_resource type="BoxMesh" id="6_room_box"]
 size = Vector3(0.25, 0.25, 0.25)
 
-[node name="QuestBootstrapRepro" type="Node3D"]
+[node name="QuestBootstrapRepro" type="Node3D" unique_id=715531589]
 script = ExtResource("1_bootstrap_repro")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1882809386]
 environment = SubResource("3_environment")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=787367937]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=540174440]
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=1330417268]
 
-[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D" unique_id=528595352]
 tracker = &"left_hand"
 pose = &"grip"
 
-[node name="FallbackMesh" type="MeshInstance3D" parent="XROrigin3D/LeftHand"]
+[node name="FallbackMesh" type="MeshInstance3D" parent="XROrigin3D/LeftHand" unique_id=250809659]
 visible = false
 mesh = SubResource("5_controller_mesh")
 
-[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+[node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1344423320]
 tracker = &"right_hand"
 pose = &"grip"
 
-[node name="FallbackMesh" type="MeshInstance3D" parent="XROrigin3D/RightHand"]
+[node name="FallbackMesh" type="MeshInstance3D" parent="XROrigin3D/RightHand" unique_id=1231773523]
 visible = false
 mesh = SubResource("5_controller_mesh")
 
-[node name="QuestUiLayer" type="OpenXRCompositionLayerQuad" parent="XROrigin3D" groups=["ui_layer"]]
+[node name="QuestUiLayer" type="OpenXRCompositionLayerQuad" parent="XROrigin3D" unique_id=1259414866 groups=["ui_layer"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.1)
 quad_size = Vector2(1, 0.5625)
 script = ExtResource("2_repro_quad")
 
-[node name="SubViewport" type="SubViewport" parent="XROrigin3D/QuestUiLayer"]
+[node name="SubViewport" type="SubViewport" parent="XROrigin3D/QuestUiLayer" unique_id=746102559]
 disable_3d = true
 gui_embed_subwindows = true
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
-[node name="QuestPanel" parent="XROrigin3D/QuestUiLayer/SubViewport" instance=ExtResource("3_quest_panel")]
+[node name="QuestPanel" parent="XROrigin3D/QuestUiLayer/SubViewport" unique_id=1408920361 instance=ExtResource("3_quest_panel")]
 
-[node name="Background" type="Node3D" parent="."]
+[node name="Background" type="Node3D" parent="." unique_id=454597037]
 
-[node name="CubeA" type="MeshInstance3D" parent="Background"]
+[node name="CubeA" type="MeshInstance3D" parent="Background" unique_id=6798642]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 1.2, -2)
 mesh = SubResource("6_room_box")
 
-[node name="CubeB" type="MeshInstance3D" parent="Background"]
+[node name="CubeB" type="MeshInstance3D" parent="Background" unique_id=1584341532]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, 1.55, -1.8)
 mesh = SubResource("6_room_box")

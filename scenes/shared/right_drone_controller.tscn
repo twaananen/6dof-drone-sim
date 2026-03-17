@@ -1,46 +1,21 @@
-[gd_scene format=3]
-
-[sub_resource type="StandardMaterial3D" id="1_body_material"]
-shading_mode = 0
-albedo_color = Color(0.137255, 0.188235, 0.243137, 1)
-metallic = 0.15
-roughness = 0.32
-
-[sub_resource type="StandardMaterial3D" id="2_front_material"]
-shading_mode = 0
-emission_enabled = true
-emission = Color(0.2, 0.654902, 1, 1)
-emission_energy_multiplier = 0.8
-albedo_color = Color(0.435294, 0.866667, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="3_rear_material"]
-shading_mode = 0
-emission_enabled = true
-emission = Color(1, 0.333333, 0.235294, 1)
-emission_energy_multiplier = 0.6
-albedo_color = Color(1, 0.533333, 0.454902, 1)
-
-[sub_resource type="StandardMaterial3D" id="4_top_material"]
-shading_mode = 0
-emission_enabled = true
-emission = Color(0.980392, 0.882353, 0.290196, 1)
-emission_energy_multiplier = 0.7
-albedo_color = Color(1, 0.929412, 0.505882, 1)
+[gd_scene format=3 uid="uid://6kuwje358g1p"]
 
 [sub_resource type="BoxMesh" id="5_body_mesh"]
 size = Vector3(0.085, 0.024, 0.06)
 
+[sub_resource type="StandardMaterial3D" id="1_body_material"]
+shading_mode = 0
+albedo_color = Color(0.137255, 0.188235, 0.243137, 1)
+
 [sub_resource type="BoxMesh" id="6_arm_mesh"]
 size = Vector3(0.16, 0.008, 0.01)
 
-[sub_resource type="CylinderMesh" id="7_rotor_mesh"]
-top_radius = 0.018
-bottom_radius = 0.018
-height = 0.006
-radial_segments = 20
-
 [sub_resource type="BoxMesh" id="8_camera_mesh"]
 size = Vector3(0.02, 0.012, 0.02)
+
+[sub_resource type="StandardMaterial3D" id="2_front_material"]
+shading_mode = 0
+albedo_color = Color(0.435294, 0.866667, 1, 1)
 
 [sub_resource type="PrismMesh" id="9_nose_mesh"]
 left_to_right = 0.02
@@ -49,60 +24,74 @@ size = Vector3(0.034, 0.015, 0.03)
 [sub_resource type="BoxMesh" id="10_top_fin_mesh"]
 size = Vector3(0.012, 0.022, 0.03)
 
+[sub_resource type="StandardMaterial3D" id="4_top_material"]
+shading_mode = 0
+albedo_color = Color(1, 0.929412, 0.505882, 1)
+
 [sub_resource type="BoxMesh" id="11_top_stripe_mesh"]
 size = Vector3(0.05, 0.004, 0.016)
 
-[node name="RightDroneController" type="Node3D"]
+[sub_resource type="CylinderMesh" id="7_rotor_mesh"]
+top_radius = 0.018
+bottom_radius = 0.018
+height = 0.006
+radial_segments = 20
 
-[node name="Body" type="MeshInstance3D" parent="."]
+[sub_resource type="StandardMaterial3D" id="3_rear_material"]
+shading_mode = 0
+albedo_color = Color(1, 0.533333, 0.454902, 1)
+
+[node name="RightDroneController" type="Node3D" unique_id=1883261026]
+
+[node name="Body" type="MeshInstance3D" parent="." unique_id=1923377961]
 mesh = SubResource("5_body_mesh")
 surface_material_override/0 = SubResource("1_body_material")
 
-[node name="ArmX" type="MeshInstance3D" parent="."]
+[node name="ArmX" type="MeshInstance3D" parent="." unique_id=2063021354]
 mesh = SubResource("6_arm_mesh")
 surface_material_override/0 = SubResource("1_body_material")
 
-[node name="ArmZ" type="MeshInstance3D" parent="."]
+[node name="ArmZ" type="MeshInstance3D" parent="." unique_id=1583760701]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 mesh = SubResource("6_arm_mesh")
 surface_material_override/0 = SubResource("1_body_material")
 
-[node name="FrontCamera" type="MeshInstance3D" parent="."]
+[node name="FrontCamera" type="MeshInstance3D" parent="." unique_id=1967652071]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.008, -0.04)
 mesh = SubResource("8_camera_mesh")
 surface_material_override/0 = SubResource("2_front_material")
 
-[node name="FrontArrow" type="MeshInstance3D" parent="."]
+[node name="FrontArrow" type="MeshInstance3D" parent="." unique_id=1129770658]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0.002, -0.056)
 mesh = SubResource("9_nose_mesh")
 surface_material_override/0 = SubResource("2_front_material")
 
-[node name="TopFin" type="MeshInstance3D" parent="."]
+[node name="TopFin" type="MeshInstance3D" parent="." unique_id=1704346171]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.019, 0)
 mesh = SubResource("10_top_fin_mesh")
 surface_material_override/0 = SubResource("4_top_material")
 
-[node name="TopStripe" type="MeshInstance3D" parent="."]
+[node name="TopStripe" type="MeshInstance3D" parent="." unique_id=1776897535]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.014, -0.004)
 mesh = SubResource("11_top_stripe_mesh")
 surface_material_override/0 = SubResource("4_top_material")
 
-[node name="RotorFL" type="MeshInstance3D" parent="."]
+[node name="RotorFL" type="MeshInstance3D" parent="." unique_id=357375246]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.008, -0.08)
 mesh = SubResource("7_rotor_mesh")
 surface_material_override/0 = SubResource("2_front_material")
 
-[node name="RotorFR" type="MeshInstance3D" parent="."]
+[node name="RotorFR" type="MeshInstance3D" parent="." unique_id=250516401]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.008, -0.08)
 mesh = SubResource("7_rotor_mesh")
 surface_material_override/0 = SubResource("2_front_material")
 
-[node name="RotorRL" type="MeshInstance3D" parent="."]
+[node name="RotorRL" type="MeshInstance3D" parent="." unique_id=1065259615]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.008, 0.08)
 mesh = SubResource("7_rotor_mesh")
 surface_material_override/0 = SubResource("3_rear_material")
 
-[node name="RotorRR" type="MeshInstance3D" parent="."]
+[node name="RotorRR" type="MeshInstance3D" parent="." unique_id=952415295]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.008, 0.08)
 mesh = SubResource("7_rotor_mesh")
 surface_material_override/0 = SubResource("3_rear_material")

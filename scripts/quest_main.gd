@@ -84,6 +84,7 @@ var _updating_passthrough_toggle: bool = false
 var _xr_interface: XRInterface
 var _panel_recentering_connected: bool = false
 var _last_pose_snapshot_msec: int = 0
+var _suppress_origin_indicator_until_release: bool = false
 
 
 func _ready() -> void:
@@ -1079,13 +1080,20 @@ func _sync_flight_origin_indicator(state: Dictionary) -> void:
 		return
 	var control_active := bool(state.get("control_active", false))
 	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN:
+		_suppress_origin_indicator_until_release = false
 		right_origin_indicator.call("show_from_transform", right_hand.global_transform)
 		_log_info("XR_FLIGHT_ORIGIN_ANCHOR", _build_origin_anchor_fields(right_origin_indicator.transform))
-	elif state.get("event_flags", 0) & RawControllerState.EVENT_CLEAR_ORIGIN and control_active:
-		right_origin_indicator.call("show_from_transform", right_hand.global_transform)
-		_log_info("XR_FLIGHT_ORIGIN_ANCHOR", _build_origin_anchor_fields(right_origin_indicator.transform))
+	elif state.get("event_flags", 0) & RawControllerState.EVENT_CLEAR_ORIGIN:
+		_suppress_origin_indicator_until_release = true
+		right_origin_indicator.call("hide_indicator")
 
 	if not control_active:
+		_suppress_origin_indicator_until_release = false
+		if right_origin_indicator.visible:
+			right_origin_indicator.call("hide_indicator")
+		return
+
+	if _suppress_origin_indicator_until_release:
 		if right_origin_indicator.visible:
 			right_origin_indicator.call("hide_indicator")
 		return

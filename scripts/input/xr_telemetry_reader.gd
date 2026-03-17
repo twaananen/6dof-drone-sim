@@ -10,6 +10,7 @@ var controller: XRController3D
 var _pending_event_flags := 0
 var _control_active := false
 var _grip_pressed := false
+var _origin_capture_pending := false
 var _last_tracking_valid := false
 var _last_buttons := -1
 var _last_logged_control_active := false
@@ -38,7 +39,14 @@ func _ready() -> void:
 
 
 func request_set_origin() -> void:
-    _pending_event_flags |= RawControllerState.EVENT_SET_ORIGIN
+    if controller != null and controller.get_has_tracking_data():
+        _pending_event_flags |= RawControllerState.EVENT_SET_ORIGIN
+        _origin_capture_pending = false
+        return
+    _origin_capture_pending = true
+    QuestRuntimeLog.warn("XR_FLIGHT_ORIGIN_DEFERRED", {
+        "controller": _controller_label(),
+    })
 
 
 func request_clear_origin() -> void:
@@ -79,6 +87,9 @@ func read_state() -> Dictionary:
         return state
 
     var pose = controller.get_pose()
+    if _origin_capture_pending:
+        _pending_event_flags |= RawControllerState.EVENT_SET_ORIGIN
+        _origin_capture_pending = false
     state["tracking_valid"] = true
     state["event_flags"] = _consume_event_flags()
     state["grip_position"] = controller.position
@@ -102,7 +113,9 @@ func _sync_grip_state() -> void:
     _grip_pressed = grip_pressed
     _control_active = grip_pressed
     if grip_pressed:
-        _pending_event_flags |= RawControllerState.EVENT_SET_ORIGIN
+        _origin_capture_pending = true
+    else:
+        _origin_capture_pending = false
 
 
 func _consume_event_flags() -> int:

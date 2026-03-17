@@ -39,3 +39,12 @@ func test_invalid_magic_rejected() -> void:
     var packet := PackedByteArray([0, 0, 0, 0])
     var unpacked := RawControllerState.unpack_state(packet)
     assert_false(unpacked["valid"])
+
+
+func test_invalid_version_reported_before_size_mismatch() -> void:
+    var packet := RawControllerState.pack_state(RawControllerState.default_state())
+    packet[4] = RawControllerState.VERSION - 1
+
+    var unpacked := RawControllerState.unpack_state(packet)
+    assert_false(unpacked["valid"])
+    assert_eq(unpacked["error"], "invalid_version")

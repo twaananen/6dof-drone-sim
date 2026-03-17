@@ -95,3 +95,40 @@ func _has_event(event_name: String) -> bool:
 
 func _logger() -> Node:
 	return get_tree().root.get_node("QuestRuntimeLog")
+
+
+func test_clear_origin_hides_indicator_until_release() -> void:
+	var scene: PackedScene = load("res://scenes/quest_main.tscn")
+	assert_not_null(scene)
+
+	var quest_main := scene.instantiate()
+	add_child_autofree(quest_main)
+	await wait_process_frames(1)
+
+	quest_main._sync_flight_origin_indicator({
+		"control_active": true,
+		"event_flags": RawControllerState.EVENT_SET_ORIGIN,
+	})
+	assert_true(quest_main.right_origin_indicator.visible)
+
+	quest_main._sync_flight_origin_indicator({
+		"control_active": true,
+		"event_flags": RawControllerState.EVENT_CLEAR_ORIGIN,
+	})
+	assert_false(quest_main.right_origin_indicator.visible)
+
+	quest_main._sync_flight_origin_indicator({
+		"control_active": true,
+		"event_flags": 0,
+	})
+	assert_false(quest_main.right_origin_indicator.visible)
+
+	quest_main._sync_flight_origin_indicator({
+		"control_active": false,
+		"event_flags": 0,
+	})
+	quest_main._sync_flight_origin_indicator({
+		"control_active": true,
+		"event_flags": RawControllerState.EVENT_SET_ORIGIN,
+	})
+	assert_true(quest_main.right_origin_indicator.visible)
