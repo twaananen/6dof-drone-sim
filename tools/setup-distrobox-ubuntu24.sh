@@ -12,6 +12,7 @@ readonly ANDROID_NDK="28.1.13356709"
 readonly JAVA_HOME_DIR="/usr/lib/jvm/java-17-openjdk-amd64"
 readonly DEBUG_KEYSTORE="/opt/debug.keystore"
 readonly CMDLINE_TOOLS_BOOTSTRAP_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+readonly SCRCPY_REPO="https://github.com/Genymobile/scrcpy.git"
 
 readonly -a REQUIRED_REPO_FILES=(
     ".godot-version"
@@ -58,9 +59,22 @@ readonly -a APT_PACKAGES=(
     libvulkan1
     libdbus-1-3
     libudev1
+    ffmpeg
+    libsdl2-2.0-0
+    libsdl2-dev
+    libavcodec-dev
+    libavdevice-dev
+    libavformat-dev
+    libavutil-dev
+    libswresample-dev
+    libusb-1.0-0
+    libusb-1.0-0-dev
+    meson
+    ninja-build
 )
 
 readonly -a SDK_PACKAGES=(
+    "cmdline-tools;latest"
     "platform-tools"
     "build-tools;35.0.1"
     "platforms;android-35"
@@ -242,21 +256,29 @@ install_android_cmdline_tools() {
     unzip -q -o "${download_zip}" -d "${bootstrap_dir}"
     rm -f "${download_zip}"
 
-    rm -rf "${ANDROID_HOME_DIR}/cmdline-tools/latest"
-    mv "${bootstrap_dir}/cmdline-tools" "${ANDROID_HOME_DIR}/cmdline-tools/latest"
-    rmdir "${bootstrap_dir}" 2>/dev/null || true
+    # Keep bootstrap in place — sdkmanager will install cmdline-tools;latest
+    # into the canonical latest/ directory without a self-update conflict.
+    if [ -d "${bootstrap_dir}/cmdline-tools" ]; then
+        mv "${bootstrap_dir}/cmdline-tools"/* "${bootstrap_dir}/"
+        rmdir "${bootstrap_dir}/cmdline-tools"
+    fi
 
-    SDKMANAGER_BIN="${ANDROID_HOME_DIR}/cmdline-tools/latest/bin/sdkmanager"
+    SDKMANAGER_BIN="${bootstrap_dir}/bin/sdkmanager"
 }
 
 install_android_sdk_packages() {
     log "Installing Android SDK packages"
-    SDKMANAGER_BIN="${ANDROID_HOME_DIR}/cmdline-tools/latest/bin/sdkmanager"
     set +o pipefail
     yes | "${SDKMANAGER_BIN}" --sdk_root="${ANDROID_HOME_DIR}" --licenses >/dev/null
     set -o pipefail
     "${SDKMANAGER_BIN}" --sdk_root="${ANDROID_HOME_DIR}" "${SDK_PACKAGES[@]}"
     normalize_android_cmdline_tools_latest
+
+    # Remove bootstrap now that cmdline-tools;latest installed the canonical tools.
+    if [ -d "${ANDROID_HOME_DIR}/cmdline-tools/bootstrap" ]; then
+        rm -rf "${ANDROID_HOME_DIR}/cmdline-tools/bootstrap"
+    fi
+    SDKMANAGER_BIN="${ANDROID_HOME_DIR}/cmdline-tools/latest/bin/sdkmanager"
 }
 
 normalize_android_cmdline_tools_latest() {
@@ -448,12 +470,47 @@ ensure_openxr_vendors_addon() {
     rm -rf "${temp_dir}"
 }
 
+install_scrcpy() {
+    if command -v scrcpy >/dev/null 2>&1; then
+        log "scrcpy already installed: $(scrcpy --version 2>&1 | head -1)"
+        return 0
+    fi
+
+    log "Installing scrcpy from source"
+    local build_dir=""
+    build_dir="$(mktemp -d)"
+
+    # Pre-create icon directories that meson install expects.
+    # On immutable hosts (Bazzite) these paths may be read-only; the
+    # distrobox overlay usually makes /usr/local writable, but the
+    # deep icon hierarchy may not exist yet.
+    sudo mkdir -p /usr/local/share/icons/hicolor/256x256/apps 2>/dev/null || true
+
+    git clone --depth 1 "${SCRCPY_REPO}" "${build_dir}/scrcpy"
+    cd "${build_dir}/scrcpy"
+    bash install_release.sh
+    cd "${ROOT_DIR}"
+
+    rm -rf "${build_dir}"
+
+    if command -v scrcpy >/dev/null 2>&1; then
+        log "scrcpy installed: $(scrcpy --version 2>&1 | head -1)"
+    else
+        warn "scrcpy installation may have failed. Check the output above."
+    fi
+}
+
 prepare_project() {
     log "Preparing Android build template"
     bash "${ROOT_DIR}/tools/install-android-build-template.sh"
 
     log "Running headless Godot import pass"
-    timeout 120 godot --headless --import >/dev/null 2>&1 || true
+    local import_exit=0
+    timeout 120 godot --headless --import 2>&1 || import_exit=$?
+    if [ "${import_exit}" -ne 0 ]; then
+        warn "Import pass exited ${import_exit} (may be normal for headless)"
+    fi
+    sync
 }
 
 verify_environment() {
@@ -476,6 +533,7 @@ print_next_steps() {
     printf '  bash tools/quest-adb.sh doctor\n'
     printf '  bash tools/quest-deploy.sh export\n'
     printf '  bash tools/quest-deploy.sh\n'
+    printf '  bash tools/quest-screenshot.sh\n'
 }
 
 main() {
@@ -498,6 +556,7 @@ main() {
     install_export_templates
     write_editor_settings
     ensure_openxr_vendors_addon
+    install_scrcpy
     prepare_project
     verify_environment
     print_next_steps

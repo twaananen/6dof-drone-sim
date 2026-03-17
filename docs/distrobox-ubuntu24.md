@@ -23,3 +23,16 @@ This distrobox setup intentionally follows the current Godot Android export docu
 - CMake `3.10.2.4988404`
 
 Those versions differ from the current devcontainer pins, which remain unchanged for the existing container workflow.
+
+## AI Visual Feedback (scrcpy)
+
+The setup script installs scrcpy from source for Quest screen mirroring. This lets the AI agent capture screenshots from the running Quest app over wireless ADB.
+
+```bash
+bash tools/quest-screenshot.sh              # Capture a single screenshot
+bash tools/quest-screenshot.sh scrcpy       # Start live mirror window
+bash tools/quest-screenshot.sh scrcpy-stop  # Stop the mirror
+bash tools/quest-screenshot.sh clean        # Keep only the last 20 captures
+```
+
+Screenshots are saved to `.screenshots/latest.png` (symlink to the most recent capture).
