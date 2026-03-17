@@ -17,7 +17,7 @@ albedo_color = Color(0.917647, 0.956863, 1, 0.92)
 
 [node name="QuestTutorialLayer" type="OpenXRCompositionLayerQuad" unique_id=684606926 groups=["ui_layer"]]
 sort_order = 0
-quad_size = Vector2(0.56, 0.62)
+quad_size = Vector2(0.67, 0.74)
 script = ExtResource("1_quest_panel_layer")
 scene = ExtResource("2_tutorial_panel")
 

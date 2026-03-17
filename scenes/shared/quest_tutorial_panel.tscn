@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cqdnj512ou0j3"]
 
+[ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
+
 [sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
 bg_color = Color(0.0862745, 0.141176, 0.215686, 1)
 border_width_left = 4
@@ -47,12 +49,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_vr_theme")
 
 [node name="Chrome" type="PanelContainer" parent="." unique_id=372180331]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 82.0
+offset_bottom = 92.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("1_panel_chrome_style")
 
@@ -69,6 +72,7 @@ layout_mode = 2
 [node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=625932492]
 layout_mode = 2
 text = "Quest Flight Tutorial"
+theme_override_font_sizes/font_size = 26
 
 [node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=646025157]
 layout_mode = 2
@@ -80,7 +84,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 82.0
+offset_top = 92.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("2_panel_body_style")
@@ -151,9 +155,9 @@ text = "Hide Tutorial"
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 1
 offset_left = 12.0
-offset_top = 94.0
+offset_top = 102.0
 offset_right = 44.0
-offset_bottom = 126.0
+offset_bottom = 134.0
 theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=188858691]
@@ -163,9 +167,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -44.0
-offset_top = 94.0
+offset_top = 102.0
 offset_right = -12.0
-offset_bottom = 126.0
+offset_bottom = 134.0
 theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1585736277]
