@@ -10,6 +10,10 @@ readonly MAX_SCREENSHOTS=20
 readonly CAPTURE_TIMEOUT=10
 readonly PNG_MAGIC=$'\x89PNG'
 
+# Crop to left eye. Quest 3 produces a side-by-side stereo buffer.
+# "crop=iw/2:ih:0:0" takes the left half of the frame.
+readonly FFMPEG_MONO_CROP="crop=iw/2:ih:0:0"
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -170,8 +174,9 @@ capture_scrcpy() {
         die "scrcpy capture produced no output. Is the Quest awake and connected? Try: bash tools/quest-adb.sh doctor"
     fi
 
-    log "Extracting frame"
-    if ! ffmpeg -y -sseof -0.5 -i "${tmp_video}" -frames:v 1 -update 1 "${filepath}" 2>/dev/null; then
+    log "Extracting mono frame (left eye)"
+    if ! ffmpeg -y -sseof -0.5 -i "${tmp_video}" -frames:v 1 -update 1 \
+        -filter:v "${FFMPEG_MONO_CROP}" "${filepath}" 2>/dev/null; then
         rm -f "${tmp_video}" "${filepath}"
         die "ffmpeg frame extraction failed."
     fi
