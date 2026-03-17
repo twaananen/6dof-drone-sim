@@ -543,7 +543,7 @@ print_next_steps() {
     printf 'Setup complete.\n'
     printf '\n'
     printf 'Next steps:\n'
-    printf '  godot\n'
+    printf '  godot --editor\n'
     printf '  bash tools/run_tests.sh\n'
     printf '  bash tools/quest-adb.sh doctor\n'
     printf '  bash tools/quest-deploy.sh export\n'

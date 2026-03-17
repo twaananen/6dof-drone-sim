@@ -8,7 +8,7 @@ Bootstrap from the repository root:
 bash tools/setup-distrobox-ubuntu24.sh
 ```
 
-The script assumes distrobox host integration is already handling graphical apps, so `godot` should open the editor directly from inside the box when X11 or Wayland forwarding is available.
+The script assumes distrobox host integration is already handling graphical apps. Use `godot --editor` (or `godot -e`) to open the editor from inside the box. Running bare `godot` runs the project's main scene, not the editor.
 
 `~/.android` is reused through your shared distrobox home directory. That keeps ADB keys and wireless pairing state available across shell sessions and box restarts.
 
