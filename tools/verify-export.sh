@@ -114,6 +114,14 @@ if [ "${FAIL}" -ne 0 ]; then
     exit 1
 fi
 
+apk_has_vendor_so() {
+    # Capture all output first to avoid SIGPIPE when grep -q exits early
+    # with pipefail enabled (zipinfo gets killed mid-write → exit 141).
+    local contents
+    contents="$(zipinfo -1 "$1" 2>/dev/null)" || true
+    [[ "${contents}" == *libgodotopenxrvendors.so* ]]
+}
+
 echo ""
 echo "=== Running import pass ==="
 timeout 120 godot --headless --import > /dev/null 2>&1 || true
@@ -123,46 +131,45 @@ echo "=== Exporting debug APK ==="
 rm -f "${APK_OUT}"
 godot --headless --export-debug "Android" "${APK_OUT}"
 
-if [ -f "${APK_OUT}" ]; then
-    ensure_debug_signature
-    AAPT_BIN="$(find_aapt || true)"
-    if [ -n "${AAPT_BIN}" ]; then
-        MANIFEST_DUMP="$("${AAPT_BIN}" dump xmltree "${APK_OUT}" AndroidManifest.xml 2>/dev/null || true)"
-        if printf '%s\n' "${MANIFEST_DUMP}" | grep -Fq 'com.oculus.feature.PASSTHROUGH'; then
-            echo "  [OK]   APK manifest declares com.oculus.feature.PASSTHROUGH"
-        else
-            echo "  [FAIL] APK manifest missing com.oculus.feature.PASSTHROUGH"
-            FAIL=1
-        fi
-        if printf '%s\n' "${MANIFEST_DUMP}" | grep -Fq 'com.oculus.feature.RENDER_MODEL'; then
-            echo "  [OK]   APK manifest declares com.oculus.feature.RENDER_MODEL"
-        else
-            echo "  [FAIL] APK manifest missing com.oculus.feature.RENDER_MODEL"
-            FAIL=1
-        fi
-    else
-        echo "  [WARN] Unable to locate aapt; skipping APK manifest feature verification"
-    fi
-
-    APK_CONTENTS="$(zipinfo -1 "${APK_OUT}" 2>/dev/null || true)"
-    if printf '%s\n' "${APK_CONTENTS}" | grep -Fq 'libgodotopenxrvendors.so'; then
-        echo "  [OK]   APK packages libgodotopenxrvendors.so"
-    else
-        echo "  [FAIL] APK missing libgodotopenxrvendors.so"
-        FAIL=1
-    fi
-
-    SIZE=$(du -h "${APK_OUT}" | cut -f1)
-    echo ""
-    if [ "${FAIL}" -eq 0 ]; then
-        echo "Export succeeded: ${APK_OUT} (${SIZE})"
-        exit 0
-    fi
-
-    echo "Export produced ${APK_OUT} (${SIZE}) but Quest XR vendor validation failed."
-    exit 1
-else
+if [ ! -f "${APK_OUT}" ]; then
     echo ""
     echo "Export failed — no APK produced."
     exit 1
 fi
+
+ensure_debug_signature
+AAPT_BIN="$(find_aapt || true)"
+if [ -n "${AAPT_BIN}" ]; then
+    MANIFEST_DUMP="$("${AAPT_BIN}" dump xmltree "${APK_OUT}" AndroidManifest.xml 2>/dev/null || true)"
+    if [[ "${MANIFEST_DUMP}" == *'com.oculus.feature.PASSTHROUGH'* ]]; then
+        echo "  [OK]   APK manifest declares com.oculus.feature.PASSTHROUGH"
+    else
+        echo "  [FAIL] APK manifest missing com.oculus.feature.PASSTHROUGH"
+        FAIL=1
+    fi
+    if [[ "${MANIFEST_DUMP}" == *'com.oculus.feature.RENDER_MODEL'* ]]; then
+        echo "  [OK]   APK manifest declares com.oculus.feature.RENDER_MODEL"
+    else
+        echo "  [FAIL] APK manifest missing com.oculus.feature.RENDER_MODEL"
+        FAIL=1
+    fi
+else
+    echo "  [WARN] Unable to locate aapt; skipping APK manifest feature verification"
+fi
+
+if apk_has_vendor_so "${APK_OUT}"; then
+    echo "  [OK]   APK packages libgodotopenxrvendors.so"
+else
+    echo "  [FAIL] APK missing libgodotopenxrvendors.so"
+    FAIL=1
+fi
+
+SIZE=$(du -h "${APK_OUT}" | cut -f1)
+echo ""
+if [ "${FAIL}" -eq 0 ]; then
+    echo "Export succeeded: ${APK_OUT} (${SIZE})"
+    exit 0
+fi
+
+echo "Export produced ${APK_OUT} (${SIZE}) but Quest XR vendor validation failed."
+exit 1
