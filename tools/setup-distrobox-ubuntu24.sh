@@ -13,6 +13,7 @@ readonly JAVA_HOME_DIR="/usr/lib/jvm/java-17-openjdk-amd64"
 readonly DEBUG_KEYSTORE="/opt/debug.keystore"
 readonly CMDLINE_TOOLS_BOOTSTRAP_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
 readonly SCRCPY_REPO="https://github.com/Genymobile/scrcpy.git"
+readonly SCRCPY_VERSION="3.3.4"
 
 readonly -a REQUIRED_REPO_FILES=(
     ".godot-version"
@@ -470,28 +471,47 @@ ensure_openxr_vendors_addon() {
     rm -rf "${temp_dir}"
 }
 
+ensure_local_bin_on_path() {
+    local local_bin="${HOME}/.local/bin"
+
+    if [[ ":${PATH}:" != *":${local_bin}:"* ]]; then
+        export PATH="${local_bin}:${PATH}"
+    fi
+
+    if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "${HOME}/.bashrc" 2>/dev/null; then
+        log "Adding ~/.local/bin to PATH in ~/.bashrc"
+        printf '\n# User-local binaries (scrcpy, etc.)\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "${HOME}/.bashrc"
+    fi
+}
+
 install_scrcpy() {
     if command -v scrcpy >/dev/null 2>&1; then
         log "scrcpy already installed: $(scrcpy --version 2>&1 | head -1)"
         return 0
     fi
 
-    log "Installing scrcpy from source"
+    log "Installing scrcpy from source to ~/.local"
     local build_dir=""
+    local server_url="https://github.com/Genymobile/scrcpy/releases/latest/download/scrcpy-server-v${SCRCPY_VERSION}"
     build_dir="$(mktemp -d)"
-
-    # Pre-create icon directories that meson install expects.
-    # On immutable hosts (Bazzite) these paths may be read-only; the
-    # distrobox overlay usually makes /usr/local writable, but the
-    # deep icon hierarchy may not exist yet.
-    sudo mkdir -p /usr/local/share/icons/hicolor/256x256/apps 2>/dev/null || true
 
     git clone --depth 1 "${SCRCPY_REPO}" "${build_dir}/scrcpy"
     cd "${build_dir}/scrcpy"
-    bash install_release.sh
-    cd "${ROOT_DIR}"
 
+    wget -q --show-progress -O scrcpy-server "${server_url}"
+    meson setup build-local \
+        --buildtype=release \
+        --strip \
+        -Db_lto=true \
+        --prefix="${HOME}/.local" \
+        -Dprebuilt_server=scrcpy-server
+    ninja -Cbuild-local
+    ninja -Cbuild-local install
+
+    cd "${ROOT_DIR}"
     rm -rf "${build_dir}"
+
+    ensure_local_bin_on_path
 
     if command -v scrcpy >/dev/null 2>&1; then
         log "scrcpy installed: $(scrcpy --version 2>&1 | head -1)"
@@ -505,12 +525,7 @@ prepare_project() {
     bash "${ROOT_DIR}/tools/install-android-build-template.sh"
 
     log "Running headless Godot import pass"
-    local import_exit=0
-    timeout 120 godot --headless --import 2>&1 || import_exit=$?
-    if [ "${import_exit}" -ne 0 ]; then
-        warn "Import pass exited ${import_exit} (may be normal for headless)"
-    fi
-    sync
+    timeout 120 godot --headless --import >/dev/null 2>&1 || true
 }
 
 verify_environment() {

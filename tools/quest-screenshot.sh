@@ -13,18 +13,17 @@ readonly PNG_MAGIC=$'\x89PNG'
 usage() {
     cat <<'EOF'
 Usage:
-  bash tools/quest-screenshot.sh              Capture a single screenshot
-  bash tools/quest-screenshot.sh scrcpy       Start scrcpy live mirror
+  bash tools/quest-screenshot.sh              Capture via scrcpy (best quality)
+  bash tools/quest-screenshot.sh adb          Capture via adb screencap (fast, may be distorted)
+  bash tools/quest-screenshot.sh scrcpy       Start scrcpy live mirror window
   bash tools/quest-screenshot.sh scrcpy-stop  Stop scrcpy mirror
   bash tools/quest-screenshot.sh clean        Keep only the last 20 captures
   bash tools/quest-screenshot.sh help         Show this help
 
-The capture uses adb screencap over wireless ADB. The Quest must be
-connected via wireless ADB before running this script.
-
-Note: adb screencap may not capture VR content on all Quest firmware
-versions (OpenXR can bypass Android's SurfaceFlinger). If captures
-are black, use scrcpy which reliably captures VR content via MediaCodec.
+The default capture uses scrcpy to record a short clip and extract a
+single frame. This gives a clean flat projection of the VR scene.
+The "adb" subcommand uses adb screencap which is faster but produces
+a distorted both-lenses stereo image.
 
 Screenshots are saved to .screenshots/ with latest.png always being
 the most recent capture.
@@ -110,7 +109,78 @@ auto_clean() {
     done
 }
 
-capture() {
+require_scrcpy() {
+    if ! command -v scrcpy >/dev/null 2>&1; then
+        die "scrcpy is not installed. Run: bash tools/setup-distrobox-ubuntu24.sh"
+    fi
+    if ! command -v ffmpeg >/dev/null 2>&1; then
+        die "ffmpeg is not installed. Run: bash tools/setup-distrobox-ubuntu24.sh"
+    fi
+}
+
+save_and_report() {
+    local filepath="$1"
+
+    if ! validate_png "${filepath}"; then
+        rm -f "${filepath}"
+        die "Capture is not a valid PNG."
+    fi
+
+    cp -f "${filepath}" "${SCREENSHOT_DIR}/latest.png"
+    auto_clean
+    log "Saved: ${filepath}"
+    printf '%s\n' "${filepath}"
+}
+
+capture_scrcpy() {
+    local serial=""
+    local timestamp=""
+    local filename=""
+    local filepath=""
+    local tmp_video=""
+
+    require_adb
+    require_scrcpy
+    ensure_screenshot_dir
+
+    log "Resolving Quest ADB target"
+    serial="$(resolve_target)"
+    log "Using target: ${serial}"
+
+    timestamp="$(date +%Y%m%d-%H%M%S)"
+    filename="${timestamp}.png"
+    filepath="${SCREENSHOT_DIR}/${filename}"
+    tmp_video="$(mktemp /tmp/quest-capture.XXXXXX.mkv)"
+
+    log "Recording short scrcpy clip"
+    # scrcpy may return non-zero when --time-limit expires; check the
+    # output file instead of the exit code.
+    timeout 15 scrcpy \
+        --serial="${serial}" \
+        --no-playback \
+        --no-audio \
+        --max-size=1920 \
+        --video-bit-rate=8M \
+        --record="${tmp_video}" \
+        --time-limit=2 \
+        2>&1 || true
+
+    if [ ! -s "${tmp_video}" ]; then
+        rm -f "${tmp_video}"
+        die "scrcpy capture produced no output. Is the Quest awake and connected? Try: bash tools/quest-adb.sh doctor"
+    fi
+
+    log "Extracting frame"
+    if ! ffmpeg -y -sseof -0.5 -i "${tmp_video}" -frames:v 1 -update 1 "${filepath}" 2>/dev/null; then
+        rm -f "${tmp_video}" "${filepath}"
+        die "ffmpeg frame extraction failed."
+    fi
+
+    rm -f "${tmp_video}"
+    save_and_report "${filepath}"
+}
+
+capture_adb() {
     local serial=""
     local timestamp=""
     local filename=""
@@ -127,21 +197,13 @@ capture() {
     filename="${timestamp}.png"
     filepath="${SCREENSHOT_DIR}/${filename}"
 
-    log "Capturing screenshot (${CAPTURE_TIMEOUT}s timeout)"
+    log "Capturing via adb screencap (${CAPTURE_TIMEOUT}s timeout)"
     if ! timeout "${CAPTURE_TIMEOUT}" adb -s "${serial}" exec-out screencap -p > "${filepath}" 2>/dev/null; then
         rm -f "${filepath}"
         die "screencap failed or timed out. Is the Quest awake? Try: bash tools/quest-adb.sh doctor"
     fi
 
-    if ! validate_png "${filepath}"; then
-        rm -f "${filepath}"
-        die "Capture is not a valid PNG. adb screencap may not work for VR content on this Quest firmware. Try 'bash tools/quest-screenshot.sh scrcpy' instead."
-    fi
-
-    cp -f "${filepath}" "${SCREENSHOT_DIR}/latest.png"
-    auto_clean
-    log "Saved: ${filepath}"
-    printf '%s\n' "${filepath}"
+    save_and_report "${filepath}"
 }
 
 scrcpy_start() {
@@ -232,7 +294,10 @@ main() {
 
     case "${command}" in
         capture)
-            capture
+            capture_scrcpy
+            ;;
+        adb)
+            capture_adb
             ;;
         scrcpy)
             scrcpy_start
