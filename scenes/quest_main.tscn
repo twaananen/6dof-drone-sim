@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://d4nncnpji5kaq" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
 [ext_resource type="PackedScene" uid="uid://v3tle8368h3m" path="res://scenes/shared/quest_connection_layer.tscn" id="13_connection_layer"]
 [ext_resource type="PackedScene" uid="uid://82ma6up55f7b" path="res://scenes/shared/quest_session_layer.tscn" id="14_session_layer"]
+[ext_resource type="Script" uid="uid://b550u566bucp0" path="res://scripts/xr/smooth_pivot.gd" id="15_smooth_pivot"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -71,9 +72,12 @@ mesh = SubResource("BoxMesh_controller")
 tracker = &"left_hand"
 pose = &"aim"
 
-[node name="LeftPointer" parent="XROrigin3D/LeftAim" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
+[node name="SmoothPointer" type="Node3D" parent="XROrigin3D/LeftAim" unique_id=1442544722]
+script = ExtResource("15_smooth_pivot")
 
-[node name="ControllerVisual" parent="XROrigin3D/LeftAim" unique_id=545737677 instance=ExtResource("9_left_wand")]
+[node name="LeftPointer" parent="XROrigin3D/LeftAim/SmoothPointer" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
+
+[node name="ControllerVisual" parent="XROrigin3D/LeftAim/SmoothPointer" unique_id=545737677 instance=ExtResource("9_left_wand")]
 
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1940137224]
 tracker = &"right_hand"
