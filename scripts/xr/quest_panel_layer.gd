@@ -11,6 +11,7 @@ const ZONE_TOP_RIGHT := "top_right"
 const ZONE_BOTTOM_LEFT := "bottom_left"
 const ZONE_BOTTOM_RIGHT := "bottom_right"
 const NO_RAY_INTERSECTION := Vector3(INF, INF, INF)
+const DEPTH_SENSITIVITY := 3.0
 const RESIZE_SIGNS := {
 	ZONE_TOP_LEFT: Vector2(-1.0, 1.0),
 	ZONE_TOP_RIGHT: Vector2(1.0, 1.0),
@@ -366,7 +367,7 @@ func _update_manipulation(ray_origin: Vector3, ray_direction: Vector3) -> void:
 			return
 		var cam_pos := _xr_camera.global_position
 		var depth_delta := cam_pos.distance_to(ray_origin) - _drag_initial_controller_dist
-		var current_radius := maxf(_drag_radius + depth_delta, 0.1)
+		var current_radius := maxf(_drag_radius + depth_delta * DEPTH_SENSITIVITY, 0.1)
 		var sphere_hit := _ray_sphere_exit(ray_origin, ray_direction, cam_pos, current_radius)
 		if not sphere_hit.is_finite():
 			return
