@@ -37,6 +37,19 @@ func _bridge_controller_signals() -> void:
 			_controller.button_released.connect(child._on_controller_button_released)
 
 
+func _exit_tree() -> void:
+	if _controller == null:
+		return
+	for child in get_children():
+		if child.has_method("_on_controller_input_float_changed") and _controller.input_float_changed.is_connected(child._on_controller_input_float_changed):
+			_controller.input_float_changed.disconnect(child._on_controller_input_float_changed)
+		if child.has_method("_on_controller_button_pressed") and _controller.button_pressed.is_connected(child._on_controller_button_pressed):
+			_controller.button_pressed.disconnect(child._on_controller_button_pressed)
+		if child.has_method("_on_controller_button_released") and _controller.button_released.is_connected(child._on_controller_button_released):
+			_controller.button_released.disconnect(child._on_controller_button_released)
+	_controller = null
+
+
 func _process(delta: float) -> void:
 	var parent_node: Node3D = get_parent() as Node3D
 	if parent_node == null:
