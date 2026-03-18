@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://d2x6u6k3dvl1e" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
 [ext_resource type="PackedScene" uid="uid://dxqlxmvy7kw7a" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
 [ext_resource type="Script" uid="uid://bue7lm3hjt4cm" path="res://scripts/network/discovery_beacon.gd" id="11"]
-[ext_resource type="Script" path="res://scripts/network/inspect_server.gd" id="12"]
+[ext_resource type="Script" uid="uid://bkc58nnu6m6lo" path="res://scripts/network/inspect_server.gd" id="12"]
 
 [node name="PcMain" type="Control" unique_id=1032354419]
 layout_mode = 3
@@ -30,7 +30,7 @@ script = ExtResource("2")
 [node name="ControlServer" type="Node" parent="." unique_id=2016668229]
 script = ExtResource("3")
 
-[node name="InspectServer" type="Node" parent="."]
+[node name="InspectServer" type="Node" parent="." unique_id=511312281]
 script = ExtResource("12")
 
 [node name="LinuxGamepadBackend" type="Node" parent="." unique_id=1002458134]

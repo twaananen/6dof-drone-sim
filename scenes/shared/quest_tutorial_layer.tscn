@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d4nncnpji5kaq"]
 
 [ext_resource type="Script" uid="uid://devixte28xcgr" path="res://scripts/xr/quest_panel_layer.gd" id="1_quest_panel_layer"]
-[ext_resource type="PackedScene" path="res://scenes/shared/quest_tutorial_panel.tscn" id="2_tutorial_panel"]
+[ext_resource type="PackedScene" uid="uid://cqdnj512ou0j3" path="res://scenes/shared/quest_tutorial_panel.tscn" id="2_tutorial_panel"]
 
 [sub_resource type="SphereMesh" id="1_cursor_mesh"]
 radius = 0.008

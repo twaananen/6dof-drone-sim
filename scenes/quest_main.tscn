@@ -7,10 +7,10 @@
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
 [ext_resource type="PackedScene" uid="uid://bcev6uu7eo8vt" path="res://scenes/shared/quest_panel_layer.tscn" id="7_quest_panel_layer"]
 [ext_resource type="PackedScene" uid="uid://cqs8c3rq6cxvk" path="res://addons/common/viewport_2d_in_3d/function_pointer.tscn" id="8_function_pointer"]
-[ext_resource type="PackedScene" path="res://scenes/shared/left_wand_controller.tscn" id="9_left_wand"]
-[ext_resource type="PackedScene" path="res://scenes/shared/right_drone_controller.tscn" id="10_right_drone"]
-[ext_resource type="PackedScene" path="res://scenes/shared/flight_origin_indicator.tscn" id="11_origin_indicator"]
-[ext_resource type="PackedScene" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
+[ext_resource type="PackedScene" uid="uid://cesq2u7fh05sp" path="res://scenes/shared/left_wand_controller.tscn" id="9_left_wand"]
+[ext_resource type="PackedScene" uid="uid://6kuwje358g1p" path="res://scenes/shared/right_drone_controller.tscn" id="10_right_drone"]
+[ext_resource type="PackedScene" uid="uid://bx554c6mrerch" path="res://scenes/shared/flight_origin_indicator.tscn" id="11_origin_indicator"]
+[ext_resource type="PackedScene" uid="uid://d4nncnpji5kaq" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)

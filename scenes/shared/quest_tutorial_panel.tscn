@@ -71,8 +71,8 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=625932492]
 layout_mode = 2
-text = "Quest Flight Tutorial"
 theme_override_font_sizes/font_size = 26
+text = "Quest Flight Tutorial"
 
 [node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=646025157]
 layout_mode = 2
@@ -170,6 +170,7 @@ offset_left = -44.0
 offset_top = 102.0
 offset_right = -12.0
 offset_bottom = 134.0
+grow_horizontal = 0
 theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1585736277]
@@ -182,6 +183,7 @@ offset_left = 12.0
 offset_top = -44.0
 offset_right = 44.0
 offset_bottom = -12.0
+grow_vertical = 0
 theme_override_styles/panel = SubResource("3_resize_handle_style")
 
 [node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=1903107750]
@@ -196,4 +198,6 @@ offset_left = -44.0
 offset_top = -44.0
 offset_right = -12.0
 offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_styles/panel = SubResource("3_resize_handle_style")
