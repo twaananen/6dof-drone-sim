@@ -647,6 +647,48 @@ func _on_control_message(message: Dictionary) -> void:
 			_last_status = message
 			if _active_template_name.is_empty():
 				_active_template_name = str(message.get("template_name", ""))
+		"inspect_tree":
+			_handle_inspect_tree(message)
+		"inspect_node":
+			_handle_inspect_node(message)
+
+
+func _resolve_inspect_node(path: String) -> Node:
+	if path == "/root":
+		return get_tree().root
+	var node: Node = get_node_or_null(NodePath(path))
+	if node == null:
+		node = get_tree().root.get_node_or_null(NodePath(path.trim_prefix("/root/")))
+	return node
+
+
+func _send_inspect_response(result_type: String, request_id: String, result: Variant) -> void:
+	if result is String:
+		control_client.send_message({"type": result_type, "request_id": request_id, "ok": false, "error": result})
+	else:
+		control_client.send_message({"type": result_type, "request_id": request_id, "ok": true, "result": result})
+
+
+func _handle_inspect_tree(message: Dictionary) -> void:
+	var request_id := str(message.get("request_id", ""))
+	var path_prefix := str(message.get("path_prefix", "/root"))
+	var max_depth := int(message.get("max_depth", 3))
+	var node := _resolve_inspect_node(path_prefix)
+	if node == null:
+		_send_inspect_response("inspect_tree_result", request_id, "Node not found: %s" % path_prefix)
+		return
+	_send_inspect_response("inspect_tree_result", request_id, SceneTreeInspector.walk_tree(node, max_depth))
+
+
+func _handle_inspect_node(message: Dictionary) -> void:
+	var request_id := str(message.get("request_id", ""))
+	var node_path := str(message.get("node_path", ""))
+	var properties: Array = message.get("properties", [])
+	var node := _resolve_inspect_node(node_path)
+	if node == null:
+		_send_inspect_response("inspect_node_result", request_id, "Node not found: %s" % node_path)
+		return
+	_send_inspect_response("inspect_node_result", request_id, SceneTreeInspector.inspect_node(node, properties))
 
 
 func _load_presets(presets: Array) -> void:

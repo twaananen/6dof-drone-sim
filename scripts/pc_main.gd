@@ -15,6 +15,7 @@ const SessionRunStore = preload("res://scripts/workflow/session_run_store.gd")
 
 @onready var telemetry_receiver: Node = $TelemetryReceiver
 @onready var control_server: Node = $ControlServer
+@onready var inspect_server: Node = $InspectServer
 @onready var backend: Node = $LinuxGamepadBackend
 @onready var discovery_beacon: Node = $DiscoveryBeacon
 @onready var quest_status_panel: QuestStatusPanel = $VBox/StatusPanel
@@ -56,6 +57,7 @@ func _ready() -> void:
 	control_server.message_received.connect(_on_control_message)
 	control_server.client_connected.connect(_send_initial_status)
 	control_server.client_disconnected.connect(_on_control_client_disconnected)
+	inspect_server.query_received.connect(_on_inspect_query)
 	workflow_editor.profile_applied.connect(_on_session_profile_applied)
 	workflow_editor.reload_requested.connect(_reload_session_profile)
 	workflow_run_panel.snapshot_requested.connect(_on_snapshot_requested)
@@ -204,6 +206,20 @@ func _on_control_message(message: Dictionary) -> void:
 			)
 		"export_session_report":
 			_export_session_report(str(message.get("note", "")))
+		"inspect_tree_result", "inspect_node_result":
+			if inspect_server != null:
+				inspect_server.deliver_response(message)
+
+
+func _on_inspect_query(message: Dictionary) -> void:
+	if control_server.has_client():
+		control_server.send_message(message)
+	else:
+		inspect_server.deliver_response({
+			"request_id": str(message.get("request_id", "")),
+			"ok": false,
+			"error": "No Quest connected",
+		})
 
 
 func _on_control_client_disconnected() -> void:

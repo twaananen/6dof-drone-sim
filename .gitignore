@@ -22,8 +22,9 @@ android/build/
 # Local binaries
 .local/
 
-# AI visual feedback screenshots
+# AI visual feedback
 .screenshots/
+.inspect/
 
 # Superpowers brainstorm sessions
 .superpowers/
