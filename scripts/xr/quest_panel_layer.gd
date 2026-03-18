@@ -39,9 +39,12 @@ var _active_pointer: Node3D
 var _manipulation_mode := ""
 var _drag_origin: Vector3 = Vector3.ZERO
 var _drag_normal: Vector3 = Vector3.FORWARD
-var _drag_offset: Vector3 = Vector3.ZERO
+var _drag_radius := 0.0
+var _drag_offset_quat := Quaternion.IDENTITY
+var _drag_initial_controller_dist := 0.0
 var _resize_sign := Vector2.ZERO
 var _resize_start_size := Vector2.ONE
+var _xr_camera: Node3D
 var _title_bar: Control
 var _top_left_handle: Control
 var _top_right_handle: Control
@@ -62,6 +65,7 @@ func _ready() -> void:
 	QuestRuntimeLog.info("UI_LAYER_VIEWPORT_ATTACHED", {
 		"viewport_path": str(_viewport.get_path()),
 	})
+	_xr_camera = get_parent().get_node_or_null("XRCamera3D")
 	_try_to_add_scene_root_to_viewport()
 	_update_sizes()
 	_cache_handles()
@@ -326,11 +330,23 @@ func _control_contains_point(control: Control, viewport_pos: Vector2) -> bool:
 
 
 func _begin_move(p_pointer: Node3D) -> void:
+	if _xr_camera == null:
+		return
+	var cam_pos := _xr_camera.global_position
+	var radius := cam_pos.distance_to(global_position)
+	var ptr_xform := p_pointer.global_transform
+	var ray_origin := ptr_xform.origin
+	var ray_dir := -ptr_xform.basis.z
+	var sphere_hit := _ray_sphere_exit(ray_origin, ray_dir, cam_pos, radius)
+	if not sphere_hit.is_finite():
+		return
 	_active_pointer = p_pointer
 	_manipulation_mode = ZONE_BODY
-	_drag_origin = global_position
-	_drag_normal = global_transform.basis.z.normalized()
-	_drag_offset = global_position - _intersect_to_global_pos(_prev_intersection)
+	_drag_radius = radius
+	var hit_dir := (sphere_hit - cam_pos).normalized()
+	var panel_dir := (global_position - cam_pos).normalized()
+	_drag_offset_quat = Quaternion(hit_dir, panel_dir)
+	_drag_initial_controller_dist = cam_pos.distance_to(ray_origin)
 	_cursor.visible = false
 
 
@@ -345,13 +361,23 @@ func _begin_resize(p_pointer: Node3D, zone: String) -> void:
 
 
 func _update_manipulation(ray_origin: Vector3, ray_direction: Vector3) -> void:
-	var point: Vector3 = _ray_plane_intersection(ray_origin, ray_direction, _drag_origin, _drag_normal)
-	if not point.is_finite():
-		return
-
 	if _manipulation_mode == ZONE_BODY:
-		global_position = point + _drag_offset
+		if _xr_camera == null:
+			return
+		var cam_pos := _xr_camera.global_position
+		var depth_delta := cam_pos.distance_to(ray_origin) - _drag_initial_controller_dist
+		var current_radius := maxf(_drag_radius + depth_delta, 0.1)
+		var sphere_hit := _ray_sphere_exit(ray_origin, ray_direction, cam_pos, current_radius)
+		if not sphere_hit.is_finite():
+			return
+		var hit_dir := (sphere_hit - cam_pos).normalized()
+		var panel_dir: Vector3 = _drag_offset_quat * hit_dir
+		global_position = cam_pos + panel_dir * current_radius
+		look_at(_xr_camera.global_position, Vector3.UP, true)
 	elif _manipulation_mode == "resize":
+		var point: Vector3 = _ray_plane_intersection(ray_origin, ray_direction, _drag_origin, _drag_normal)
+		if not point.is_finite():
+			return
 		var local_point: Vector2 = _global_to_local(point)
 		var start_half: Vector2 = _resize_start_size * 0.5
 		var scale_x: float = (local_point.x * _resize_sign.x) / maxf(start_half.x, 0.001)
@@ -402,3 +428,16 @@ func _ray_plane_intersection(ray_origin: Vector3, ray_direction: Vector3, plane_
 		return NO_RAY_INTERSECTION
 
 	return ray_origin + (ray_direction * distance)
+
+
+func _ray_sphere_exit(ray_origin: Vector3, ray_dir: Vector3, center: Vector3, radius: float) -> Vector3:
+	var v := ray_origin - center
+	var b := v.dot(ray_dir)
+	var c := v.dot(v) - radius * radius
+	var discriminant := b * b - c
+	if discriminant < 0.0:
+		return NO_RAY_INTERSECTION
+	var t := -b + sqrt(discriminant)
+	if t < 0.0:
+		return NO_RAY_INTERSECTION
+	return ray_origin + ray_dir * t
