@@ -11,8 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://6kuwje358g1p" path="res://scenes/shared/right_drone_controller.tscn" id="10_right_drone"]
 [ext_resource type="PackedScene" uid="uid://bx554c6mrerch" path="res://scenes/shared/flight_origin_indicator.tscn" id="11_origin_indicator"]
 [ext_resource type="PackedScene" uid="uid://d4nncnpji5kaq" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
-[ext_resource type="PackedScene" path="res://scenes/shared/quest_connection_layer.tscn" id="13_connection_layer"]
-[ext_resource type="PackedScene" path="res://scenes/shared/quest_session_layer.tscn" id="14_session_layer"]
+[ext_resource type="PackedScene" uid="uid://v3tle8368h3m" path="res://scenes/shared/quest_connection_layer.tscn" id="13_connection_layer"]
+[ext_resource type="PackedScene" uid="uid://82ma6up55f7b" path="res://scenes/shared/quest_session_layer.tscn" id="14_session_layer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -47,6 +47,12 @@ script = ExtResource("1_quest_main")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=132191149]
 environment = SubResource("3_environment")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1817563225]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+light_energy = 3.002
+light_indirect_energy = 1.899
+shadow_enabled = true
 
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1956195186]
 

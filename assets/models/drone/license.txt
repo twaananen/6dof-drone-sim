@@ -1,0 +1,11 @@
+Model Information:
+* title:	Eachine E58 Pocket Drone - Game Ready Asset
+* source:	https://sketchfab.com/3d-models/eachine-e58-pocket-drone-game-ready-asset-95c15555467b455ea9e2e923904e9b60
+* author:	the_Thorminator (https://sketchfab.com/the_Thorminator)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Eachine E58 Pocket Drone - Game Ready Asset" (https://sketchfab.com/3d-models/eachine-e58-pocket-drone-game-ready-asset-95c15555467b455ea9e2e923904e9b60) by the_Thorminator (https://sketchfab.com/the_Thorminator) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

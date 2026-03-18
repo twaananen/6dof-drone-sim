@@ -1,42 +1,8 @@
 [gd_scene format=3 uid="uid://cesq2u7fh05sp"]
 
-[sub_resource type="CylinderMesh" id="3_handle_mesh"]
-top_radius = 0.013
-bottom_radius = 0.02
-height = 0.19
-radial_segments = 18
-
-[sub_resource type="StandardMaterial3D" id="1_handle_material"]
-shading_mode = 0
-albedo_color = Color(0.979, 0.965, 0.874, 1)
-
-[sub_resource type="SphereMesh" id="4_tip_mesh"]
-radius = 0.025
-height = 0.05
-
-[sub_resource type="StandardMaterial3D" id="2_tip_material"]
-shading_mode = 0
-albedo_color = Color(0.631373, 0.952941, 0.933333, 1)
-
-[sub_resource type="TorusMesh" id="5_ring_mesh"]
-inner_radius = 0.013
-outer_radius = 0.018
-rings = 24
-ring_segments = 14
+[ext_resource type="PackedScene" uid="uid://duua12iuqjg60" path="res://assets/models/wand/scene.gltf" id="1_wand_model"]
 
 [node name="LeftWandController" type="Node3D" unique_id=636211407]
 
-[node name="Handle" type="MeshInstance3D" parent="." unique_id=1125769968]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.11)
-mesh = SubResource("3_handle_mesh")
-surface_material_override/0 = SubResource("1_handle_material")
-
-[node name="Tip" type="MeshInstance3D" parent="." unique_id=828958843]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012, -0.225)
-mesh = SubResource("4_tip_mesh")
-surface_material_override/0 = SubResource("2_tip_material")
-
-[node name="GuardRing" type="MeshInstance3D" parent="." unique_id=1299342804]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.008, -0.055)
-mesh = SubResource("5_ring_mesh")
-surface_material_override/0 = SubResource("2_tip_material")
+[node name="Model" parent="." unique_id=1047864137 instance=ExtResource("1_wand_model")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, -0.132)
