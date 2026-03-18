@@ -81,7 +81,7 @@ script = ExtResource("15_smooth_pivot")
 
 [node name="RightHand" type="XRController3D" parent="XROrigin3D" unique_id=1940137224]
 tracker = &"right_hand"
-pose = &"grip"
+pose = &"aim"
 
 [node name="FallbackMesh" type="MeshInstance3D" parent="XROrigin3D/RightHand" unique_id=2015807718]
 visible = false

@@ -66,3 +66,40 @@ func test_button_binding_maps_to_aux_button_output() -> void:
 
     assert_eq(pressed["aux_button_1"], 1.0)
     assert_eq(released["aux_button_1"], 0.0)
+
+
+func test_button_east_maps_to_aux_button_2() -> void:
+    var template := MappingTemplate.new()
+    var binding := MappingTemplate.default_binding("button_east", "absolute")
+    binding["range_min"] = 0.0
+    binding["range_max"] = 1.0
+    template.add_binding("aux_button_2", binding)
+
+    var engine := MappingEngine.new()
+    engine.set_template(template)
+
+    var pressed := engine.process({"button_east": 1.0}, 1.0 / 90.0)
+    var released := engine.process({"button_east": 0.0}, 1.0 / 90.0)
+
+    assert_eq(pressed["aux_button_2"], 1.0)
+    assert_eq(released["aux_button_2"], 0.0)
+
+
+func test_deadzone_filters_small_values() -> void:
+    var template := MappingTemplate.new()
+    var binding := MappingTemplate.default_binding("pose_yaw_deg", "absolute")
+    binding["range_min"] = -90.0
+    binding["range_max"] = 90.0
+    template.add_binding("yaw", binding)
+    template.outputs["yaw"]["deadzone"] = 0.05
+
+    var engine := MappingEngine.new()
+    engine.set_template(template)
+
+    # 2 degrees out of 90 normalizes to ~0.022, which is below 0.05 deadzone
+    var small := engine.process({"pose_yaw_deg": 2.0}, 1.0 / 90.0)
+    assert_almost_eq(small["yaw"], 0.0, 0.001)
+
+    # 10 degrees out of 90 normalizes to ~0.111, which is above 0.05 deadzone
+    var large := engine.process({"pose_yaw_deg": 10.0}, 1.0 / 90.0)
+    assert_gt(absf(large["yaw"]), 0.0)

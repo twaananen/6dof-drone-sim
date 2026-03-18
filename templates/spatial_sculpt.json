@@ -29,12 +29,12 @@
     "yaw": {
       "bindings": [
         {
-          "source": "pose_yaw_deg",
+          "source": "swing_yaw_deg",
           "mode": "absolute",
           "range_min": -70.0,
           "range_max": 70.0,
           "weight": 0.6,
-          "invert": false,
+          "invert": true,
           "smoothing": 0.02,
           "curve": "expo_soft"
         },
@@ -44,11 +44,12 @@
           "range_min": -2.0,
           "range_max": 2.0,
           "weight": 0.4,
-          "invert": false,
+          "invert": true,
           "smoothing": 0.02,
           "curve": "linear"
         }
-      ]
+      ],
+      "deadzone": 0.05
     },
     "pitch": {
       "bindings": [
@@ -58,21 +59,22 @@
           "range_min": -0.25,
           "range_max": 0.25,
           "weight": 0.5,
-          "invert": true,
+          "invert": false,
           "smoothing": 0.03,
           "curve": "linear"
         },
         {
-          "source": "pose_pitch_deg",
+          "source": "swing_pitch_deg",
           "mode": "absolute",
           "range_min": -30.0,
           "range_max": 30.0,
           "weight": 0.5,
-          "invert": true,
+          "invert": false,
           "smoothing": 0.02,
           "curve": "expo_soft"
         }
-      ]
+      ],
+      "deadzone": 0.05
     },
     "roll": {
       "bindings": [
@@ -87,7 +89,7 @@
           "curve": "linear"
         },
         {
-          "source": "pose_roll_deg",
+          "source": "twist_roll_deg",
           "mode": "absolute",
           "range_min": -30.0,
           "range_max": 30.0,
@@ -96,12 +98,41 @@
           "smoothing": 0.02,
           "curve": "expo_soft"
         }
-      ]
+      ],
+      "deadzone": 0.05
     },
     "aux_button_1": {
       "bindings": [
         {
           "source": "button_south",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.0,
+          "curve": "linear"
+        }
+      ]
+    },
+    "aux_button_2": {
+      "bindings": [
+        {
+          "source": "button_east",
+          "mode": "absolute",
+          "range_min": 0.0,
+          "range_max": 1.0,
+          "weight": 1.0,
+          "invert": false,
+          "smoothing": 0.0,
+          "curve": "linear"
+        }
+      ]
+    },
+    "aux_button_4": {
+      "bindings": [
+        {
+          "source": "button_thumbstick",
           "mode": "absolute",
           "range_min": 0.0,
           "range_max": 1.0,

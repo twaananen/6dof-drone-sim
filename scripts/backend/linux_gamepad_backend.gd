@@ -36,7 +36,8 @@ func push_state(mapped_outputs: Dictionary) -> void:
 	buf.big_endian = false
 	buf.put_data(MAGIC_TEXT.to_utf8_buffer())
 	for key in ["yaw", "throttle", "roll", "pitch", "aux_analog_1", "aux_analog_2"]:
-		buf.put_float(float(mapped_outputs.get(key, 0.0)))
+		var val := float(mapped_outputs.get(key, 0.0))
+		buf.put_float(val)
 	var buttons: int = 0
 	for i in range(4):
 		if mapped_outputs.get("aux_button_%d" % (i + 1), 0.0) >= 0.5:

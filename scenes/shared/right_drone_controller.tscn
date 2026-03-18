@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cxto67plul4at" path="res://assets/models/drone/scene.gltf" id="1_drone_model"]
 
 [node name="RightDroneController" type="Node3D" unique_id=1883261026]
-transform = Transform3D(1, 0, 0, 0, 0.49999985, 0.86602545, 0, -0.86602527, 0.49999997, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.9999998, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Model" parent="." unique_id=829639612 instance=ExtResource("1_drone_model")]
 transform = Transform3D(0.95772517, -0.21046266, -0.19613273, 0.14910416, 0.94618464, -0.28723267, 0.24602956, 0.24584574, 0.9375656, 0, 0, 0)

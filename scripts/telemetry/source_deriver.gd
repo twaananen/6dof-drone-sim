@@ -23,6 +23,7 @@ func derive_sources(state: Dictionary) -> Dictionary:
 	)
 	var basis: Basis = Basis(orientation)
 	var euler: Vector3 = basis.get_euler(EULER_ORDER_YXZ)
+	var swing_twist: Dictionary = _swing_twist_decompose(orientation, Vector3(0, 0, -1))
 	var buttons: int = int(state.get("buttons", 0))
 	var angvel: Vector3 = state.get("angular_velocity", Vector3.ZERO)
 	var linvel: Vector3 = state.get("linear_velocity", Vector3.ZERO)
@@ -32,6 +33,9 @@ func derive_sources(state: Dictionary) -> Dictionary:
 		"pose_pitch_deg": rad_to_deg(euler.x),
 		"pose_yaw_deg": rad_to_deg(euler.y),
 		"pose_roll_deg": rad_to_deg(euler.z),
+		"twist_roll_deg": swing_twist["twist_deg"],
+		"swing_pitch_deg": swing_twist["swing_pitch_deg"],
+		"swing_yaw_deg": swing_twist["swing_yaw_deg"],
 		"pos_x_m": position.x,
 		"pos_y_m": position.y,
 		"pos_z_m": position.z,
@@ -53,4 +57,29 @@ func derive_sources(state: Dictionary) -> Dictionary:
 		"button_north": 1.0 if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_NORTH) else 0.0,
 		"button_thumbstick": 1.0 if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_THUMBSTICK) else 0.0,
 		"button_menu": 1.0 if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_MENU) else 0.0,
+	}
+
+
+static func _swing_twist_decompose(q: Quaternion, twist_axis: Vector3) -> Dictionary:
+	var projection: float = Vector3(q.x, q.y, q.z).dot(twist_axis)
+	var twist := Quaternion(
+		twist_axis.x * projection,
+		twist_axis.y * projection,
+		twist_axis.z * projection,
+		q.w
+	)
+	var twist_len := twist.length()
+	if twist_len < 1e-6:
+		twist = Quaternion.IDENTITY
+	else:
+		twist = Quaternion(twist.x / twist_len, twist.y / twist_len, twist.z / twist_len, twist.w / twist_len)
+	var swing := q * twist.inverse()
+
+	var twist_angle := 2.0 * atan2(Vector3(twist.x, twist.y, twist.z).dot(twist_axis), twist.w)
+	var swing_euler := Basis(swing).get_euler(EULER_ORDER_YXZ)
+
+	return {
+		"twist_deg": rad_to_deg(twist_angle),
+		"swing_pitch_deg": rad_to_deg(swing_euler.x),
+		"swing_yaw_deg": rad_to_deg(swing_euler.y),
 	}
