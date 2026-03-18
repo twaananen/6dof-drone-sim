@@ -5,7 +5,9 @@ const QuestConnectionState = preload("res://scripts/network/quest_connection_sta
 const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
 const PanelPositionStore = preload("res://scripts/ui/panel_position_store.gd")
 
-const PANEL_KEY_UI := "quest_ui"
+const PANEL_KEY_FLIGHT := "flight"
+const PANEL_KEY_CONNECTION := "connection"
+const PANEL_KEY_SESSION := "session"
 const PANEL_KEY_TUTORIAL := "tutorial"
 
 const DEFAULT_CONTROL_PORT := 9101
@@ -24,6 +26,8 @@ const POSE_SNAPSHOT_INTERVAL_MSEC := 1000
 @onready var ui_pivot: Node3D = $XROrigin3D/QuestUiLayer
 @onready var quest_ui_layer: Node = $XROrigin3D/QuestUiLayer
 @onready var tutorial_ui_layer: Node3D = get_node_or_null("XROrigin3D/TutorialUiLayer") as Node3D
+@onready var connection_layer: Node3D = get_node_or_null("XROrigin3D/QuestConnectionLayer") as Node3D
+@onready var session_layer: Node3D = get_node_or_null("XROrigin3D/QuestSessionLayer") as Node3D
 @onready var left_hand: XRController3D = $XROrigin3D/LeftHand
 @onready var right_hand: XRController3D = $XROrigin3D/RightHand
 @onready var left_fallback_mesh: MeshInstance3D = $XROrigin3D/LeftHand/FallbackMesh
@@ -65,6 +69,8 @@ var integrator_slider: HSlider
 var output_preview_label: Label
 var workflow_diagnostics_label: Label
 var hide_tutorial_button: Button
+var show_connection_button: Button
+var show_session_button: Button
 
 var _active_template_name: String = ""
 var _last_status: Dictionary = {}
@@ -88,19 +94,31 @@ var _updating_passthrough_toggle: bool = false
 var _xr_interface: XRInterface
 var _panel_recentering_connected: bool = false
 var _panel_position_store := PanelPositionStore.new()
-var _ui_default_position: Vector3
-var _tutorial_default_position: Vector3
+var _managed_panels: Dictionary = {}
 var _last_pose_snapshot_msec: int = 0
 var _suppress_origin_indicator_until_release: bool = false
+
+
+func _register_panel(key: String, node: Node3D) -> void:
+	_managed_panels[key] = {
+		"node": node,
+		"default_offset": node.position - xr_camera.position,
+	}
+	if node.has_signal("manipulation_ended"):
+		node.manipulation_ended.connect(func(): _save_panel_position(node, key))
 
 
 func _ready() -> void:
 	_log_boot("READY_BEGIN", {
 		"scene": "quest_main",
 	})
-	_ui_default_position = ui_pivot.position - xr_camera.position
+	_register_panel(PANEL_KEY_FLIGHT, ui_pivot)
+	if connection_layer != null:
+		_register_panel(PANEL_KEY_CONNECTION, connection_layer)
+	if session_layer != null:
+		_register_panel(PANEL_KEY_SESSION, session_layer)
 	if tutorial_ui_layer != null:
-		_tutorial_default_position = tutorial_ui_layer.position - xr_camera.position
+		_register_panel(PANEL_KEY_TUTORIAL, tutorial_ui_layer)
 	if not _bind_ui_controls():
 		_log_error("QUEST_READY_ABORTED", {
 			"reason": "ui_bind_failed",
@@ -172,50 +190,12 @@ func _physics_process(_delta: float) -> void:
 
 func _bind_ui_controls() -> bool:
 	_log_boot("UI_BIND_BEGIN", {})
-	var quest_panel := quest_ui_layer.call("get_scene_root") as Control
-	if quest_panel == null:
-		var error_text := "Quest UI layer did not provide a Control root"
-		push_error(error_text)
-		_log_error("UI_BIND_FAILED", {
-			"error": error_text,
-		})
+	if not _bind_flight_controls():
 		return false
-
-	var base_path := "Panel/Margin/Scroll/VBox/"
-	status_label = _require_panel_node(quest_panel, base_path + "StatusLabel") as Label
-	passthrough_toggle = _require_panel_node(quest_panel, base_path + "PassthroughToggle") as BaseButton
-	connect_mode_select = _require_panel_node(quest_panel, base_path + "ConnectModeSelect") as OptionButton
-	manual_server_host_label = _require_panel_node(quest_panel, base_path + "ManualServerHostLabel") as Label
-	manual_server_host_edit = _require_panel_node(quest_panel, base_path + "ManualServerHostEdit") as LineEdit
-	apply_connection_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/ApplyConnectionButton") as Button
-	retry_connect_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RetryConnectButton") as Button
-	recenter_panel_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/RecenterPanelButton") as Button
-	show_tutorial_button = _require_panel_node(quest_panel, base_path + "ConnectionButtons/ShowTutorialButton") as Button
-	preset_select = _require_panel_node(quest_panel, base_path + "PresetSelect") as OptionButton
-	template_select = _require_panel_node(quest_panel, base_path + "TemplateSelect") as OptionButton
-	workflow_mode_select = _require_panel_node(quest_panel, base_path + "WorkflowModeSelect") as OptionButton
-	workflow_details_label = _require_panel_node(quest_panel, base_path + "WorkflowDetailsLabel") as Label
-	checklist_box = _require_panel_node(quest_panel, base_path + "ChecklistBox") as VBoxContainer
-	stream_client_label = _require_panel_node(quest_panel, base_path + "StreamClientLabel") as Label
-	stream_client_select = _require_panel_node(quest_panel, base_path + "StreamClientSelect") as OptionButton
-	run_label_edit = _require_panel_node(quest_panel, base_path + "RunLabelEdit") as LineEdit
-	latency_budget_spin = _require_panel_node(quest_panel, base_path + "LatencyBudgetSpin") as SpinBox
-	observed_latency_spin = _require_panel_node(quest_panel, base_path + "ObservedLatencySpin") as SpinBox
-	focus_loss_spin = _require_panel_node(quest_panel, base_path + "FocusLossSpin") as SpinBox
-	operator_note_edit = _require_panel_node(quest_panel, base_path + "OperatorNoteEdit") as TextEdit
-	apply_session_details_button = _require_panel_node(quest_panel, base_path + "ApplySessionDetailsButton") as Button
-	calibrate_button = _require_panel_node(quest_panel, base_path + "Buttons/CalibrateButton") as Button
-	recenter_button = _require_panel_node(quest_panel, base_path + "Buttons/RecenterButton") as Button
-	snapshot_note_edit = _require_panel_node(quest_panel, base_path + "SnapshotNoteEdit") as TextEdit
-	capture_snapshot_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/CaptureSnapshotButton") as Button
-	report_issue_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/ReportIssueButton") as Button
-	export_report_button = _require_panel_node(quest_panel, base_path + "SnapshotButtons/ExportReportButton") as Button
-	sensitivity_slider = _require_panel_node(quest_panel, base_path + "Tuning/SensitivitySlider") as HSlider
-	deadzone_slider = _require_panel_node(quest_panel, base_path + "Tuning/DeadzoneSlider") as HSlider
-	expo_slider = _require_panel_node(quest_panel, base_path + "Tuning/ExpoSlider") as HSlider
-	integrator_slider = _require_panel_node(quest_panel, base_path + "Tuning/IntegratorSlider") as HSlider
-	output_preview_label = _require_panel_node(quest_panel, base_path + "OutputPreviewLabel") as Label
-	workflow_diagnostics_label = _require_panel_node(quest_panel, base_path + "WorkflowDiagnosticsLabel") as Label
+	if not _bind_connection_controls():
+		return false
+	if not _bind_session_controls():
+		return false
 	if tutorial_ui_layer != null:
 		var tutorial_panel := tutorial_ui_layer.call("get_scene_root") as Control
 		if tutorial_panel == null:
@@ -226,10 +206,77 @@ func _bind_ui_controls() -> bool:
 		hide_tutorial_button = _require_panel_node(tutorial_panel, "Panel/Margin/Scroll/VBox/HideTutorialButton") as Button
 	if not _has_bound_ui_controls():
 		_log_error("UI_BIND_FAILED", {
-			"error": "Quest panel controls missing",
+			"error": "Panel controls missing",
 		})
 		return false
 	_log_boot("UI_BIND_OK", {})
+	return true
+
+
+func _bind_flight_controls() -> bool:
+	var panel := quest_ui_layer.call("get_scene_root") as Control
+	if panel == null:
+		_log_error("UI_BIND_FAILED", {"error": "Flight panel root missing"})
+		return false
+	var base_path := "Panel/Margin/Scroll/VBox/"
+	passthrough_toggle = _require_panel_node(panel, base_path + "PassthroughToggle") as BaseButton
+	template_select = _require_panel_node(panel, base_path + "TemplateSelect") as OptionButton
+	sensitivity_slider = _require_panel_node(panel, base_path + "Tuning/SensitivitySlider") as HSlider
+	deadzone_slider = _require_panel_node(panel, base_path + "Tuning/DeadzoneSlider") as HSlider
+	expo_slider = _require_panel_node(panel, base_path + "Tuning/ExpoSlider") as HSlider
+	integrator_slider = _require_panel_node(panel, base_path + "Tuning/IntegratorSlider") as HSlider
+	calibrate_button = _require_panel_node(panel, base_path + "Buttons/CalibrateButton") as Button
+	recenter_button = _require_panel_node(panel, base_path + "Buttons/RecenterButton") as Button
+	output_preview_label = _require_panel_node(panel, base_path + "OutputPreviewLabel") as Label
+	show_connection_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowConnectionButton") as Button
+	show_session_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowSessionButton") as Button
+	recenter_panel_button = _require_panel_node(panel, base_path + "PanelButtons/RecenterPanelButton") as Button
+	show_tutorial_button = _require_panel_node(panel, base_path + "PanelButtons/ShowTutorialButton") as Button
+	return true
+
+
+func _bind_connection_controls() -> bool:
+	if connection_layer == null:
+		return true
+	var panel := connection_layer.call("get_scene_root") as Control
+	if panel == null:
+		_log_error("UI_BIND_FAILED", {"error": "Connection panel root missing"})
+		return false
+	var base_path := "Panel/Margin/Scroll/VBox/"
+	connect_mode_select = _require_panel_node(panel, base_path + "ConnectModeSelect") as OptionButton
+	manual_server_host_label = _require_panel_node(panel, base_path + "ManualServerHostLabel") as Label
+	manual_server_host_edit = _require_panel_node(panel, base_path + "ManualServerHostEdit") as LineEdit
+	apply_connection_button = _require_panel_node(panel, base_path + "ConnectionButtons/ApplyConnectionButton") as Button
+	retry_connect_button = _require_panel_node(panel, base_path + "ConnectionButtons/RetryConnectButton") as Button
+	status_label = _require_panel_node(panel, base_path + "StatusLabel") as Label
+	return true
+
+
+func _bind_session_controls() -> bool:
+	if session_layer == null:
+		return true
+	var panel := session_layer.call("get_scene_root") as Control
+	if panel == null:
+		_log_error("UI_BIND_FAILED", {"error": "Session panel root missing"})
+		return false
+	var base_path := "Panel/Margin/Scroll/VBox/"
+	preset_select = _require_panel_node(panel, base_path + "PresetSelect") as OptionButton
+	workflow_mode_select = _require_panel_node(panel, base_path + "WorkflowModeSelect") as OptionButton
+	workflow_details_label = _require_panel_node(panel, base_path + "WorkflowDetailsLabel") as Label
+	checklist_box = _require_panel_node(panel, base_path + "ChecklistBox") as VBoxContainer
+	stream_client_label = _require_panel_node(panel, base_path + "StreamClientLabel") as Label
+	stream_client_select = _require_panel_node(panel, base_path + "StreamClientSelect") as OptionButton
+	run_label_edit = _require_panel_node(panel, base_path + "RunLabelEdit") as LineEdit
+	latency_budget_spin = _require_panel_node(panel, base_path + "LatencyBudgetSpin") as SpinBox
+	observed_latency_spin = _require_panel_node(panel, base_path + "ObservedLatencySpin") as SpinBox
+	focus_loss_spin = _require_panel_node(panel, base_path + "FocusLossSpin") as SpinBox
+	operator_note_edit = _require_panel_node(panel, base_path + "OperatorNoteEdit") as TextEdit
+	apply_session_details_button = _require_panel_node(panel, base_path + "ApplySessionDetailsButton") as Button
+	snapshot_note_edit = _require_panel_node(panel, base_path + "SnapshotNoteEdit") as TextEdit
+	capture_snapshot_button = _require_panel_node(panel, base_path + "SnapshotButtons/CaptureSnapshotButton") as Button
+	report_issue_button = _require_panel_node(panel, base_path + "SnapshotButtons/ReportIssueButton") as Button
+	export_report_button = _require_panel_node(panel, base_path + "SnapshotButtons/ExportReportButton") as Button
+	workflow_diagnostics_label = _require_panel_node(panel, base_path + "WorkflowDiagnosticsLabel") as Label
 	return true
 
 
@@ -237,38 +284,38 @@ func _wire_ui_signals() -> void:
 	calibrate_button.pressed.connect(func(): controller_reader.request_set_origin())
 	recenter_button.pressed.connect(func(): controller_reader.request_clear_origin())
 	recenter_panel_button.pressed.connect(_on_recenter_all_panels)
-	if quest_ui_layer.has_signal("manipulation_ended"):
-		quest_ui_layer.manipulation_ended.connect(func(): _save_panel_position(ui_pivot, PANEL_KEY_UI))
-	if tutorial_ui_layer != null and tutorial_ui_layer.has_signal("manipulation_ended"):
-		tutorial_ui_layer.manipulation_ended.connect(func(): _save_panel_position(tutorial_ui_layer, PANEL_KEY_TUTORIAL))
 	if tutorial_ui_layer != null:
 		show_tutorial_button.pressed.connect(_show_tutorial_panel)
 	if hide_tutorial_button != null:
 		hide_tutorial_button.pressed.connect(_hide_tutorial_panel)
+	show_connection_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_CONNECTION))
+	show_session_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_SESSION))
 	passthrough_toggle.toggled.connect(_on_passthrough_toggled)
-	connect_mode_select.item_selected.connect(_on_connect_mode_selected)
-	manual_server_host_edit.text_changed.connect(func(_new_text: String): _update_connection_controls())
-	apply_connection_button.pressed.connect(_on_apply_connection_pressed)
-	retry_connect_button.pressed.connect(_on_retry_connect_pressed)
-	preset_select.item_selected.connect(_on_preset_selected)
 	template_select.item_selected.connect(_on_template_selected)
-	workflow_mode_select.item_selected.connect(_on_workflow_mode_selected)
-	stream_client_select.item_selected.connect(_on_stream_client_selected)
-	apply_session_details_button.pressed.connect(_on_apply_session_details_pressed)
 	sensitivity_slider.value_changed.connect(_on_tuning_changed)
 	deadzone_slider.value_changed.connect(_on_tuning_changed)
 	expo_slider.value_changed.connect(_on_tuning_changed)
 	integrator_slider.value_changed.connect(_on_tuning_changed)
-	capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
-	report_issue_button.pressed.connect(_on_report_issue_pressed)
-	export_report_button.pressed.connect(_on_export_report_pressed)
+	if connection_layer != null:
+		connect_mode_select.item_selected.connect(_on_connect_mode_selected)
+		manual_server_host_edit.text_changed.connect(func(_new_text: String): _update_connection_controls())
+		apply_connection_button.pressed.connect(_on_apply_connection_pressed)
+		retry_connect_button.pressed.connect(_on_retry_connect_pressed)
+	if session_layer != null:
+		preset_select.item_selected.connect(_on_preset_selected)
+		workflow_mode_select.item_selected.connect(_on_workflow_mode_selected)
+		stream_client_select.item_selected.connect(_on_stream_client_selected)
+		apply_session_details_button.pressed.connect(_on_apply_session_details_pressed)
+		capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
+		report_issue_button.pressed.connect(_on_report_issue_pressed)
+		export_report_button.pressed.connect(_on_export_report_pressed)
 
 
 func _schedule_startup_recenter() -> void:
 	if _xr_interface == null or not _xr_interface.has_signal("session_begun"):
-		_restore_or_recenter_panel(ui_pivot, PANEL_KEY_UI, _ui_default_position)
-		if tutorial_ui_layer != null:
-			_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
+		for key in _managed_panels:
+			var info: Dictionary = _managed_panels[key]
+			_restore_or_recenter_panel(info["node"], key, info["default_offset"])
 		return
 	if _panel_recentering_connected:
 		return
@@ -281,9 +328,9 @@ func _schedule_startup_recenter() -> void:
 
 func _on_xr_session_begun() -> void:
 	await get_tree().process_frame
-	_restore_or_recenter_panel(ui_pivot, PANEL_KEY_UI, _ui_default_position)
-	if tutorial_ui_layer != null:
-		_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
+	for key in _managed_panels:
+		var info: Dictionary = _managed_panels[key]
+		_restore_or_recenter_panel(info["node"], key, info["default_offset"])
 
 
 func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
@@ -299,17 +346,28 @@ func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
 
 
 func _has_bound_ui_controls() -> bool:
-	return status_label != null \
-		and passthrough_toggle != null \
+	if not (passthrough_toggle != null \
+		and template_select != null \
+		and sensitivity_slider != null \
+		and deadzone_slider != null \
+		and expo_slider != null \
+		and integrator_slider != null \
+		and calibrate_button != null \
+		and recenter_button != null \
+		and output_preview_label != null \
+		and show_connection_button != null \
+		and show_session_button != null \
+		and recenter_panel_button != null \
+		and show_tutorial_button != null):
+		return false
+	if connection_layer != null and not (status_label != null \
 		and connect_mode_select != null \
 		and manual_server_host_label != null \
 		and manual_server_host_edit != null \
 		and apply_connection_button != null \
-		and retry_connect_button != null \
-		and recenter_panel_button != null \
-		and show_tutorial_button != null \
-		and preset_select != null \
-		and template_select != null \
+		and retry_connect_button != null):
+		return false
+	if session_layer != null and not (preset_select != null \
 		and workflow_mode_select != null \
 		and workflow_details_label != null \
 		and checklist_box != null \
@@ -321,21 +379,18 @@ func _has_bound_ui_controls() -> bool:
 		and focus_loss_spin != null \
 		and operator_note_edit != null \
 		and apply_session_details_button != null \
-		and calibrate_button != null \
-		and recenter_button != null \
 		and snapshot_note_edit != null \
 		and capture_snapshot_button != null \
 		and report_issue_button != null \
 		and export_report_button != null \
-		and sensitivity_slider != null \
-		and deadzone_slider != null \
-		and expo_slider != null \
-		and integrator_slider != null \
-		and output_preview_label != null \
-		and workflow_diagnostics_label != null
+		and workflow_diagnostics_label != null):
+		return false
+	return true
 
 
 func _load_connection_modes() -> void:
+	if connect_mode_select == null:
+		return
 	_updating_connection_mode_select = true
 	connect_mode_select.clear()
 	connect_mode_select.add_item("Auto Discovery")
@@ -571,11 +626,13 @@ func _save_panel_position(panel: Node3D, key: String) -> void:
 
 
 func _on_recenter_all_panels() -> void:
-	_place_panel(ui_pivot, _ui_default_position)
-	_panel_position_store.clear_offsets(PANEL_KEY_UI)
-	if tutorial_ui_layer != null:
-		_place_panel(tutorial_ui_layer, _tutorial_default_position)
-		_panel_position_store.clear_offsets(PANEL_KEY_TUTORIAL)
+	for key in _managed_panels:
+		var info: Dictionary = _managed_panels[key]
+		var node: Node3D = info["node"]
+		if not node.visible:
+			continue
+		_place_panel(node, info["default_offset"])
+		_panel_position_store.clear_offsets(key)
 	_log_info("UI_PANELS_RECENTERED_BY_USER", {})
 
 
@@ -583,7 +640,9 @@ func _show_tutorial_panel() -> void:
 	if tutorial_ui_layer == null:
 		return
 	tutorial_ui_layer.visible = true
-	_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
+	var info: Dictionary = _managed_panels.get(PANEL_KEY_TUTORIAL, {})
+	if not info.is_empty():
+		_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, info["default_offset"])
 	_refresh_tutorial_controls()
 
 
@@ -592,6 +651,16 @@ func _hide_tutorial_panel() -> void:
 		return
 	tutorial_ui_layer.visible = false
 	_refresh_tutorial_controls()
+
+
+func _toggle_panel(key: String) -> void:
+	var info: Dictionary = _managed_panels.get(key, {})
+	if info.is_empty():
+		return
+	var node: Node3D = info["node"]
+	node.visible = not node.visible
+	if node.visible:
+		_restore_or_recenter_panel(node, key, info["default_offset"])
 
 
 func _sync_passthrough_toggle() -> void:
@@ -710,6 +779,8 @@ func _handle_inspect_node(message: Dictionary) -> void:
 
 
 func _load_presets(presets: Array) -> void:
+	if preset_select == null:
+		return
 	_updating_preset_select = true
 	preset_select.clear()
 	if presets.is_empty():
@@ -723,6 +794,8 @@ func _load_presets(presets: Array) -> void:
 
 
 func _load_catalog(templates: Array) -> void:
+	if template_select == null:
+		return
 	var previous: String = _active_template_name
 	template_select.clear()
 	for item in templates:
@@ -829,6 +902,8 @@ func _on_tuning_changed(_value: float) -> void:
 
 
 func _update_status_label() -> void:
+	if output_preview_label == null and status_label == null:
+		return
 	var mode_label := str(_session_profile.get("mode_label", "Passthrough Standalone"))
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	var run_label := str(_session_profile.get("run_label", ""))
@@ -938,17 +1013,21 @@ func _update_status_label() -> void:
 		var debug_actions: Array = playbook.get("debug_actions", [])
 		if not debug_actions.is_empty():
 			lines.append("Debug: %s" % str(debug_actions[0]))
-	status_label.text = "\n".join(lines)
-	workflow_details_label.text = _format_session_playbook(playbook)
+	if status_label != null:
+		status_label.text = "\n".join(lines)
+	if workflow_details_label != null:
+		workflow_details_label.text = _format_session_playbook(playbook)
 	var outputs: Dictionary = _last_status.get("output_summary", {})
-	output_preview_label.text = "Outputs: T %.2f | Y %.2f | P %.2f | R %.2f | AUX1 %.0f" % [
-		float(outputs.get("throttle", 0.0)),
-		float(outputs.get("yaw", 0.0)),
-		float(outputs.get("pitch", 0.0)),
-		float(outputs.get("roll", 0.0)),
-		float(outputs.get("aux_button_1", 0.0)),
-	]
-	workflow_diagnostics_label.text = _format_session_diagnostics(_last_status.get("session_diagnostics", {}))
+	if output_preview_label != null:
+		output_preview_label.text = "Outputs: T %.2f | Y %.2f | P %.2f | R %.2f | AUX1 %.0f" % [
+			float(outputs.get("throttle", 0.0)),
+			float(outputs.get("yaw", 0.0)),
+			float(outputs.get("pitch", 0.0)),
+			float(outputs.get("roll", 0.0)),
+			float(outputs.get("aux_button_1", 0.0)),
+		]
+	if workflow_diagnostics_label != null:
+		workflow_diagnostics_label.text = _format_session_diagnostics(_last_status.get("session_diagnostics", {}), runtime_diagnostics)
 
 
 func _build_runtime_diagnostics() -> Dictionary:
@@ -1018,6 +1097,8 @@ func _push_runtime_diagnostics(force: bool) -> void:
 
 
 func _load_workflow_modes(modes: Array) -> void:
+	if workflow_mode_select == null:
+		return
 	_updating_workflow_select = true
 	workflow_mode_select.clear()
 	if modes.is_empty():
@@ -1033,6 +1114,8 @@ func _load_workflow_modes(modes: Array) -> void:
 
 
 func _load_stream_clients(stream_clients: Array) -> void:
+	if stream_client_select == null:
+		return
 	_updating_stream_client_select = true
 	stream_client_select.clear()
 	if stream_clients.is_empty():
@@ -1046,6 +1129,8 @@ func _load_stream_clients(stream_clients: Array) -> void:
 
 
 func _select_workflow_mode(mode: String) -> void:
+	if workflow_mode_select == null:
+		return
 	_updating_workflow_select = true
 	for index in range(workflow_mode_select.item_count):
 		if str(workflow_mode_select.get_item_metadata(index)) == mode:
@@ -1055,6 +1140,8 @@ func _select_workflow_mode(mode: String) -> void:
 
 
 func _select_stream_client(stream_client: String) -> void:
+	if stream_client_select == null:
+		return
 	_updating_stream_client_select = true
 	for index in range(stream_client_select.item_count):
 		if str(stream_client_select.get_item_metadata(index)) == stream_client:
@@ -1064,6 +1151,8 @@ func _select_stream_client(stream_client: String) -> void:
 
 
 func _load_session_details() -> void:
+	if run_label_edit == null:
+		return
 	_updating_session_detail_controls = true
 	run_label_edit.text = str(_session_profile.get("run_label", ""))
 	latency_budget_spin.value = int(_session_profile.get("latency_budget_ms", 0))
@@ -1074,6 +1163,8 @@ func _load_session_details() -> void:
 
 
 func _select_preset(preset_id: String) -> void:
+	if preset_select == null:
+		return
 	_updating_preset_select = true
 	for index in range(preset_select.item_count):
 		if str(preset_select.get_item_metadata(index)) == preset_id:
@@ -1083,6 +1174,8 @@ func _select_preset(preset_id: String) -> void:
 
 
 func _rebuild_manual_check_controls() -> void:
+	if checklist_box == null:
+		return
 	for child in checklist_box.get_children():
 		child.queue_free()
 	for check_info in _session_profile.get("manual_check_items", []):
@@ -1097,6 +1190,8 @@ func _rebuild_manual_check_controls() -> void:
 
 
 func _update_connection_controls() -> void:
+	if manual_server_host_label == null:
+		return
 	var manual_mode := _connection_mode == CONNECTION_MODE_MANUAL
 	manual_server_host_label.visible = manual_mode
 	manual_server_host_edit.visible = manual_mode
@@ -1108,6 +1203,10 @@ func _update_connection_controls() -> void:
 func _update_workflow_controls() -> void:
 	_update_connection_controls()
 	_refresh_tutorial_controls()
+	if passthrough_toggle != null:
+		passthrough_toggle.disabled = not bool(_xr_diagnostics.get("alpha_blend_supported", false))
+	if session_layer == null:
+		return
 	var stream_client_enabled := bool(_session_profile.get("stream_client_enabled", false))
 	stream_client_label.visible = stream_client_enabled
 	stream_client_select.visible = stream_client_enabled
@@ -1119,7 +1218,6 @@ func _update_workflow_controls() -> void:
 	observed_latency_spin.editable = control_client.is_socket_connected()
 	focus_loss_spin.editable = control_client.is_socket_connected()
 	operator_note_edit.editable = control_client.is_socket_connected()
-	passthrough_toggle.disabled = not bool(_xr_diagnostics.get("alpha_blend_supported", false))
 	apply_session_details_button.disabled = not control_client.is_socket_connected()
 	snapshot_note_edit.editable = control_client.is_socket_connected()
 	capture_snapshot_button.disabled = not control_client.is_socket_connected()
@@ -1242,7 +1340,7 @@ func _describe_origin_event(event_flags: int) -> String:
 	return "none"
 
 
-func _format_session_diagnostics(diagnostics: Dictionary) -> String:
+func _format_session_diagnostics(diagnostics: Dictionary, runtime_diagnostics: Dictionary) -> String:
 	var lines := PackedStringArray()
 	if diagnostics.is_empty():
 		lines.append("Checklist: waiting for desktop status.")
@@ -1258,7 +1356,6 @@ func _format_session_diagnostics(diagnostics: Dictionary) -> String:
 			elif state == "attention":
 				prefix = "Check"
 			lines.append("%s: %s" % [prefix, str(item.get("label", ""))])
-	var runtime_diagnostics := _build_runtime_diagnostics()
 	lines.append("Quest XR: %s" % str(runtime_diagnostics.get("xr_state", "xr_starting")))
 	lines.append("Quest Connect: %s" % str(runtime_diagnostics.get("discovery_state", QuestConnectionState.STATE_XR_STARTING)))
 	var connect_error := str(runtime_diagnostics.get("discovery_error", ""))
@@ -1302,6 +1399,8 @@ func _format_session_playbook(playbook: Dictionary) -> String:
 
 
 func _on_capture_snapshot_pressed() -> void:
+	if snapshot_note_edit == null:
+		return
 	var severity := str(_last_status.get("session_diagnostics", {}).get("severity", "attention"))
 	var kind := "checkpoint"
 	if severity == "ready":
@@ -1316,6 +1415,8 @@ func _on_capture_snapshot_pressed() -> void:
 
 
 func _on_report_issue_pressed() -> void:
+	if snapshot_note_edit == null:
+		return
 	control_client.send_message({
 		"type": "capture_run_snapshot",
 		"kind": "issue",
@@ -1326,6 +1427,8 @@ func _on_report_issue_pressed() -> void:
 
 
 func _on_export_report_pressed() -> void:
+	if snapshot_note_edit == null:
+		return
 	control_client.send_message({
 		"type": "export_session_report",
 		"note": snapshot_note_edit.text.strip_edges(),

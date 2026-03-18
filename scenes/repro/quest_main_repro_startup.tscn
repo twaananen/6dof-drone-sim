@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://gr8vnn8xys1x" path="res://scripts/network/control_client.gd" id="4_control_client"]
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
 [ext_resource type="Script" uid="uid://b5ccyb0sy2bbb" path="res://scripts/xr/quest_composition_layer_repro_quad.gd" id="6_repro_quad"]
-[ext_resource type="PackedScene" uid="uid://b75ra01cc46nc" path="res://scenes/quest_panel.tscn" id="7_quest_panel"]
+[ext_resource type="PackedScene" uid="uid://bmp738135p3wf" path="res://scenes/quest_flight_panel.tscn" id="7_quest_panel"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -72,7 +72,7 @@ gui_embed_subwindows = true
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
-[node name="QuestPanel" parent="XROrigin3D/QuestUiLayer/SubViewport" unique_id=1966624533 instance=ExtResource("7_quest_panel")]
+[node name="QuestFlightPanel" parent="XROrigin3D/QuestUiLayer/SubViewport" unique_id=1966624533 instance=ExtResource("7_quest_panel")]
 
 [node name="ControllerReader" type="Node" parent="." unique_id=54629680]
 script = ExtResource("2_controller_reader")

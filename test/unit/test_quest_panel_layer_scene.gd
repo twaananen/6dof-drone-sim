@@ -15,7 +15,7 @@ func test_quest_panel_layer_scene_instantiates_viewport_backed_control() -> void
 
 	assert_not_null(panel_layer.get_node("SubViewport"))
 	assert_not_null(panel_layer.call("get_scene_root"))
-	assert_not_null(panel_layer.get_node("SubViewport/QuestPanel/Chrome"))
+	assert_not_null(panel_layer.get_node("SubViewport/QuestFlightPanel/Chrome"))
 	assert_true(_has_boot_phase("UI_LAYER_READY"))
 	assert_true(_has_event("UI_LAYER_VIEWPORT_ATTACHED"))
 	assert_true(_has_event("UI_LAYER_SCENE_ATTACHED"))

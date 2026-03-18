@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://6kuwje358g1p" path="res://scenes/shared/right_drone_controller.tscn" id="10_right_drone"]
 [ext_resource type="PackedScene" uid="uid://bx554c6mrerch" path="res://scenes/shared/flight_origin_indicator.tscn" id="11_origin_indicator"]
 [ext_resource type="PackedScene" uid="uid://d4nncnpji5kaq" path="res://scenes/shared/quest_tutorial_layer.tscn" id="12_tutorial_layer"]
+[ext_resource type="PackedScene" path="res://scenes/shared/quest_connection_layer.tscn" id="13_connection_layer"]
+[ext_resource type="PackedScene" path="res://scenes/shared/quest_session_layer.tscn" id="14_session_layer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -86,6 +88,14 @@ transform = Transform3D(0.79277927, 0, 0.6095089, 0, 1, 0, -0.6095089, 0, 0.7927
 
 [node name="TutorialUiLayer" parent="XROrigin3D" unique_id=278361188 instance=ExtResource("12_tutorial_layer")]
 transform = Transform3D(0.14563411, 0, 0.9893385, 0, 1, 0, -0.9893385, 0, 0.14563411, -1.511, 1.4, 0.013790056)
+
+[node name="QuestConnectionLayer" parent="XROrigin3D" unique_id=1998497298 instance=ExtResource("13_connection_layer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -1.2)
+visible = false
+
+[node name="QuestSessionLayer" parent="XROrigin3D" unique_id=1633179666 instance=ExtResource("14_session_layer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1.4, -0.8)
+visible = false
 
 [node name="RightOriginIndicator" parent="XROrigin3D" unique_id=570705658 instance=ExtResource("11_origin_indicator")]
 

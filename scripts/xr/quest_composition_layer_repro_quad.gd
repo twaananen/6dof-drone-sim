@@ -13,4 +13,7 @@ func _ready() -> void:
 
 
 func get_scene_root() -> Control:
+	var root := get_node_or_null("SubViewport/QuestFlightPanel") as Control
+	if root != null:
+		return root
 	return get_node_or_null("SubViewport/QuestPanel") as Control

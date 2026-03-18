@@ -1,0 +1,250 @@
+[gd_scene format=3 uid="uid://bmp738135p3wf"]
+
+[ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
+
+[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
+bg_color = Color(0.101563, 0.210938, 0.160156, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
+bg_color = Color(0.074219, 0.175781, 0.128906, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
+bg_color = Color(0.921875, 0.953125, 0.925781, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0507813, 0.136719, 0.101563, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="QuestFlightPanel" type="Control" unique_id=944695423]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_vr_theme")
+
+[node name="Chrome" type="PanelContainer" parent="." unique_id=571309764]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("1_panel_chrome_style")
+
+[node name="Margin" type="MarginContainer" parent="Chrome" unique_id=1645896980]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Chrome/Margin" unique_id=306437939]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=1579130070]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Flight Controls"
+
+[node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=2099526745]
+layout_mode = 2
+text = "Trigger drag here. Grip anywhere to move. Corner pads resize."
+autowrap_mode = 3
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1614422789]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 88.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("2_panel_body_style")
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1482044192]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin" unique_id=258502013]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=550166648]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PassthroughToggle" type="CheckButton" parent="Panel/Margin/Scroll/VBox" unique_id=826369999]
+layout_mode = 2
+text = "Enable passthrough when available"
+
+[node name="TemplateLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1711488152]
+layout_mode = 2
+text = "Template"
+
+[node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1961154830]
+layout_mode = 2
+
+[node name="Tuning" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=554600950]
+layout_mode = 2
+
+[node name="SensitivityLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=378888523]
+layout_mode = 2
+text = "Sensitivity"
+
+[node name="SensitivitySlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1790650374]
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0
+
+[node name="DeadzoneLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=839137119]
+layout_mode = 2
+text = "Deadzone"
+
+[node name="DeadzoneSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1540309759]
+layout_mode = 2
+max_value = 0.4
+step = 0.01
+
+[node name="ExpoLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=692699857]
+layout_mode = 2
+text = "Expo"
+
+[node name="ExpoSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=515139164]
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+
+[node name="IntegratorLabel" type="Label" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1641164357]
+layout_mode = 2
+text = "Integrator Gain"
+
+[node name="IntegratorSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=48472001]
+layout_mode = 2
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.0
+
+[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1437898549]
+layout_mode = 2
+
+[node name="CalibrateButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=1351599119]
+layout_mode = 2
+text = "Set Flight Origin"
+
+[node name="RecenterButton" type="Button" parent="Panel/Margin/Scroll/VBox/Buttons" unique_id=618597200]
+layout_mode = 2
+text = "Clear Flight Origin"
+
+[node name="OutputPreviewLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1767143144]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Outputs: T 0.00 | Y 0.00 | P 0.00 | R 0.00"
+autowrap_mode = 3
+
+[node name="NavigationButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1101128224]
+layout_mode = 2
+
+[node name="ShowConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=968124691]
+layout_mode = 2
+text = "Connection"
+
+[node name="ShowSessionButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=1520660416]
+layout_mode = 2
+text = "Session"
+
+[node name="PanelButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=2088073709]
+layout_mode = 2
+
+[node name="RecenterPanelButton" type="Button" parent="Panel/Margin/Scroll/VBox/PanelButtons" unique_id=1270629397]
+layout_mode = 2
+text = "Recenter Panels"
+
+[node name="ShowTutorialButton" type="Button" parent="Panel/Margin/Scroll/VBox/PanelButtons" unique_id=1744808014]
+layout_mode = 2
+text = "Show Tutorial"
+
+[node name="ResizeTopLeftHandle" type="PanelContainer" parent="." unique_id=125376165]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+offset_left = 8.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=1101281764]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -52.0
+offset_top = 96.0
+offset_right = -8.0
+offset_bottom = 140.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1748716724]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -52.0
+offset_right = 52.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=975229920]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -52.0
+offset_top = -52.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")

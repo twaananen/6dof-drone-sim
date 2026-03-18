@@ -1,0 +1,189 @@
+[gd_scene format=3 uid="uid://ciuys3x533imy"]
+
+[ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
+
+[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
+bg_color = Color(0.101563, 0.210938, 0.160156, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
+bg_color = Color(0.074219, 0.175781, 0.128906, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.980469, 0.980469, 0.960938, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
+bg_color = Color(0.921875, 0.953125, 0.925781, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0507813, 0.136719, 0.101563, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="QuestConnectionPanel" type="Control" unique_id=1302406546]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_vr_theme")
+
+[node name="Chrome" type="PanelContainer" parent="." unique_id=2042280787]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("1_panel_chrome_style")
+
+[node name="Margin" type="MarginContainer" parent="Chrome" unique_id=1429988026]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Chrome/Margin" unique_id=1160599666]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=666137150]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Connection"
+
+[node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=1920713170]
+layout_mode = 2
+text = "Trigger drag here. Grip anywhere to move. Corner pads resize."
+autowrap_mode = 3
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1291591301]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 88.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("2_panel_body_style")
+
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=2138135931]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin" unique_id=18738102]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=590394527]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ConnectModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=644450090]
+layout_mode = 2
+text = "Connect Mode"
+
+[node name="ConnectModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=868712924]
+layout_mode = 2
+
+[node name="ManualServerHostLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1880091940]
+layout_mode = 2
+text = "Manual Server Host"
+
+[node name="ManualServerHostEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=1924447532]
+layout_mode = 2
+placeholder_text = "192.168.1.42"
+
+[node name="ConnectionButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1148143899]
+layout_mode = 2
+
+[node name="ApplyConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=348080624]
+layout_mode = 2
+text = "Apply Connection"
+
+[node name="RetryConnectButton" type="Button" parent="Panel/Margin/Scroll/VBox/ConnectionButtons" unique_id=1668225745]
+layout_mode = 2
+text = "Retry Connect"
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1389675186]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+text = "Starting Quest runtime..."
+autowrap_mode = 3
+
+[node name="ResizeTopLeftHandle" type="PanelContainer" parent="." unique_id=1135613315]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+offset_left = 8.0
+offset_top = 96.0
+offset_right = 52.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=1563143948]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -52.0
+offset_top = 96.0
+offset_right = -8.0
+offset_bottom = 140.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1924618908]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -52.0
+offset_right = 52.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
+
+[node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=1536155610]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -52.0
+offset_top = -52.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("3_resize_handle_style")
