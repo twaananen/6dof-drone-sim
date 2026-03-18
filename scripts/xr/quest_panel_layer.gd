@@ -1,5 +1,7 @@
 extends OpenXRCompositionLayerQuad
 
+signal manipulation_ended
+
 const NO_INTERSECTION := Vector2(-1.0, -1.0)
 const CURSOR_DISTANCE := 0.002
 const DOUBLE_CLICK_TIME := 400
@@ -391,10 +393,13 @@ func _update_manipulation(ray_origin: Vector3, ray_direction: Vector3) -> void:
 
 
 func _end_manipulation() -> void:
+	var was_move := _manipulation_mode == ZONE_BODY
 	_active_pointer = null
 	_manipulation_mode = ""
 	_resize_sign = Vector2.ZERO
 	_clear_pointer_if_idle()
+	if was_move:
+		manipulation_ended.emit()
 
 
 func _clear_pointer_if_idle() -> void:

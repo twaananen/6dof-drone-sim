@@ -3,6 +3,10 @@ extends Node3D
 const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
 const QuestConnectionState = preload("res://scripts/network/quest_connection_state.gd")
 const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
+const PanelPositionStore = preload("res://scripts/ui/panel_position_store.gd")
+
+const PANEL_KEY_UI := "quest_ui"
+const PANEL_KEY_TUTORIAL := "tutorial"
 
 const DEFAULT_CONTROL_PORT := 9101
 const DEFAULT_TELEMETRY_PORT := 9100
@@ -83,6 +87,9 @@ var _last_runtime_diagnostics_push_usec: int = 0
 var _updating_passthrough_toggle: bool = false
 var _xr_interface: XRInterface
 var _panel_recentering_connected: bool = false
+var _panel_position_store := PanelPositionStore.new()
+var _ui_default_position: Vector3
+var _tutorial_default_position: Vector3
 var _last_pose_snapshot_msec: int = 0
 var _suppress_origin_indicator_until_release: bool = false
 
@@ -91,6 +98,9 @@ func _ready() -> void:
 	_log_boot("READY_BEGIN", {
 		"scene": "quest_main",
 	})
+	_ui_default_position = ui_pivot.position - xr_camera.position
+	if tutorial_ui_layer != null:
+		_tutorial_default_position = tutorial_ui_layer.position - xr_camera.position
 	if not _bind_ui_controls():
 		_log_error("QUEST_READY_ABORTED", {
 			"reason": "ui_bind_failed",
@@ -226,7 +236,11 @@ func _bind_ui_controls() -> bool:
 func _wire_ui_signals() -> void:
 	calibrate_button.pressed.connect(func(): controller_reader.request_set_origin())
 	recenter_button.pressed.connect(func(): controller_reader.request_clear_origin())
-	recenter_panel_button.pressed.connect(_recenter_ui_panel)
+	recenter_panel_button.pressed.connect(_on_recenter_all_panels)
+	if quest_ui_layer.has_signal("manipulation_ended"):
+		quest_ui_layer.manipulation_ended.connect(func(): _save_panel_position(ui_pivot, PANEL_KEY_UI))
+	if tutorial_ui_layer != null and tutorial_ui_layer.has_signal("manipulation_ended"):
+		tutorial_ui_layer.manipulation_ended.connect(func(): _save_panel_position(tutorial_ui_layer, PANEL_KEY_TUTORIAL))
 	if tutorial_ui_layer != null:
 		show_tutorial_button.pressed.connect(_show_tutorial_panel)
 	if hide_tutorial_button != null:
@@ -252,9 +266,9 @@ func _wire_ui_signals() -> void:
 
 func _schedule_startup_recenter() -> void:
 	if _xr_interface == null or not _xr_interface.has_signal("session_begun"):
-		_recenter_ui_panel()
+		_restore_or_recenter_panel(ui_pivot, PANEL_KEY_UI, _ui_default_position)
 		if tutorial_ui_layer != null:
-			_recenter_tutorial_panel()
+			_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
 		return
 	if _panel_recentering_connected:
 		return
@@ -267,9 +281,9 @@ func _schedule_startup_recenter() -> void:
 
 func _on_xr_session_begun() -> void:
 	await get_tree().process_frame
-	_recenter_ui_panel()
+	_restore_or_recenter_panel(ui_pivot, PANEL_KEY_UI, _ui_default_position)
 	if tutorial_ui_layer != null:
-		_recenter_tutorial_panel()
+		_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
 
 
 func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
@@ -517,55 +531,59 @@ func _update_controller_visuals() -> void:
 			render_model_3d.visible = false
 
 
-func _recenter_ui_panel() -> void:
-	var camera_position := xr_camera.global_position
-	var camera_basis := xr_camera.global_transform.basis
-	if not camera_position.is_finite() or not camera_basis.is_finite():
+func _place_panel(panel: Node3D, offset: Vector3) -> void:
+	var cam_pos := xr_camera.global_position
+	if not cam_pos.is_finite():
 		_log_error("UI_PANEL_RECENTER_SKIPPED", {
 			"reason": "camera_pose_invalid",
 		})
 		return
-	var forward := -xr_camera.global_transform.basis.z
-	forward.y = 0.0
-	if is_zero_approx(forward.length_squared()):
-		forward = Vector3(0.0, 0.0, -1.0)
-	else:
-		forward = forward.normalized()
-	ui_pivot.global_position = xr_camera.global_position + (forward * 1.1) + Vector3(0.0, -0.12, 0.0)
-	ui_pivot.look_at(xr_camera.global_position, Vector3.UP, true)
-	_log_boot("UI_PANEL_RECENTERED", {
-		"position": [ui_pivot.global_position.x, ui_pivot.global_position.y, ui_pivot.global_position.z],
-	})
+	panel.global_position = cam_pos + offset
+	panel.look_at(cam_pos, Vector3.UP, true)
 
 
-func _recenter_tutorial_panel() -> void:
-	if tutorial_ui_layer == null:
-		return
-	var camera_position := xr_camera.global_position
-	var camera_basis := xr_camera.global_transform.basis
-	if not camera_position.is_finite() or not camera_basis.is_finite():
-		return
-	var forward := -xr_camera.global_transform.basis.z
-	forward.y = 0.0
-	if is_zero_approx(forward.length_squared()):
-		forward = Vector3(0.0, 0.0, -1.0)
+func _compute_camera_relative_offsets(panel: Node3D) -> Dictionary:
+	var delta := panel.global_position - xr_camera.global_position
+	return {"x": delta.x, "y": delta.y, "z": delta.z}
+
+
+func _restore_or_recenter_panel(panel: Node3D, key: String, default_offset: Vector3) -> void:
+	var saved: Variant = _panel_position_store.load_offsets(key)
+	if saved != null:
+		var offset := Vector3(
+			float(saved.get("x", 0.0)),
+			float(saved.get("y", 0.0)),
+			float(saved.get("z", 0.0)))
+		_place_panel(panel, offset)
+		_log_info("UI_PANEL_RESTORED", {"key": key})
 	else:
-		forward = forward.normalized()
-	var right := xr_camera.global_transform.basis.x
-	right.y = 0.0
-	if is_zero_approx(right.length_squared()):
-		right = Vector3.RIGHT
-	else:
-		right = right.normalized()
-	tutorial_ui_layer.global_position = xr_camera.global_position + (forward * 0.95) - (right * 0.5) + Vector3(0.0, 0.02, 0.0)
-	tutorial_ui_layer.look_at(xr_camera.global_position, Vector3.UP, true)
+		_place_panel(panel, default_offset)
+		_log_boot("UI_PANEL_RECENTERED", {
+			"key": key,
+			"position": [panel.global_position.x, panel.global_position.y, panel.global_position.z],
+		})
+
+
+func _save_panel_position(panel: Node3D, key: String) -> void:
+	var offsets := _compute_camera_relative_offsets(panel)
+	_panel_position_store.save_offsets(key, offsets)
+	_log_info("UI_PANEL_POSITION_SAVED", {"key": key})
+
+
+func _on_recenter_all_panels() -> void:
+	_place_panel(ui_pivot, _ui_default_position)
+	_panel_position_store.clear_offsets(PANEL_KEY_UI)
+	if tutorial_ui_layer != null:
+		_place_panel(tutorial_ui_layer, _tutorial_default_position)
+		_panel_position_store.clear_offsets(PANEL_KEY_TUTORIAL)
+	_log_info("UI_PANELS_RECENTERED_BY_USER", {})
 
 
 func _show_tutorial_panel() -> void:
 	if tutorial_ui_layer == null:
 		return
 	tutorial_ui_layer.visible = true
-	_recenter_tutorial_panel()
+	_restore_or_recenter_panel(tutorial_ui_layer, PANEL_KEY_TUTORIAL, _tutorial_default_position)
 	_refresh_tutorial_controls()
 
 

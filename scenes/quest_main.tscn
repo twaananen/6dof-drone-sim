@@ -49,6 +49,7 @@ environment = SubResource("3_environment")
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1956195186]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=731307555]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3531485, 0)
 
 [node name="LeftHand" type="XRController3D" parent="XROrigin3D" unique_id=1781806273]
 tracker = &"left_hand"
@@ -84,7 +85,7 @@ pose = &"aim"
 transform = Transform3D(0.79277927, 0, 0.6095089, 0, 1, 0, -0.6095089, 0, 0.79277927, -1.2115452, 1.4, -0.66928256)
 
 [node name="TutorialUiLayer" parent="XROrigin3D" unique_id=278361188 instance=ExtResource("12_tutorial_layer")]
-transform = Transform3D(0.14563411, 0, 0.9893385, 0, 1, 0, -0.9893385, 0, 0.14563411, -1.5112035, 1.3963404, -0.17230761)
+transform = Transform3D(0.14563411, 0, 0.9893385, 0, 1, 0, -0.9893385, 0, 0.14563411, -1.511, 1.4, 0.013790056)
 
 [node name="RightOriginIndicator" parent="XROrigin3D" unique_id=570705658 instance=ExtResource("11_origin_indicator")]
 
