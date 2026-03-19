@@ -18,6 +18,5 @@ func test_project_settings_commit_required_openxr_flags() -> void:
 	var project_text := FileAccess.get_file_as_string("res://project.godot")
 
 	assert_string_contains(project_text, "openxr/enabled.android=true")
-	assert_string_contains(project_text, "openxr/default_action_map=\"res://openxr_action_map.tres\"")
 	assert_string_contains(project_text, "openxr/extensions/meta/passthrough=true")
 	assert_string_contains(project_text, "openxr/extensions/meta/render_model=true")

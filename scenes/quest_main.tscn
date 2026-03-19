@@ -89,10 +89,6 @@ mesh = SubResource("BoxMesh_controller")
 
 [node name="ControllerVisual" parent="XROrigin3D/RightHand" unique_id=2004967626 instance=ExtResource("10_right_drone")]
 
-[node name="RightAim" type="XRController3D" parent="XROrigin3D" unique_id=115002]
-tracker = &"right_hand"
-pose = &"aim"
-
 [node name="QuestUiLayer" parent="XROrigin3D" unique_id=1465962986 instance=ExtResource("7_quest_panel_layer")]
 transform = Transform3D(0.79277927, 0, 0.6095089, 0, 1, 0, -0.6095089, 0, 0.79277927, -1.2115452, 1.4, -0.66928256)
 

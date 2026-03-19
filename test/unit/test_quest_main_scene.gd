@@ -21,7 +21,6 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_not_null(quest_main.get_node("XROrigin3D/LeftAim/SmoothPointer/LeftPointer"))
 	assert_not_null(quest_main.get_node("XROrigin3D/LeftAim/SmoothPointer/ControllerVisual"))
 	assert_not_null(quest_main.get_node("XROrigin3D/RightHand/ControllerVisual"))
-	assert_null(quest_main.get_node_or_null("XROrigin3D/RightAim/RightPointer"))
 	assert_null(quest_main.get_node_or_null("Backdrop"))
 	assert_not_null(quest_main.get_node("Floor"))
 	assert_null(quest_main.get_node_or_null("Background"))

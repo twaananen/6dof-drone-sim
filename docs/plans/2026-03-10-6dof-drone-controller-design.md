@@ -33,7 +33,7 @@ Quest 3 (Android / OpenXR / passthrough)
   ├─ Godot XR sender app
   │   ├─ Explicit OpenXR action map
   │   ├─ Local reference space
-  │   ├─ Grip-pose telemetry reader
+  │   ├─ Aim-pose telemetry reader
   │   ├─ Flight-origin set / clear events
   │   ├─ Grip clutch state (`control_active`)
   │   ├─ UDP raw telemetry sender (90 Hz target)
@@ -75,7 +75,7 @@ Linux PC
 
 - **PC-side mapping for Phase 1a**. Quest sends raw controller telemetry; mapping, tuning, logs, and gamepad injection happen on the PC.
 - **Linux-first backend**. Build a backend interface now, but only implement the Linux uinput helper in Phase 1a.
-- **Grip pose for flight**. The primary motion source uses the controller grip pose. Aim pose is reserved for left-hand UI pointing.
+- **Aim pose for flight**. The right-hand controller uses aim pose so `-Z` naturally points where the user aims, aligning with the drone's forward axis without needing a rotation offset. Left-hand aim pose is used for UI pointing.
 - **Local reference space**. This is the recommended OpenXR reference space for seated/vehicle experiences such as flight simulators.
 - **Two separate channels**. Raw telemetry uses UDP for low latency. Template/status uses a small reliable TCP channel.
 - **Grip is a clutch, not arm/disarm.** Holding right `grip_click` captures a fresh flight origin and enables motion control. Releasing it pauses motion outputs but keeps telemetry live. Right `A` is the default arm/disarm button path.
@@ -134,9 +134,12 @@ The PC derives a canonical set of sources from raw telemetry before templates ar
 
 ### Pose and motion sources
 
-- `pose_pitch_deg`
-- `pose_yaw_deg`
-- `pose_roll_deg`
+- `swing_pitch_deg`
+- `swing_yaw_deg`
+- `twist_roll_deg`
+- `pose_pitch_deg` (legacy, prefer swing/twist)
+- `pose_yaw_deg` (legacy, prefer swing/twist)
+- `pose_roll_deg` (legacy, prefer swing/twist)
 - `pos_x_m`
 - `pos_y_m`
 - `pos_z_m`
@@ -290,8 +293,8 @@ Phase 1a ships with seven bundled templates:
 The benchmark template is `rate_direct`:
 
 - throttle from `trigger`
-- yaw from `pose_yaw_deg`
-- pitch and roll from embodied wrist/controller motion
+- yaw from `swing_yaw_deg`
+- pitch and roll from angular velocity
 - no thumbstick-assisted fallback preset
 
 ## Project Structure

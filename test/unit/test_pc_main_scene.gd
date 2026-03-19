@@ -2,6 +2,15 @@ extends "res://addons/gut/test.gd"
 
 const RawControllerState = preload("res://scripts/telemetry/raw_controller_state.gd")
 
+var _test_port_base: int = 40000 + randi() % 10000
+
+
+func _assign_test_ports(pc_main: Node) -> void:
+	_test_port_base += 10
+	pc_main.get_node("TelemetryReceiver").listen_port = _test_port_base
+	pc_main.get_node("ControlServer").listen_port = _test_port_base + 1
+	pc_main.get_node("InspectServer").listen_port = _test_port_base + 2
+
 
 func test_pc_main_scene_wraps_left_column_in_scroll_container() -> void:
 	var scene: PackedScene = load("res://scenes/pc_main.tscn")
@@ -21,6 +30,7 @@ func test_pc_runtime_pauses_motion_outputs_but_preserves_aux_button_when_control
 	assert_not_null(scene)
 
 	var pc_main := scene.instantiate()
+	_assign_test_ports(pc_main)
 	add_child_autofree(pc_main)
 	await wait_process_frames(1)
 
@@ -46,6 +56,7 @@ func test_pc_runtime_ignores_origin_capture_when_tracking_is_invalid() -> void:
 	assert_not_null(scene)
 
 	var pc_main := scene.instantiate()
+	_assign_test_ports(pc_main)
 	add_child_autofree(pc_main)
 	await wait_process_frames(1)
 
