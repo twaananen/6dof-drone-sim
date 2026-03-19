@@ -2,6 +2,7 @@ extends Control
 
 const MappingEngine = preload("res://scripts/mapping/mapping_engine.gd")
 const MappingTemplate = preload("res://scripts/mapping/mapping_template.gd")
+const TemplateSummaryFormatter = preload("res://scripts/mapping/template_summary_formatter.gd")
 const FailsafeSupervisor = preload("res://scripts/mapping/failsafe_supervisor.gd")
 const SourceDeriver = preload("res://scripts/telemetry/source_deriver.gd")
 const TemplateManager = preload("res://scripts/ui/template_manager.gd")
@@ -30,6 +31,7 @@ var _source_deriver: SourceDeriver = SourceDeriver.new()
 var _mapping_engine: MappingEngine = MappingEngine.new()
 var _failsafe: FailsafeSupervisor = FailsafeSupervisor.new()
 var _template_manager: TemplateManager = TemplateManager.new()
+var _template_summary_formatter := TemplateSummaryFormatter.new()
 var _session_baseline_comparator: SessionBaselineComparator = SessionBaselineComparator.new()
 var _session_store: SessionProfileStore = SessionProfileStore.new()
 var _session_report_exporter: SessionReportExporter = SessionReportExporter.new()
@@ -70,9 +72,9 @@ func _ready() -> void:
 	workflow_run_panel.set_last_report_export(_last_report_export)
 	_reload_session_profile()
 
-	var template_names: PackedStringArray = _template_manager.list_names()
-	if template_names.size() > 0:
-		var template: MappingTemplate = _template_manager.load_template(template_names[0])
+	var template_ids: PackedStringArray = _template_manager.list_ids()
+	if template_ids.size() > 0:
+		var template: MappingTemplate = _template_manager.load_template(template_ids[0])
 		if template != null:
 			_apply_template(template)
 
@@ -151,7 +153,7 @@ func _on_template_saved(template: MappingTemplate) -> void:
 	_apply_template(template)
 
 
-func _on_template_deleted(_template_name: String) -> void:
+func _on_template_deleted(_template_id: String) -> void:
 	_template_manager.refresh()
 	_send_initial_status()
 
@@ -165,10 +167,38 @@ func _on_control_message(message: Dictionary) -> void:
 			_quest_runtime_diagnostics = message.get("diagnostics", {}).duplicate(true)
 			_send_status_update()
 		"select_template":
-			var name: String = str(message.get("template_name", ""))
-			var template: MappingTemplate = _template_manager.load_template(name)
+			var template_id: String = str(message.get("template_id", ""))
+			var template: MappingTemplate = _template_manager.load_template(template_id)
 			if template != null:
 				_apply_template(template)
+		"duplicate_template":
+			var duplicate := _template_manager.copy_to_user_template(str(message.get("template_id", "")))
+			if duplicate != null:
+				_apply_template(duplicate)
+				_send_initial_status()
+		"create_blank_template":
+			var blank := _template_manager.create_blank_template(str(message.get("display_name", "New Template")))
+			_apply_template(blank)
+			_send_initial_status()
+		"apply_template":
+			var template := MappingTemplate.new()
+			template.from_dict(message.get("template", {}))
+			_apply_template(template)
+		"save_template":
+			var template := MappingTemplate.new()
+			template.from_dict(message.get("template", {}))
+			if _template_manager.save_user_template(template) == OK:
+				_template_manager.refresh()
+				_apply_template(template)
+		"delete_template":
+			if _template_manager.delete_user_template(str(message.get("template_id", ""))) == OK:
+				_template_manager.refresh()
+				var template_ids: PackedStringArray = _template_manager.list_ids()
+				if not template_ids.is_empty():
+					var fallback := _template_manager.load_template(template_ids[0])
+					if fallback != null:
+						_apply_template(fallback)
+				_send_initial_status()
 		"apply_tuning":
 			_apply_global_tuning(message.get("settings", {}))
 		"set_session_mode":
@@ -253,7 +283,7 @@ func _send_initial_status() -> void:
 	})
 	control_server.send_message({
 		"type": "template_catalog",
-		"templates": _template_manager.list_names(),
+		"templates": _template_manager.list_templates(),
 	})
 	_send_session_profile()
 	_send_status_update()
@@ -273,7 +303,9 @@ func _send_status_update() -> void:
 		return
 	control_server.send_message({
 		"type": "active_template",
-		"template_name": _active_template.template_name if _active_template != null else "",
+		"template_id": _active_template.template_id if _active_template != null else "",
+		"template_summary": _active_template_summary(),
+		"template": _active_template.to_dict() if _active_template != null else {},
 	})
 	var status_payload := _build_status_payload()
 	status_payload["type"] = "status"
@@ -311,7 +343,11 @@ func _summarize_outputs(outputs: Dictionary) -> Dictionary:
 func _build_status_payload() -> Dictionary:
 	var payload := {
 		"connected": control_server.has_client(),
-		"template_name": _active_template.template_name if _active_template != null else "",
+		"template_id": _active_template.template_id if _active_template != null else "",
+		"template_name": _active_template.display_name if _active_template != null else "",
+		"template_slug": _active_template.slug if _active_template != null else "",
+		"template_summary": _active_template_summary(),
+		"template": _active_template.to_dict() if _active_template != null else {},
 		"failsafe_active": _failsafe.is_active(),
 		"packets_received": telemetry_receiver.packets_received,
 		"packets_dropped": telemetry_receiver.packets_dropped,
@@ -350,6 +386,12 @@ func _build_status_payload() -> Dictionary:
 		_session_run_history
 	)
 	return payload
+
+
+func _active_template_summary() -> Dictionary:
+	if _active_template == null:
+		return {}
+	return _template_summary_formatter.build_summary(_active_template)
 
 
 func _neutralize_motion_outputs(outputs: Dictionary) -> Dictionary:

@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://bt3ybne07kbhj"]
+
+[ext_resource type="Script" uid="uid://devixte28xcgr" path="res://scripts/xr/quest_panel_layer.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://c8sue43vq0vpg" path="res://scenes/shared/template_structured_editor.tscn" id="2"]
+
+[sub_resource type="SphereMesh" id="1"]
+radius = 0.008
+height = 0.016
+
+[sub_resource type="StandardMaterial3D" id="2"]
+resource_local_to_scene = true
+transparency = 1
+shading_mode = 0
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(1, 1, 1, 0.92)
+
+[node name="QuestTemplateEditorLayer" type="OpenXRCompositionLayerQuad" unique_id=1044644285 groups=["ui_layer"]]
+quad_size = Vector2(0.92, 1.1)
+script = ExtResource("1")
+scene = ExtResource("2")
+
+[node name="Cursor" type="MeshInstance3D" parent="." unique_id=439936085]
+visible = false
+mesh = SubResource("1")
+surface_material_override/0 = SubResource("2")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1339548607]
+disable_3d = true
+gui_embed_subwindows = true
+size = Vector2i(1792, 2144)
+render_target_update_mode = 4

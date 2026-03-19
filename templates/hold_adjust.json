@@ -1,107 +1,140 @@
 {
-  "template_name": "hold_adjust",
-  "description": "Set-and-hold template using integrator bindings for relaxed hand repositioning.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "trigger",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ]
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "swing_yaw_deg",
-          "mode": "integrator",
-          "range_min": -45.0,
-          "range_max": 45.0,
-          "weight": 0.9,
-          "invert": true,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "swing_pitch_deg",
-          "mode": "integrator",
-          "range_min": -35.0,
-          "range_max": 35.0,
-          "weight": 0.9,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "twist_roll_deg",
-          "mode": "integrator",
-          "range_min": -35.0,
-          "range_max": 35.0,
-          "weight": 0.9,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.hold_adjust",
+	"slug": "hold_adjust",
+	"display_name": "Hold Adjust",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Changing controller attitude sets and holds stick deflection so you can relax or reposition your hand.",
+	"control_scheme": "latched_attitude",
+	"difficulty": "intermediate",
+	"betaflight_recommendation": {
+		"recommended": ["Angle"],
+		"acceptable": ["Horizon"],
+		"avoid": ["Acro/Rate", "Acro Trainer"],
+		"notes": "Best when the quad self-levels after each latched input change."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Level"],
+		"acceptable": ["Limited Acro"],
+		"avoid": ["Acro", "Full Assist"],
+		"notes": "Use assisted flight so the held stick values represent a stable attitude request."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": ["Hold Altitude"],
+		"avoid": [],
+		"notes": "Altitude assist can make the latched attitude workflow easier to learn."
+	},
+	"warnings": [
+		"Outputs stay held until you counter-adjust or reset the flight origin.",
+		"Avoid Acro; latched stick deflection becomes continuous rotation there."
+	],
+	"usage_tips": [
+		"Make short deliberate hand adjustments instead of holding a big tilt.",
+		"Release the clutch and recentre your hand whenever the held command feels offset."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "trigger",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				}
+			]
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "swing_yaw_deg",
+					"mode": "integrator",
+					"range_min": -40.0,
+					"range_max": 40.0,
+					"weight": 0.7,
+					"invert": true,
+					"smoothing": 0.03,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "swing_pitch_deg",
+					"mode": "integrator",
+					"range_min": -28.0,
+					"range_max": 28.0,
+					"weight": 0.75,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "twist_roll_deg",
+					"mode": "integrator",
+					"range_min": -28.0,
+					"range_max": 28.0,
+					"weight": 0.75,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

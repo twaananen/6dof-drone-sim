@@ -1,107 +1,140 @@
 {
-  "template_name": "impulse_flick",
-  "description": "Impulse-style control using angular-velocity spikes and integrator hold.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "trigger",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.01,
-          "curve": "linear"
-        }
-      ]
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "angvel_y_rad_s",
-          "mode": "integrator",
-          "range_min": -3.0,
-          "range_max": 3.0,
-          "weight": 1.2,
-          "invert": true,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "angvel_x_rad_s",
-          "mode": "integrator",
-          "range_min": -3.0,
-          "range_max": 3.0,
-          "weight": 1.2,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "angvel_z_rad_s",
-          "mode": "integrator",
-          "range_min": -3.0,
-          "range_max": 3.0,
-          "weight": 1.2,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.impulse_flick",
+	"slug": "impulse_flick",
+	"display_name": "Impulse Flick",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Fast controller flicks step the held output so each impulse nudges the drone into a new attitude request.",
+	"control_scheme": "impulse_latched",
+	"difficulty": "advanced",
+	"betaflight_recommendation": {
+		"recommended": ["Angle"],
+		"acceptable": ["Horizon"],
+		"avoid": ["Acro/Rate", "Acro Trainer"],
+		"notes": "Treat the flick as a way to set a new attitude request, not a sustained rate input."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Level"],
+		"acceptable": ["Limited Acro"],
+		"avoid": ["Acro", "Full Assist"],
+		"notes": "Limited Acro is acceptable for experiments, but pure Acro becomes too easy to over-command."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": [],
+		"avoid": ["Hold Altitude"],
+		"notes": "The template already uses stepwise control; extra altitude assist tends to blur the feedback."
+	},
+	"warnings": [
+		"Flick magnitude changes the held output, not just the instant you move.",
+		"Over-aggressive wrist snaps can quickly saturate pitch and roll."
+	],
+	"usage_tips": [
+		"Use small repeatable snaps instead of large swings.",
+		"Counter-flick to remove held output before landing."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "trigger",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			]
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "angvel_y_rad_s",
+					"mode": "integrator",
+					"range_min": -2.2,
+					"range_max": 2.2,
+					"weight": 0.8,
+					"invert": true,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "angvel_x_rad_s",
+					"mode": "integrator",
+					"range_min": -2.2,
+					"range_max": 2.2,
+					"weight": 0.85,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "angvel_z_rad_s",
+					"mode": "integrator",
+					"range_min": -2.2,
+					"range_max": 2.2,
+					"weight": 0.85,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.08
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

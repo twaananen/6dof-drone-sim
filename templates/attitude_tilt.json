@@ -1,107 +1,140 @@
 {
-  "template_name": "attitude_tilt",
-  "description": "Simple embodied tilt mapping for intuitive angle-style flight.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "trigger",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.01,
-          "curve": "linear"
-        }
-      ]
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "swing_yaw_deg",
-          "mode": "absolute",
-          "range_min": -70.0,
-          "range_max": 70.0,
-          "weight": 1.0,
-          "invert": true,
-          "smoothing": 0.01,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "swing_pitch_deg",
-          "mode": "absolute",
-          "range_min": -45.0,
-          "range_max": 45.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.01,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "twist_roll_deg",
-          "mode": "absolute",
-          "range_min": -45.0,
-          "range_max": 45.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.01,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.attitude_tilt",
+	"slug": "attitude_tilt",
+	"display_name": "Attitude Tilt",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Absolute hand tilt maps directly to stick deflection for self-leveling flight.",
+	"control_scheme": "absolute_attitude",
+	"difficulty": "beginner",
+	"betaflight_recommendation": {
+		"recommended": ["Angle"],
+		"acceptable": ["Horizon"],
+		"avoid": ["Acro/Rate", "Acro Trainer"],
+		"notes": "Best when the flight controller is responsible for self-leveling."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Level"],
+		"acceptable": ["Full Assist", "Limited Acro"],
+		"avoid": ["Acro"],
+		"notes": "Use the self-leveling modes first; Acro over-rotates too easily with absolute tilt."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": ["Hold Altitude"],
+		"avoid": [],
+		"notes": "Hold Altitude can reduce workload while learning the tilt mapping."
+	},
+	"warnings": [
+		"Set flight origin from a comfortable neutral pose before takeoff.",
+		"Any physical tilt offset becomes steady stick deflection until you recenter."
+	],
+	"usage_tips": [
+		"Use trigger for throttle and keep the controller close to neutral when hovering.",
+		"Start with gentle pitch and roll motions to calibrate your hand range."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "trigger",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				}
+			]
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "swing_yaw_deg",
+					"mode": "absolute",
+					"range_min": -60.0,
+					"range_max": 60.0,
+					"weight": 1.0,
+					"invert": true,
+					"smoothing": 0.03,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.06
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "swing_pitch_deg",
+					"mode": "absolute",
+					"range_min": -30.0,
+					"range_max": 30.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.06
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "twist_roll_deg",
+					"mode": "absolute",
+					"range_min": -35.0,
+					"range_max": 35.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.06
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

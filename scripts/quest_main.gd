@@ -1,5 +1,6 @@
 extends Node3D
 
+const MappingTemplate = preload("res://scripts/mapping/mapping_template.gd")
 const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
 const QuestConnectionState = preload("res://scripts/network/quest_connection_state.gd")
 const OpenXRBootstrap = preload("res://scripts/xr/openxr_bootstrap.gd")
@@ -9,6 +10,9 @@ const PANEL_KEY_FLIGHT := "flight"
 const PANEL_KEY_CONNECTION := "connection"
 const PANEL_KEY_SESSION := "session"
 const PANEL_KEY_TUTORIAL := "tutorial"
+const PANEL_KEY_TEMPLATE_LIBRARY := "template_library"
+const PANEL_KEY_TEMPLATE_GUIDE := "template_guide"
+const PANEL_KEY_TEMPLATE_EDITOR := "template_editor"
 
 const DEFAULT_CONTROL_PORT := 9101
 const DEFAULT_TELEMETRY_PORT := 9100
@@ -28,6 +32,9 @@ const POSE_SNAPSHOT_INTERVAL_MSEC := 1000
 @onready var tutorial_ui_layer: Node3D = get_node_or_null("XROrigin3D/TutorialUiLayer") as Node3D
 @onready var connection_layer: Node3D = get_node_or_null("XROrigin3D/QuestConnectionLayer") as Node3D
 @onready var session_layer: Node3D = get_node_or_null("XROrigin3D/QuestSessionLayer") as Node3D
+@onready var template_library_layer: Node3D = get_node_or_null("XROrigin3D/QuestTemplateLibraryLayer") as Node3D
+@onready var template_guide_layer: Node3D = get_node_or_null("XROrigin3D/QuestTemplateGuideLayer") as Node3D
+@onready var template_editor_layer: Node3D = get_node_or_null("XROrigin3D/QuestTemplateEditorLayer") as Node3D
 @onready var left_hand: XRController3D = $XROrigin3D/LeftHand
 @onready var right_hand: XRController3D = $XROrigin3D/RightHand
 @onready var left_fallback_mesh: MeshInstance3D = $XROrigin3D/LeftHand/FallbackMesh
@@ -44,6 +51,8 @@ var show_tutorial_button: Button
 var passthrough_toggle: BaseButton
 var preset_select: OptionButton
 var template_select: OptionButton
+var template_summary_label: Label
+var template_modes_label: Label
 var status_label: Label
 var workflow_mode_select: OptionButton
 var workflow_details_label: Label
@@ -71,8 +80,19 @@ var workflow_diagnostics_label: Label
 var hide_tutorial_button: Button
 var show_connection_button: Button
 var show_session_button: Button
+var show_library_button: Button
+var show_guide_button: Button
+var show_editor_button: Button
 
-var _active_template_name: String = ""
+var template_library_panel: TemplateLibraryPanel
+var template_guide_panel: TemplateGuidePanel
+var template_editor_panel: TemplateStructuredEditor
+
+var _active_template_id: String = ""
+var _active_template_summary: Dictionary = {}
+var _active_template_payload: Dictionary = {}
+var _template_catalog: Array = []
+var _template_editor_loaded_id: String = ""
 var _last_status: Dictionary = {}
 var _last_local_controller_state: Dictionary = {}
 var _session_profile: Dictionary = SessionProfile.new().to_dict()
@@ -117,11 +137,22 @@ func _ready() -> void:
 		_register_panel(PANEL_KEY_CONNECTION, connection_layer)
 	if session_layer != null:
 		_register_panel(PANEL_KEY_SESSION, session_layer)
+	if template_library_layer != null:
+		_register_panel(PANEL_KEY_TEMPLATE_LIBRARY, template_library_layer)
+	if template_guide_layer != null:
+		_register_panel(PANEL_KEY_TEMPLATE_GUIDE, template_guide_layer)
+	if template_editor_layer != null:
+		_register_panel(PANEL_KEY_TEMPLATE_EDITOR, template_editor_layer)
 	if tutorial_ui_layer != null:
 		_register_panel(PANEL_KEY_TUTORIAL, tutorial_ui_layer)
 	if not _bind_ui_controls():
 		_log_error("QUEST_READY_ABORTED", {
 			"reason": "ui_bind_failed",
+		})
+		return
+	if not _bind_template_workbench_panels():
+		_log_error("QUEST_READY_ABORTED", {
+			"reason": "template_workbench_bind_failed",
 		})
 		return
 	_wire_ui_signals()
@@ -221,6 +252,8 @@ func _bind_flight_controls() -> bool:
 	var base_path := "Panel/Margin/Scroll/VBox/"
 	passthrough_toggle = _require_panel_node(panel, base_path + "PassthroughToggle") as BaseButton
 	template_select = _require_panel_node(panel, base_path + "TemplateSelect") as OptionButton
+	template_summary_label = _require_panel_node(panel, base_path + "TemplateSummaryLabel") as Label
+	template_modes_label = _require_panel_node(panel, base_path + "TemplateModesLabel") as Label
 	sensitivity_slider = _require_panel_node(panel, base_path + "Tuning/SensitivitySlider") as HSlider
 	deadzone_slider = _require_panel_node(panel, base_path + "Tuning/DeadzoneSlider") as HSlider
 	expo_slider = _require_panel_node(panel, base_path + "Tuning/ExpoSlider") as HSlider
@@ -228,6 +261,9 @@ func _bind_flight_controls() -> bool:
 	calibrate_button = _require_panel_node(panel, base_path + "Buttons/CalibrateButton") as Button
 	recenter_button = _require_panel_node(panel, base_path + "Buttons/RecenterButton") as Button
 	output_preview_label = _require_panel_node(panel, base_path + "OutputPreviewLabel") as Label
+	show_library_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowLibraryButton") as Button
+	show_guide_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowGuideButton") as Button
+	show_editor_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowEditorButton") as Button
 	show_connection_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowConnectionButton") as Button
 	show_session_button = _require_panel_node(panel, base_path + "NavigationButtons/ShowSessionButton") as Button
 	recenter_panel_button = _require_panel_node(panel, base_path + "PanelButtons/RecenterPanelButton") as Button
@@ -280,6 +316,22 @@ func _bind_session_controls() -> bool:
 	return true
 
 
+func _bind_template_workbench_panels() -> bool:
+	if template_library_layer != null:
+		template_library_panel = template_library_layer.call("get_scene_root") as TemplateLibraryPanel
+		if template_library_panel == null:
+			return false
+	if template_guide_layer != null:
+		template_guide_panel = template_guide_layer.call("get_scene_root") as TemplateGuidePanel
+		if template_guide_panel == null:
+			return false
+	if template_editor_layer != null:
+		template_editor_panel = template_editor_layer.call("get_scene_root") as TemplateStructuredEditor
+		if template_editor_panel == null:
+			return false
+	return true
+
+
 func _wire_ui_signals() -> void:
 	calibrate_button.pressed.connect(func(): controller_reader.request_set_origin())
 	recenter_button.pressed.connect(func(): controller_reader.request_clear_origin())
@@ -288,6 +340,9 @@ func _wire_ui_signals() -> void:
 		show_tutorial_button.pressed.connect(_show_tutorial_panel)
 	if hide_tutorial_button != null:
 		hide_tutorial_button.pressed.connect(_hide_tutorial_panel)
+	show_library_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_TEMPLATE_LIBRARY))
+	show_guide_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_TEMPLATE_GUIDE))
+	show_editor_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_TEMPLATE_EDITOR))
 	show_connection_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_CONNECTION))
 	show_session_button.pressed.connect(func(): _toggle_panel(PANEL_KEY_SESSION))
 	passthrough_toggle.toggled.connect(_on_passthrough_toggled)
@@ -309,6 +364,15 @@ func _wire_ui_signals() -> void:
 		capture_snapshot_button.pressed.connect(_on_capture_snapshot_pressed)
 		report_issue_button.pressed.connect(_on_report_issue_pressed)
 		export_report_button.pressed.connect(_on_export_report_pressed)
+	if template_library_panel != null:
+		template_library_panel.selection_changed.connect(_on_template_library_selection_changed)
+		template_library_panel.apply_requested.connect(_on_template_library_apply_requested)
+		template_library_panel.copy_requested.connect(_on_template_library_copy_requested)
+		template_library_panel.new_requested.connect(_on_template_library_new_requested)
+		template_library_panel.delete_requested.connect(_on_template_library_delete_requested)
+	if template_editor_panel != null:
+		template_editor_panel.apply_requested.connect(_on_template_editor_apply_requested)
+		template_editor_panel.save_requested.connect(_on_template_editor_save_requested)
 
 
 func _schedule_startup_recenter() -> void:
@@ -348,6 +412,8 @@ func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
 func _has_bound_ui_controls() -> bool:
 	if not (passthrough_toggle != null \
 		and template_select != null \
+		and template_summary_label != null \
+		and template_modes_label != null \
 		and sensitivity_slider != null \
 		and deadzone_slider != null \
 		and expo_slider != null \
@@ -355,6 +421,9 @@ func _has_bound_ui_controls() -> bool:
 		and calibrate_button != null \
 		and recenter_button != null \
 		and output_preview_label != null \
+		and show_library_button != null \
+		and show_guide_button != null \
+		and show_editor_button != null \
 		and show_connection_button != null \
 		and show_session_button != null \
 		and recenter_panel_button != null \
@@ -707,6 +776,7 @@ func _on_control_disconnected() -> void:
 		"port": int(control_client.server_port),
 	})
 	_last_status = {}
+	_template_editor_loaded_id = ""
 	_update_workflow_controls()
 	_update_status_label()
 
@@ -729,11 +799,19 @@ func _on_control_message(message: Dictionary) -> void:
 			_update_workflow_controls()
 			_push_runtime_diagnostics(true)
 		"active_template":
-			_active_template_name = str(message.get("template_name", ""))
+			_active_template_id = str(message.get("template_id", ""))
+			_active_template_summary = message.get("template_summary", {}).duplicate(true)
+			_active_template_payload = message.get("template", {}).duplicate(true)
+			_sync_template_surfaces()
 		"status":
 			_last_status = message
-			if _active_template_name.is_empty():
-				_active_template_name = str(message.get("template_name", ""))
+			if _active_template_id.is_empty():
+				_active_template_id = str(message.get("template_id", ""))
+			if _active_template_summary.is_empty():
+				_active_template_summary = message.get("template_summary", {}).duplicate(true)
+			if _active_template_payload.is_empty():
+				_active_template_payload = message.get("template", {}).duplicate(true)
+			_sync_template_surfaces()
 		"inspect_tree":
 			_handle_inspect_tree(message)
 		"inspect_node":
@@ -794,19 +872,28 @@ func _load_presets(presets: Array) -> void:
 
 
 func _load_catalog(templates: Array) -> void:
+	_template_catalog.clear()
+	for item in templates:
+		if typeof(item) == TYPE_DICTIONARY:
+			_template_catalog.append(item.duplicate(true))
+	if template_library_panel != null:
+		template_library_panel.set_catalog(_template_catalog)
 	if template_select == null:
 		return
-	var previous: String = _active_template_name
+	var previous: String = _active_template_id
 	template_select.clear()
-	for item in templates:
-		template_select.add_item(str(item))
+	for item in _template_catalog:
+		var summary: Dictionary = item
+		template_select.add_item(str(summary.get("display_name", "")))
+		template_select.set_item_metadata(template_select.item_count - 1, str(summary.get("template_id", "")))
 	if previous.is_empty() and template_select.item_count > 0:
 		template_select.select(0)
 	else:
 		for index in range(template_select.item_count):
-			if template_select.get_item_text(index) == previous:
+			if str(template_select.get_item_metadata(index)) == previous:
 				template_select.select(index)
 				break
+	_sync_template_surfaces()
 
 
 func _on_preset_selected(index: int) -> void:
@@ -822,7 +909,55 @@ func _on_preset_selected(index: int) -> void:
 func _on_template_selected(index: int) -> void:
 	control_client.send_message({
 		"type": "select_template",
-		"template_name": template_select.get_item_text(index),
+		"template_id": str(template_select.get_item_metadata(index)),
+	})
+
+
+func _on_template_library_selection_changed(template_id: String) -> void:
+	var summary := _catalog_summary(template_id)
+	if template_guide_panel != null:
+		template_guide_panel.set_summary(summary)
+
+
+func _on_template_library_apply_requested(template_id: String) -> void:
+	control_client.send_message({
+		"type": "select_template",
+		"template_id": template_id,
+	})
+
+
+func _on_template_library_copy_requested(template_id: String) -> void:
+	control_client.send_message({
+		"type": "duplicate_template",
+		"template_id": template_id,
+	})
+
+
+func _on_template_library_new_requested() -> void:
+	control_client.send_message({
+		"type": "create_blank_template",
+		"display_name": "New Template",
+	})
+
+
+func _on_template_library_delete_requested(template_id: String) -> void:
+	control_client.send_message({
+		"type": "delete_template",
+		"template_id": template_id,
+	})
+
+
+func _on_template_editor_apply_requested(template: MappingTemplate) -> void:
+	control_client.send_message({
+		"type": "apply_template",
+		"template": template.to_dict(),
+	})
+
+
+func _on_template_editor_save_requested(template: MappingTemplate) -> void:
+	control_client.send_message({
+		"type": "save_template",
+		"template": template.to_dict(),
 	})
 
 
@@ -933,7 +1068,7 @@ func _update_status_label() -> void:
 		],
 		"Workflow: %s" % mode_label,
 		"Preset: %s" % preset_label,
-		"Template: %s" % _active_template_name,
+		"Template: %s" % str(_active_template_summary.get("display_name", "")),
 		"Control: %s" % ("active" if bool(runtime_diagnostics.get("control_active", false)) else "paused"),
 		"Input: tracking %s | grip %.2f | trigger %.2f" % [
 			"ok" if bool(runtime_diagnostics.get("tracking_valid", false)) else "lost",
@@ -1030,6 +1165,31 @@ func _update_status_label() -> void:
 		workflow_diagnostics_label.text = _format_session_diagnostics(_last_status.get("session_diagnostics", {}), runtime_diagnostics)
 
 
+func _sync_template_surfaces() -> void:
+	if template_library_panel != null:
+		template_library_panel.set_catalog(_template_catalog)
+		template_library_panel.set_selected_template_id(_active_template_id)
+	if template_guide_panel != null:
+		template_guide_panel.set_summary(_active_template_summary)
+	if template_editor_panel != null and not _active_template_payload.is_empty() and _template_editor_loaded_id != _active_template_id:
+		var template := MappingTemplate.new()
+		template.from_dict(_active_template_payload)
+		template_editor_panel.set_template(template)
+		_template_editor_loaded_id = _active_template_id
+	if template_summary_label != null:
+		template_summary_label.text = str(_active_template_summary.get("summary", "Waiting for active template details."))
+	if template_modes_label != null:
+		var mode_lines: Array = _active_template_summary.get("mode_lines", [])
+		template_modes_label.text = "\n".join(mode_lines) if not mode_lines.is_empty() else "Modes: waiting for recommendations"
+
+
+func _catalog_summary(template_id: String) -> Dictionary:
+	for item in _template_catalog:
+		if str(item.get("template_id", "")) == template_id:
+			return item
+	return _active_template_summary.duplicate(true)
+
+
 func _build_runtime_diagnostics() -> Dictionary:
 	var diagnostics := _connection_state.to_dict()
 	diagnostics["connection_mode"] = _connection_mode
@@ -1071,7 +1231,8 @@ func _build_runtime_diagnostics() -> Dictionary:
 	diagnostics["beacon_packets_received"] = int(discovery.get("discovery_packets_received", 0))
 	diagnostics.merge(control_client.get_diagnostics(), true)
 	diagnostics.merge(telemetry_sender.get_diagnostics(), true)
-	diagnostics["active_template_name"] = _active_template_name
+	diagnostics["active_template_id"] = _active_template_id
+	diagnostics["active_template_name"] = str(_active_template_summary.get("display_name", ""))
 	return diagnostics
 
 

@@ -14,6 +14,9 @@
 [ext_resource type="PackedScene" uid="uid://v3tle8368h3m" path="res://scenes/shared/quest_connection_layer.tscn" id="13_connection_layer"]
 [ext_resource type="PackedScene" uid="uid://82ma6up55f7b" path="res://scenes/shared/quest_session_layer.tscn" id="14_session_layer"]
 [ext_resource type="Script" uid="uid://b550u566bucp0" path="res://scripts/xr/smooth_pivot.gd" id="15_smooth_pivot"]
+[ext_resource type="PackedScene" uid="uid://b0ie5j7rde87p" path="res://scenes/shared/quest_template_library_layer.tscn" id="16_template_library_layer"]
+[ext_resource type="PackedScene" uid="uid://dw7yojtaeh2u0" path="res://scenes/shared/quest_template_guide_layer.tscn" id="17_template_guide_layer"]
+[ext_resource type="PackedScene" uid="uid://bt3ybne07kbhj" path="res://scenes/shared/quest_template_editor_layer.tscn" id="18_template_editor_layer"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -101,6 +104,18 @@ visible = false
 
 [node name="QuestSessionLayer" parent="XROrigin3D" unique_id=1633179666 instance=ExtResource("14_session_layer")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1.4, -0.8)
+visible = false
+
+[node name="QuestTemplateLibraryLayer" parent="XROrigin3D" unique_id=1852274308 instance=ExtResource("16_template_library_layer")]
+transform = Transform3D(0.92388, 0, 0.382683, 0, 1, 0, -0.382683, 0, 0.92388, -0.95, 1.35, -0.15)
+visible = false
+
+[node name="QuestTemplateGuideLayer" parent="XROrigin3D" unique_id=1191087259 instance=ExtResource("17_template_guide_layer")]
+transform = Transform3D(0.793353, 0, 0.608761, 0, 1, 0, -0.608761, 0, 0.793353, -1.45, 1.35, 0.35)
+visible = false
+
+[node name="QuestTemplateEditorLayer" parent="XROrigin3D" unique_id=1263524829 instance=ExtResource("18_template_editor_layer")]
+transform = Transform3D(0.608761, 0, -0.793353, 0, 1, 0, 0.793353, 0, 0.608761, 1.1, 1.35, -0.15)
 visible = false
 
 [node name="RightOriginIndicator" parent="XROrigin3D" unique_id=570705658 instance=ExtResource("11_origin_indicator")]

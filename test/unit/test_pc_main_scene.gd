@@ -21,6 +21,12 @@ func test_pc_main_scene_wraps_left_column_in_scroll_container() -> void:
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowEditorPanel"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowRunPanel"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/VBox/Filters/SchemeFilterSelect"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/VBox/Filters/DifficultyFilterSelect"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Guide"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Editor"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/AdvancedJson"))
 
 	pc_main.free()
 

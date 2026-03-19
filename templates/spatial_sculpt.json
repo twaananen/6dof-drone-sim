@@ -1,147 +1,181 @@
 {
-  "template_name": "spatial_sculpt",
-  "description": "Continuous 6DOF spatial shaping with position and orientation blended per axis.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "pos_y_m",
-          "mode": "absolute",
-          "range_min": -0.3,
-          "range_max": 0.3,
-          "weight": 0.8,
-          "invert": false,
-          "smoothing": 0.03,
-          "curve": "linear"
-        },
-        {
-          "source": "linvel_y_m_s",
-          "mode": "delta",
-          "range_min": -0.5,
-          "range_max": 0.5,
-          "weight": 0.2,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ]
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "swing_yaw_deg",
-          "mode": "absolute",
-          "range_min": -70.0,
-          "range_max": 70.0,
-          "weight": 0.6,
-          "invert": true,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        },
-        {
-          "source": "angvel_y_rad_s",
-          "mode": "delta",
-          "range_min": -2.0,
-          "range_max": 2.0,
-          "weight": 0.4,
-          "invert": true,
-          "smoothing": 0.02,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "pos_z_m",
-          "mode": "absolute",
-          "range_min": -0.25,
-          "range_max": 0.25,
-          "weight": 0.5,
-          "invert": false,
-          "smoothing": 0.03,
-          "curve": "linear"
-        },
-        {
-          "source": "swing_pitch_deg",
-          "mode": "absolute",
-          "range_min": -30.0,
-          "range_max": 30.0,
-          "weight": 0.5,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "pos_x_m",
-          "mode": "absolute",
-          "range_min": -0.25,
-          "range_max": 0.25,
-          "weight": 0.5,
-          "invert": false,
-          "smoothing": 0.03,
-          "curve": "linear"
-        },
-        {
-          "source": "twist_roll_deg",
-          "mode": "absolute",
-          "range_min": -30.0,
-          "range_max": 30.0,
-          "weight": 0.5,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.spatial_sculpt",
+	"slug": "spatial_sculpt",
+	"display_name": "Spatial Sculpt",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Hand position shapes throttle, pitch, and roll while orientation adds attitude cues on top.",
+	"control_scheme": "position_orientation_blend",
+	"difficulty": "experimental",
+	"betaflight_recommendation": {
+		"recommended": ["Angle"],
+		"acceptable": ["Horizon"],
+		"avoid": ["Acro/Rate", "Acro Trainer"],
+		"notes": "There is no close standard FPV equivalent; use self-leveling modes if you try to mirror it on a real quad."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Level"],
+		"acceptable": ["Full Assist"],
+		"avoid": ["Acro"],
+		"notes": "This is intentionally experimental and works best when the simulator keeps the quad readable."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": ["Hold Altitude"],
+		"avoid": [],
+		"notes": "Hold Altitude can help isolate the position-driven pitch and roll workflow."
+	},
+	"warnings": [
+		"Large hand translations create large stick commands quickly.",
+		"There is no close standard Betaflight control scheme equivalent."
+	],
+	"usage_tips": [
+		"Keep movements compact and centered; this template treats the controller as a spatial sculpting tool.",
+		"Practice hover control first before using the position axes aggressively."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "pos_y_m",
+					"mode": "absolute",
+					"range_min": -0.22,
+					"range_max": 0.22,
+					"weight": 0.75,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				},
+				{
+					"source": "pos_y_m",
+					"mode": "delta",
+					"range_min": -0.18,
+					"range_max": 0.18,
+					"weight": 0.25,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.04
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "swing_yaw_deg",
+					"mode": "absolute",
+					"range_min": -60.0,
+					"range_max": 60.0,
+					"weight": 0.75,
+					"invert": true,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				},
+				{
+					"source": "swing_yaw_deg",
+					"mode": "delta",
+					"range_min": -45.0,
+					"range_max": 45.0,
+					"weight": 0.25,
+					"invert": true,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.05
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "pos_z_m",
+					"mode": "absolute",
+					"range_min": -0.18,
+					"range_max": 0.18,
+					"weight": 0.6,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				},
+				{
+					"source": "swing_pitch_deg",
+					"mode": "absolute",
+					"range_min": -26.0,
+					"range_max": 26.0,
+					"weight": 0.4,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.05
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "pos_x_m",
+					"mode": "absolute",
+					"range_min": -0.18,
+					"range_max": 0.18,
+					"weight": 0.6,
+					"invert": false,
+					"smoothing": 0.03,
+					"curve": "linear"
+				},
+				{
+					"source": "twist_roll_deg",
+					"mode": "absolute",
+					"range_min": -26.0,
+					"range_max": 26.0,
+					"weight": 0.4,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.05
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

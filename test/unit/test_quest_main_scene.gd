@@ -17,6 +17,9 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_not_null(quest_main.get_node("XROrigin3D/TutorialUiLayer"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestConnectionLayer"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestSessionLayer"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateGuideLayer"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateEditorLayer"))
 	assert_not_null(quest_main.get_node("XROrigin3D/RightOriginIndicator"))
 	assert_not_null(quest_main.get_node("XROrigin3D/LeftAim/SmoothPointer/LeftPointer"))
 	assert_not_null(quest_main.get_node("XROrigin3D/LeftAim/SmoothPointer/ControllerVisual"))
@@ -25,6 +28,11 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_not_null(quest_main.get_node("Floor"))
 	assert_null(quest_main.get_node_or_null("Background"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/PassthroughToggle"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/TemplateSummaryLabel"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/TemplateModesLabel"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/NavigationButtons/ShowLibraryButton"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/NavigationButtons/ShowGuideButton"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/NavigationButtons/ShowEditorButton"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/PanelButtons/RecenterPanelButton"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/PanelButtons/ShowTutorialButton"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestUiLayer/SubViewport/QuestFlightPanel/Panel/Margin/Scroll/VBox/NavigationButtons/ShowConnectionButton"))
@@ -32,6 +40,11 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestConnectionLayer/SubViewport/QuestConnectionPanel/Panel/Margin/Scroll/VBox/ConnectModeSelect"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestConnectionLayer/SubViewport/QuestConnectionPanel/Panel/Margin/Scroll/VBox/ManualServerHostEdit"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestSessionLayer/SubViewport/QuestSessionPanel/Panel/Margin/Scroll/VBox/RunLabelEdit"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer/SubViewport/TemplateLibraryPanel/VBox/Filters/SchemeFilterSelect"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer/SubViewport/TemplateLibraryPanel/VBox/Filters/DifficultyFilterSelect"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer/SubViewport/TemplateLibraryPanel/VBox/List"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateGuideLayer/SubViewport/TemplateGuidePanel/VBox/Body"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateEditorLayer/SubViewport/TemplateStructuredEditor/Scroll/VBox/MetaGrid/DisplayNameEdit"))
 	assert_not_null(quest_main.get_node("XROrigin3D/TutorialUiLayer/SubViewport/QuestTutorialPanel/Panel/Margin/Scroll/VBox/HideTutorialButton"))
 	assert_true(_has_event("XR_INPUT_READER_READY"))
 	assert_false(_has_event("XR_INPUT_READER_UNBOUND"))
@@ -136,3 +149,36 @@ func test_clear_origin_hides_indicator_until_release() -> void:
 		"event_flags": RawControllerState.EVENT_SET_ORIGIN,
 	})
 	assert_true(quest_main.right_origin_indicator.visible)
+
+
+func test_status_refresh_does_not_reset_template_library_selection() -> void:
+	var scene: PackedScene = load("res://scenes/quest_main.tscn")
+	assert_not_null(scene)
+
+	var quest_main := scene.instantiate()
+	add_child_autofree(quest_main)
+	await wait_process_frames(1)
+
+	var active_summary := {
+		"template_id": "bundled.attitude_tilt",
+		"display_name": "Attitude Tilt",
+		"summary": "Active template",
+	}
+	var other_summary := {
+		"template_id": "bundled.rate_direct",
+		"display_name": "Rate Direct",
+		"summary": "Other template",
+	}
+	quest_main._template_catalog = [active_summary, other_summary]
+	quest_main._active_template_id = "bundled.attitude_tilt"
+	quest_main._active_template_summary = active_summary
+	quest_main._sync_template_surfaces()
+
+	var library_panel = quest_main.template_library_panel
+	library_panel.set_selected_template_id("bundled.rate_direct")
+
+	quest_main._update_status_label()
+
+	var selected_items: PackedInt32Array = library_panel.list.get_selected_items()
+	assert_eq(selected_items.size(), 1)
+	assert_eq(str(library_panel.list.get_item_metadata(selected_items[0])), "bundled.rate_direct")

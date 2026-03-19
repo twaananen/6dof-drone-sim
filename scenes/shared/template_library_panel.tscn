@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://cxtnuh2ruf2e0"]
+
+[ext_resource type="Script" uid="uid://b5il1povmkhpd" path="res://scripts/ui/template_library_panel.gd" id="1"]
+
+[node name="TemplateLibraryPanel" type="PanelContainer" unique_id=471168504]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1921689560]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Filters" type="HBoxContainer" parent="VBox" unique_id=167724562]
+layout_mode = 2
+
+[node name="SchemeFilterLabel" type="Label" parent="VBox/Filters" unique_id=159591981]
+layout_mode = 2
+text = "Scheme"
+
+[node name="SchemeFilterSelect" type="OptionButton" parent="VBox/Filters" unique_id=495687814]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DifficultyFilterLabel" type="Label" parent="VBox/Filters" unique_id=543886615]
+layout_mode = 2
+text = "Difficulty"
+
+[node name="DifficultyFilterSelect" type="OptionButton" parent="VBox/Filters" unique_id=376949484]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="List" type="ItemList" parent="VBox" unique_id=1146784482]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Summary" type="Label" parent="VBox" unique_id=207834233]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="VBox" unique_id=550880782]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="VBox/Buttons" unique_id=555618133]
+layout_mode = 2
+text = "Apply"
+
+[node name="CopyButton" type="Button" parent="VBox/Buttons" unique_id=1963073855]
+layout_mode = 2
+text = "Copy"
+
+[node name="NewButton" type="Button" parent="VBox/Buttons" unique_id=453525590]
+layout_mode = 2
+text = "New"
+
+[node name="DeleteButton" type="Button" parent="VBox/Buttons" unique_id=782021331]
+layout_mode = 2
+text = "Delete"

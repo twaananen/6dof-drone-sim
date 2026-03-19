@@ -1,142 +1,175 @@
 {
-  "template_name": "blend_precision",
-  "description": "Low-noise blended mapping tuned for deliberate movements.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "trigger",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.05,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.03,
-      "expo": 0.2
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "swing_yaw_deg",
-          "mode": "absolute",
-          "range_min": -55.0,
-          "range_max": 55.0,
-          "weight": 0.7,
-          "invert": true,
-          "smoothing": 0.05,
-          "curve": "expo_soft"
-        },
-        {
-          "source": "angvel_y_rad_s",
-          "mode": "delta",
-          "range_min": -1.5,
-          "range_max": 1.5,
-          "weight": 0.3,
-          "invert": true,
-          "smoothing": 0.05,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05,
-      "expo": 0.25
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "swing_pitch_deg",
-          "mode": "absolute",
-          "range_min": -28.0,
-          "range_max": 28.0,
-          "weight": 0.7,
-          "invert": false,
-          "smoothing": 0.05,
-          "curve": "expo_soft"
-        },
-        {
-          "source": "linvel_z_m_s",
-          "mode": "delta",
-          "range_min": -0.5,
-          "range_max": 0.5,
-          "weight": 0.3,
-          "invert": false,
-          "smoothing": 0.05,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05,
-      "expo": 0.25
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "twist_roll_deg",
-          "mode": "absolute",
-          "range_min": -28.0,
-          "range_max": 28.0,
-          "weight": 0.7,
-          "invert": false,
-          "smoothing": 0.05,
-          "curve": "expo_soft"
-        },
-        {
-          "source": "linvel_x_m_s",
-          "mode": "delta",
-          "range_min": -0.5,
-          "range_max": 0.5,
-          "weight": 0.3,
-          "invert": false,
-          "smoothing": 0.05,
-          "curve": "linear"
-        }
-      ],
-      "deadzone": 0.05,
-      "expo": 0.25
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.blend_precision",
+	"slug": "blend_precision",
+	"display_name": "Blend Precision",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Absolute tilt gives the main command while small position changes add controlled precision nudges.",
+	"control_scheme": "blended_precision",
+	"difficulty": "intermediate",
+	"betaflight_recommendation": {
+		"recommended": ["Angle"],
+		"acceptable": ["Horizon"],
+		"avoid": ["Acro/Rate"],
+		"notes": "Use self-leveling modes so the absolute attitude component remains easy to read."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Level"],
+		"acceptable": ["Limited Acro"],
+		"avoid": ["Acro", "Full Assist"],
+		"notes": "Level is the cleanest fit for the blend of absolute and impulse-like position changes."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": ["Hold Altitude"],
+		"avoid": [],
+		"notes": "Altitude assist is optional if you want to isolate lateral and attitude precision first."
+	},
+	"warnings": [
+		"Small position nudges add momentary input on top of the main tilt command.",
+		"This template is calmer than Blend Agile and should feel deliberate rather than snappy."
+	],
+	"usage_tips": [
+		"Treat tilt as the primary command and hand displacement as the fine adjustment layer.",
+		"Keep the controller near the calibrated origin to avoid accumulating unwanted nudges."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "trigger",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.02,
+			"expo": 0.15
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "swing_yaw_deg",
+					"mode": "absolute",
+					"range_min": -50.0,
+					"range_max": 50.0,
+					"weight": 0.8,
+					"invert": true,
+					"smoothing": 0.04,
+					"curve": "expo_soft"
+				},
+				{
+					"source": "swing_yaw_deg",
+					"mode": "delta",
+					"range_min": -35.0,
+					"range_max": 35.0,
+					"weight": 0.2,
+					"invert": true,
+					"smoothing": 0.04,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.05,
+			"expo": 0.2
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "swing_pitch_deg",
+					"mode": "absolute",
+					"range_min": -24.0,
+					"range_max": 24.0,
+					"weight": 0.75,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "expo_soft"
+				},
+				{
+					"source": "pos_z_m",
+					"mode": "delta",
+					"range_min": -0.18,
+					"range_max": 0.18,
+					"weight": 0.25,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.05,
+			"expo": 0.2
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "twist_roll_deg",
+					"mode": "absolute",
+					"range_min": -24.0,
+					"range_max": 24.0,
+					"weight": 0.75,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "expo_soft"
+				},
+				{
+					"source": "pos_x_m",
+					"mode": "delta",
+					"range_min": -0.18,
+					"range_max": 0.18,
+					"weight": 0.25,
+					"invert": false,
+					"smoothing": 0.04,
+					"curve": "linear"
+				}
+			],
+			"deadzone": 0.05,
+			"expo": 0.2
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

@@ -117,3 +117,40 @@ func test_client_receives_multiple_status_messages_in_order() -> void:
 	assert_eq(client_received_messages[0]["type"], "hello_ack")
 	assert_eq(client_received_messages[1]["type"], "session_profile")
 	assert_eq(client_received_messages[2]["type"], "status")
+
+
+func test_client_receives_structured_template_catalog_and_active_template() -> void:
+	server.send_message({
+		"type": "template_catalog",
+		"templates": [
+			{
+				"template_id": "bundled.rate_direct",
+				"display_name": "Rate Direct",
+				"summary": "Direct manual rate template.",
+			}
+		],
+	})
+	server.send_message({
+		"type": "active_template",
+		"template_id": "bundled.rate_direct",
+		"template_summary": {
+			"template_id": "bundled.rate_direct",
+			"display_name": "Rate Direct",
+		},
+		"template": {
+			"template_id": "bundled.rate_direct",
+			"display_name": "Rate Direct",
+			"outputs": {},
+		},
+	})
+
+	await wait_until(
+		func(): return client_received_messages.size() == 2,
+		1.0,
+		"Timed out waiting for template catalog messages"
+	)
+
+	assert_eq(client_received_messages[0]["type"], "template_catalog")
+	assert_eq(client_received_messages[0]["templates"][0]["template_id"], "bundled.rate_direct")
+	assert_eq(client_received_messages[1]["type"], "active_template")
+	assert_eq(client_received_messages[1]["template_summary"]["display_name"], "Rate Direct")

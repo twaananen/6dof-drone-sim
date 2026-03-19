@@ -1,107 +1,140 @@
 {
-  "template_name": "rate_direct",
-  "description": "Benchmark direct-rate embodied mapping with trigger throttle.",
-  "outputs": {
-    "throttle": {
-      "bindings": [
-        {
-          "source": "trigger",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.03,
-          "curve": "linear"
-        }
-      ]
-    },
-    "yaw": {
-      "bindings": [
-        {
-          "source": "swing_yaw_deg",
-          "mode": "absolute",
-          "range_min": -80.0,
-          "range_max": 80.0,
-          "weight": 1.0,
-          "invert": true,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "pitch": {
-      "bindings": [
-        {
-          "source": "angvel_x_rad_s",
-          "mode": "absolute",
-          "range_min": -3.5,
-          "range_max": 3.5,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "roll": {
-      "bindings": [
-        {
-          "source": "angvel_z_rad_s",
-          "mode": "absolute",
-          "range_min": -3.5,
-          "range_max": 3.5,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.02,
-          "curve": "expo_soft"
-        }
-      ],
-      "deadzone": 0.05
-    },
-    "aux_button_1": {
-      "bindings": [
-        {
-          "source": "button_south",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_2": {
-      "bindings": [
-        {
-          "source": "button_east",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    },
-    "aux_button_4": {
-      "bindings": [
-        {
-          "source": "button_thumbstick",
-          "mode": "absolute",
-          "range_min": 0.0,
-          "range_max": 1.0,
-          "weight": 1.0,
-          "invert": false,
-          "smoothing": 0.0,
-          "curve": "linear"
-        }
-      ]
-    }
-  }
+	"schema_version": 2,
+	"template_id": "bundled.rate_direct",
+	"slug": "rate_direct",
+	"display_name": "Rate Direct",
+	"origin": "bundled",
+	"source_template_id": "",
+	"summary": "Controller rotation speed drives the rate axes directly for manual flight.",
+	"control_scheme": "direct_rate",
+	"difficulty": "advanced",
+	"betaflight_recommendation": {
+		"recommended": ["Acro/Rate"],
+		"acceptable": ["Acro Trainer"],
+		"avoid": ["Angle", "Horizon"],
+		"notes": "This template is tuned for manual rate-style flight, not self-leveling behavior."
+	},
+	"liftoff_recommendation": {
+		"recommended": ["Acro"],
+		"acceptable": ["Limited Acro"],
+		"avoid": ["Level", "Full Assist"],
+		"notes": "Use Acro first; assisted modes fight the direct rate interpretation."
+	},
+	"liftoff_assists": {
+		"recommended": [],
+		"optional": [],
+		"avoid": ["Hold Altitude"],
+		"notes": "Altitude assist changes the feel of the direct-rate throttle workflow."
+	},
+	"warnings": [
+		"Small wrist rotations create immediate rate commands.",
+		"This template expects active manual correction rather than self-leveling recovery."
+	],
+	"usage_tips": [
+		"Set origin with the controller pointed naturally forward.",
+		"Keep wrist motion crisp and small; large motions saturate quickly."
+	],
+	"outputs": {
+		"throttle": {
+			"bindings": [
+				{
+					"source": "trigger",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "linear"
+				}
+			]
+		},
+		"yaw": {
+			"bindings": [
+				{
+					"source": "angvel_y_rad_s",
+					"mode": "absolute",
+					"range_min": -3.0,
+					"range_max": 3.0,
+					"weight": 1.0,
+					"invert": true,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.04
+		},
+		"pitch": {
+			"bindings": [
+				{
+					"source": "angvel_x_rad_s",
+					"mode": "absolute",
+					"range_min": -3.0,
+					"range_max": 3.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.04
+		},
+		"roll": {
+			"bindings": [
+				{
+					"source": "angvel_z_rad_s",
+					"mode": "absolute",
+					"range_min": -3.0,
+					"range_max": 3.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.02,
+					"curve": "expo_soft"
+				}
+			],
+			"deadzone": 0.04
+		},
+		"aux_button_1": {
+			"bindings": [
+				{
+					"source": "button_south",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_2": {
+			"bindings": [
+				{
+					"source": "button_east",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		},
+		"aux_button_4": {
+			"bindings": [
+				{
+					"source": "button_thumbstick",
+					"mode": "absolute",
+					"range_min": 0.0,
+					"range_max": 1.0,
+					"weight": 1.0,
+					"invert": false,
+					"smoothing": 0.0,
+					"curve": "linear"
+				}
+			]
+		}
+	}
 }

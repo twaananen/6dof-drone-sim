@@ -116,6 +116,18 @@ text = "Template"
 [node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1961154830]
 layout_mode = 2
 
+[node name="TemplateSummaryLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1721121309]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+text = "Select a template to see the control intent and recommended flight modes."
+autowrap_mode = 3
+
+[node name="TemplateModesLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=869440921]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Modes: waiting for desktop catalog"
+autowrap_mode = 3
+
 [node name="Tuning" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=554600950]
 layout_mode = 2
 
@@ -178,6 +190,18 @@ autowrap_mode = 3
 
 [node name="NavigationButtons" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox" unique_id=1101128224]
 layout_mode = 2
+
+[node name="ShowLibraryButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=188123578]
+layout_mode = 2
+text = "Library"
+
+[node name="ShowGuideButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=1193367527]
+layout_mode = 2
+text = "Guide"
+
+[node name="ShowEditorButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=624277193]
+layout_mode = 2
+text = "Editor"
 
 [node name="ShowConnectionButton" type="Button" parent="Panel/Margin/Scroll/VBox/NavigationButtons" unique_id=968124691]
 layout_mode = 2
