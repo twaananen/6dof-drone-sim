@@ -1,8 +1,8 @@
 class_name TemplateGuidePanel
 extends PanelContainer
 
-@onready var title_label: Label = $VBox/Title
-@onready var body_label: RichTextLabel = $VBox/Body
+@onready var title_label: Label = $Margin/VBox/Title
+@onready var body_label: RichTextLabel = $Margin/VBox/Body
 
 
 func set_summary(summary: Dictionary) -> void:

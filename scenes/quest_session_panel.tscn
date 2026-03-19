@@ -1,46 +1,9 @@
 [gd_scene format=3 uid="uid://digplcnf8yn8y"]
 
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
-
-[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
-bg_color = Color(0.101563, 0.210938, 0.160156, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.980469, 0.980469, 0.960938, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-shadow_color = Color(0, 0, 0, 0.2)
-shadow_size = 6
-
-[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
-bg_color = Color(0.074219, 0.175781, 0.128906, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.980469, 0.980469, 0.960938, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-shadow_color = Color(0, 0, 0, 0.24)
-shadow_size = 8
-
-[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
-bg_color = Color(0.921875, 0.953125, 0.925781, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0507813, 0.136719, 0.101563, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[ext_resource type="StyleBox" path="res://resources/quest_panel_chrome_style.tres" id="2_chrome_style"]
+[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" path="res://resources/quest_panel_resize_handle_style.tres" id="4_resize_style"]
 
 [node name="QuestSessionPanel" type="Control" unique_id=1578490083]
 layout_mode = 3
@@ -57,7 +20,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 88.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("1_panel_chrome_style")
+theme_override_styles/panel = ExtResource("2_chrome_style")
 
 [node name="Margin" type="MarginContainer" parent="Chrome" unique_id=542571422]
 layout_mode = 2
@@ -71,7 +34,7 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=1092383790]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 text = "Session"
 
 [node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=1429844532]
@@ -87,7 +50,7 @@ anchor_bottom = 1.0
 offset_top = 88.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("2_panel_body_style")
+theme_override_styles/panel = ExtResource("3_body_style")
 
 [node name="Margin" type="MarginContainer" parent="Panel" unique_id=1770315073]
 layout_mode = 2
@@ -104,12 +67,14 @@ size_flags_vertical = 3
 [node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=1789635768]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
 [node name="WorkflowPresetLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1242439829]
 layout_mode = 2
 text = "Workflow Preset"
 
 [node name="PresetSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1014938597]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 
 [node name="WorkflowModeLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1588755032]
@@ -117,6 +82,7 @@ layout_mode = 2
 text = "Workflow Mode"
 
 [node name="WorkflowModeSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1644180770]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 
 [node name="WorkflowDetailsLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1432986840]
@@ -137,6 +103,7 @@ layout_mode = 2
 text = "Stream App"
 
 [node name="StreamClientSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1908866188]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 
 [node name="RunLabelFieldLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=183618269]
@@ -144,6 +111,7 @@ layout_mode = 2
 text = "Run Label"
 
 [node name="RunLabelEdit" type="LineEdit" parent="Panel/Margin/Scroll/VBox" unique_id=1083115632]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 placeholder_text = "Describe this Quest experiment pass"
 
@@ -219,7 +187,7 @@ offset_left = 8.0
 offset_top = 96.0
 offset_right = 52.0
 offset_bottom = 140.0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=595951495]
 custom_minimum_size = Vector2(44, 44)
@@ -232,7 +200,7 @@ offset_top = 96.0
 offset_right = -8.0
 offset_bottom = 140.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1745611202]
 custom_minimum_size = Vector2(44, 44)
@@ -245,7 +213,7 @@ offset_top = -52.0
 offset_right = 52.0
 offset_bottom = -8.0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=851634537]
 custom_minimum_size = Vector2(44, 44)
@@ -261,4 +229,4 @@ offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")

@@ -1,46 +1,9 @@
 [gd_scene format=3 uid="uid://bmp738135p3wf"]
 
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
-
-[sub_resource type="StyleBoxFlat" id="1_panel_chrome_style"]
-bg_color = Color(0.101563, 0.210938, 0.160156, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.980469, 0.980469, 0.960938, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-shadow_color = Color(0, 0, 0, 0.2)
-shadow_size = 6
-
-[sub_resource type="StyleBoxFlat" id="2_panel_body_style"]
-bg_color = Color(0.074219, 0.175781, 0.128906, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.980469, 0.980469, 0.960938, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
-shadow_color = Color(0, 0, 0, 0.24)
-shadow_size = 8
-
-[sub_resource type="StyleBoxFlat" id="3_resize_handle_style"]
-bg_color = Color(0.921875, 0.953125, 0.925781, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0507813, 0.136719, 0.101563, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[ext_resource type="StyleBox" path="res://resources/quest_panel_chrome_style.tres" id="2_chrome_style"]
+[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" path="res://resources/quest_panel_resize_handle_style.tres" id="4_resize_style"]
 
 [node name="QuestFlightPanel" type="Control" unique_id=944695423]
 layout_mode = 3
@@ -57,7 +20,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 88.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("1_panel_chrome_style")
+theme_override_styles/panel = ExtResource("2_chrome_style")
 
 [node name="Margin" type="MarginContainer" parent="Chrome" unique_id=1645896980]
 layout_mode = 2
@@ -71,7 +34,7 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=1579130070]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 text = "Flight Controls"
 
 [node name="HintLabel" type="Label" parent="Chrome/Margin/VBox" unique_id=2099526745]
@@ -87,7 +50,7 @@ anchor_bottom = 1.0
 offset_top = 88.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("2_panel_body_style")
+theme_override_styles/panel = ExtResource("3_body_style")
 
 [node name="Margin" type="MarginContainer" parent="Panel" unique_id=1482044192]
 layout_mode = 2
@@ -104,8 +67,10 @@ size_flags_vertical = 3
 [node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll" unique_id=550166648]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
 [node name="PassthroughToggle" type="CheckButton" parent="Panel/Margin/Scroll/VBox" unique_id=826369999]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 text = "Enable passthrough when available"
 
@@ -114,6 +79,7 @@ layout_mode = 2
 text = "Template"
 
 [node name="TemplateSelect" type="OptionButton" parent="Panel/Margin/Scroll/VBox" unique_id=1961154830]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 
 [node name="TemplateSummaryLabel" type="Label" parent="Panel/Margin/Scroll/VBox" unique_id=1721121309]
@@ -136,6 +102,7 @@ layout_mode = 2
 text = "Sensitivity"
 
 [node name="SensitivitySlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1790650374]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 min_value = 0.1
 max_value = 3.0
@@ -147,6 +114,7 @@ layout_mode = 2
 text = "Deadzone"
 
 [node name="DeadzoneSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=1540309759]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 max_value = 0.4
 step = 0.01
@@ -156,6 +124,7 @@ layout_mode = 2
 text = "Expo"
 
 [node name="ExpoSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=515139164]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 max_value = 1.0
 step = 0.05
@@ -165,6 +134,7 @@ layout_mode = 2
 text = "Integrator Gain"
 
 [node name="IntegratorSlider" type="HSlider" parent="Panel/Margin/Scroll/VBox/Tuning" unique_id=48472001]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 min_value = 0.1
 max_value = 3.0
@@ -229,7 +199,7 @@ offset_left = 8.0
 offset_top = 96.0
 offset_right = 52.0
 offset_bottom = 140.0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeTopRightHandle" type="PanelContainer" parent="." unique_id=1101281764]
 custom_minimum_size = Vector2(44, 44)
@@ -242,7 +212,7 @@ offset_top = 96.0
 offset_right = -8.0
 offset_bottom = 140.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeBottomLeftHandle" type="PanelContainer" parent="." unique_id=1748716724]
 custom_minimum_size = Vector2(44, 44)
@@ -255,7 +225,7 @@ offset_top = -52.0
 offset_right = 52.0
 offset_bottom = -8.0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")
 
 [node name="ResizeBottomRightHandle" type="PanelContainer" parent="." unique_id=975229920]
 custom_minimum_size = Vector2(44, 44)
@@ -271,4 +241,4 @@ offset_right = -8.0
 offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("3_resize_handle_style")
+theme_override_styles/panel = ExtResource("4_resize_style")

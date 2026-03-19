@@ -17,13 +17,13 @@
 [ext_resource type="PackedScene" uid="uid://b0ie5j7rde87p" path="res://scenes/shared/quest_template_library_layer.tscn" id="16_template_library_layer"]
 [ext_resource type="PackedScene" uid="uid://dw7yojtaeh2u0" path="res://scenes/shared/quest_template_guide_layer.tscn" id="17_template_guide_layer"]
 [ext_resource type="PackedScene" uid="uid://bt3ybne07kbhj" path="res://scenes/shared/quest_template_editor_layer.tscn" id="18_template_editor_layer"]
-[ext_resource type="Script" path="res://scripts/quest/quest_xr_controller.gd" id="19_quest_xr_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_panel_controller.gd" id="20_quest_panel_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_connection_controller.gd" id="21_quest_connection_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_template_controller.gd" id="22_quest_template_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_session_controller.gd" id="23_quest_session_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_flight_runtime_controller.gd" id="24_quest_flight_runtime_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_status_controller.gd" id="25_quest_status_controller"]
+[ext_resource type="Script" uid="uid://jt71bwvmlfvo" path="res://scripts/quest/quest_xr_controller.gd" id="19_quest_xr_controller"]
+[ext_resource type="Script" uid="uid://di4qllf4d66bh" path="res://scripts/quest/quest_panel_controller.gd" id="20_quest_panel_controller"]
+[ext_resource type="Script" uid="uid://dl1te6p2dx06w" path="res://scripts/quest/quest_connection_controller.gd" id="21_quest_connection_controller"]
+[ext_resource type="Script" uid="uid://4wc0bwft7j25" path="res://scripts/quest/quest_template_controller.gd" id="22_quest_template_controller"]
+[ext_resource type="Script" uid="uid://drv4ak4w1v1bw" path="res://scripts/quest/quest_session_controller.gd" id="23_quest_session_controller"]
+[ext_resource type="Script" uid="uid://dcfjtopi1sisj" path="res://scripts/quest/quest_flight_runtime_controller.gd" id="24_quest_flight_runtime_controller"]
+[ext_resource type="Script" uid="uid://dn5f0s26nj0x7" path="res://scripts/quest/quest_status_controller.gd" id="25_quest_status_controller"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_top_color = Color(1, 0.36370286, 0.50971085, 1)
@@ -56,25 +56,25 @@ radial_segments = 48
 [node name="QuestMain" type="Node3D" unique_id=1992815131]
 script = ExtResource("1_quest_main")
 
-[node name="QuestXrController" type="Node" parent="."]
+[node name="QuestXrController" type="Node" parent="." unique_id=2109929200]
 script = ExtResource("19_quest_xr_controller")
 
-[node name="QuestPanelController" type="Node" parent="."]
+[node name="QuestPanelController" type="Node" parent="." unique_id=1208086047]
 script = ExtResource("20_quest_panel_controller")
 
-[node name="QuestConnectionController" type="Node" parent="."]
+[node name="QuestConnectionController" type="Node" parent="." unique_id=1169121200]
 script = ExtResource("21_quest_connection_controller")
 
-[node name="QuestTemplateController" type="Node" parent="."]
+[node name="QuestTemplateController" type="Node" parent="." unique_id=847769378]
 script = ExtResource("22_quest_template_controller")
 
-[node name="QuestSessionController" type="Node" parent="."]
+[node name="QuestSessionController" type="Node" parent="." unique_id=1393307889]
 script = ExtResource("23_quest_session_controller")
 
-[node name="QuestFlightRuntimeController" type="Node" parent="."]
+[node name="QuestFlightRuntimeController" type="Node" parent="." unique_id=749412751]
 script = ExtResource("24_quest_flight_runtime_controller")
 
-[node name="QuestStatusController" type="Node" parent="."]
+[node name="QuestStatusController" type="Node" parent="." unique_id=610311140]
 script = ExtResource("25_quest_status_controller")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=132191149]
@@ -107,6 +107,7 @@ pose = &"aim"
 script = ExtResource("15_smooth_pivot")
 
 [node name="LeftPointer" parent="XROrigin3D/LeftAim/SmoothPointer" unique_id=1258697533 instance=ExtResource("8_function_pointer")]
+show_when_intersecting = false
 
 [node name="ControllerVisual" parent="XROrigin3D/LeftAim/SmoothPointer" unique_id=545737677 instance=ExtResource("9_left_wand")]
 

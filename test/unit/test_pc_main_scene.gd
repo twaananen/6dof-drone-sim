@@ -22,8 +22,8 @@ func test_pc_main_scene_wraps_left_column_in_scroll_container() -> void:
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowRunPanel"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/VBox/Filters/SchemeFilterSelect"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/VBox/Filters/DifficultyFilterSelect"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/Margin/VBox/Filters/SchemeFilterSelect"))
+	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/Margin/VBox/Filters/DifficultyFilterSelect"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Guide"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Editor"))
 	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/AdvancedJson"))
@@ -74,3 +74,20 @@ func test_pc_runtime_ignores_origin_capture_when_tracking_is_invalid() -> void:
 	pc_main._on_state_received(state)
 
 	assert_false(pc_main._source_deriver.calibration.is_calibrated())
+
+
+func test_pc_status_payload_uses_cached_template_summary_and_serialized_template() -> void:
+	var scene: PackedScene = load("res://scenes/pc_main.tscn")
+	assert_not_null(scene)
+
+	var pc_main := scene.instantiate()
+	_assign_test_ports(pc_main)
+	add_child_autofree(pc_main)
+	await wait_process_frames(1)
+
+	assert_false(pc_main._active_template_summary_cache.is_empty())
+	assert_false(pc_main._active_template_payload_cache.is_empty())
+
+	var payload: Dictionary = pc_main._build_status_payload()
+	assert_eq(payload["template_summary"], pc_main._active_template_summary_cache)
+	assert_eq(payload["template"], pc_main._active_template_payload_cache)

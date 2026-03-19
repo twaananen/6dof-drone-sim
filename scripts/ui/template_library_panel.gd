@@ -14,14 +14,14 @@ var _selected_template_id: String = ""
 var _scheme_filter: String = ""
 var _difficulty_filter: String = ""
 
-@onready var scheme_filter_select: OptionButton = $VBox/Filters/SchemeFilterSelect
-@onready var difficulty_filter_select: OptionButton = $VBox/Filters/DifficultyFilterSelect
-@onready var list: ItemList = $VBox/List
-@onready var summary_label: Label = $VBox/Summary
-@onready var apply_button: Button = $VBox/Buttons/ApplyButton
-@onready var copy_button: Button = $VBox/Buttons/CopyButton
-@onready var new_button: Button = $VBox/Buttons/NewButton
-@onready var delete_button: Button = $VBox/Buttons/DeleteButton
+@onready var scheme_filter_select: OptionButton = $Margin/VBox/Filters/SchemeFilterSelect
+@onready var difficulty_filter_select: OptionButton = $Margin/VBox/Filters/DifficultyFilterSelect
+@onready var list: ItemList = $Margin/VBox/List
+@onready var summary_label: Label = $Margin/VBox/Summary
+@onready var apply_button: Button = $Margin/VBox/Buttons/ApplyButton
+@onready var copy_button: Button = $Margin/VBox/Buttons/CopyButton
+@onready var new_button: Button = $Margin/VBox/Buttons/NewButton
+@onready var delete_button: Button = $Margin/VBox/Buttons/DeleteButton
 
 
 func _ready() -> void:

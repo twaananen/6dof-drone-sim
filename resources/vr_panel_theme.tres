@@ -1,4 +1,138 @@
 [gd_resource type="Theme" format=3 uid="uid://cvrpanltheme1"]
 
+[sub_resource type="StyleBoxFlat" id="4_button_disabled"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.085, 0.14, 0.115, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.52, 0.62, 0.56, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="5_focus_outline"]
+draw_center = false
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.68, 0.92, 1, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="2_button_hover"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.16, 0.33, 0.255, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.99, 0.99, 0.98, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="1_button_normal"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.135, 0.265, 0.205, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.95, 0.97, 0.95, 0.95)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="3_button_pressed"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.09, 0.21, 0.155, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.82, 0.96, 0.88, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="7_field_focus"]
+content_margin_left = 15.0
+content_margin_top = 11.0
+content_margin_right = 15.0
+content_margin_bottom = 11.0
+bg_color = Color(0.065, 0.13, 0.1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.7, 0.92, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="6_field_normal"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0.055, 0.105, 0.085, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.74, 0.82, 0.77, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [resource]
-default_font_size = 22
+default_font_size = 28
+Button/font_sizes/font_size = 28
+Button/styles/disabled = SubResource("4_button_disabled")
+Button/styles/focus = SubResource("5_focus_outline")
+Button/styles/hover = SubResource("2_button_hover")
+Button/styles/normal = SubResource("1_button_normal")
+Button/styles/pressed = SubResource("3_button_pressed")
+CheckBox/font_sizes/font_size = 28
+CheckButton/font_sizes/font_size = 28
+ItemList/font_sizes/font_size = 28
+ItemList/styles/focus = SubResource("7_field_focus")
+ItemList/styles/panel = SubResource("6_field_normal")
+Label/font_sizes/font_size = 28
+LineEdit/font_sizes/font_size = 28
+LineEdit/styles/focus = SubResource("7_field_focus")
+LineEdit/styles/normal = SubResource("6_field_normal")
+LineEdit/styles/read_only = SubResource("6_field_normal")
+OptionButton/font_sizes/font_size = 28
+OptionButton/styles/disabled = SubResource("4_button_disabled")
+OptionButton/styles/focus = SubResource("5_focus_outline")
+OptionButton/styles/hover = SubResource("2_button_hover")
+OptionButton/styles/normal = SubResource("1_button_normal")
+OptionButton/styles/pressed = SubResource("3_button_pressed")
+TextEdit/font_sizes/font_size = 28
+TextEdit/styles/focus = SubResource("7_field_focus")
+TextEdit/styles/normal = SubResource("6_field_normal")
+TextEdit/styles/read_only = SubResource("6_field_normal")

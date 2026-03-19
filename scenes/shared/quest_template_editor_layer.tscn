@@ -16,6 +16,7 @@ disable_fog = true
 albedo_color = Color(1, 1, 1, 0.92)
 
 [node name="QuestTemplateEditorLayer" type="OpenXRCompositionLayerQuad" unique_id=1044644285 groups=["ui_layer"]]
+sort_order = -1
 quad_size = Vector2(0.92, 1.1)
 script = ExtResource("1")
 scene = ExtResource("2")

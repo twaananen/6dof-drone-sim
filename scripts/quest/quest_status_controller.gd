@@ -275,8 +275,6 @@ func _push_runtime_diagnostics(force: bool) -> void:
 		return
 	if not force and not _control_client.is_socket_connected():
 		return
-	if not _control_client.is_socket_connected():
-		return
 	_last_runtime_diagnostics_push_usec = Time.get_ticks_usec()
 	control_message_requested.emit({
 		"type": "quest_diagnostics",

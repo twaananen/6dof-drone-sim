@@ -40,6 +40,8 @@ var _session_profile: SessionProfile = SessionProfile.new()
 var _session_run_history: Array = []
 var _last_report_export: Dictionary = {}
 var _active_template: MappingTemplate
+var _active_template_summary_cache: Dictionary = {}
+var _active_template_payload_cache: Dictionary = {}
 var _runtime_template: MappingTemplate
 var _last_timestamp_usec: int = 0
 var _last_outputs: Dictionary = {}
@@ -142,6 +144,7 @@ func _on_state_received(state: Dictionary) -> void:
 
 func _apply_template(template: MappingTemplate) -> void:
 	_active_template = template
+	_refresh_active_template_cache()
 	_live_tuning_settings.clear()
 	_rebuild_runtime_template()
 	template_editor.set_template(template)
@@ -305,7 +308,7 @@ func _send_status_update() -> void:
 		"type": "active_template",
 		"template_id": _active_template.template_id if _active_template != null else "",
 		"template_summary": _active_template_summary(),
-		"template": _active_template.to_dict() if _active_template != null else {},
+		"template": _active_template_payload(),
 	})
 	var status_payload := _build_status_payload()
 	status_payload["type"] = "status"
@@ -347,7 +350,7 @@ func _build_status_payload() -> Dictionary:
 		"template_name": _active_template.display_name if _active_template != null else "",
 		"template_slug": _active_template.slug if _active_template != null else "",
 		"template_summary": _active_template_summary(),
-		"template": _active_template.to_dict() if _active_template != null else {},
+		"template": _active_template_payload(),
 		"failsafe_active": _failsafe.is_active(),
 		"packets_received": telemetry_receiver.packets_received,
 		"packets_dropped": telemetry_receiver.packets_dropped,
@@ -391,7 +394,22 @@ func _build_status_payload() -> Dictionary:
 func _active_template_summary() -> Dictionary:
 	if _active_template == null:
 		return {}
-	return _template_summary_formatter.build_summary(_active_template)
+	return _active_template_summary_cache
+
+
+func _active_template_payload() -> Dictionary:
+	if _active_template == null:
+		return {}
+	return _active_template_payload_cache
+
+
+func _refresh_active_template_cache() -> void:
+	if _active_template == null:
+		_active_template_summary_cache = {}
+		_active_template_payload_cache = {}
+		return
+	_active_template_summary_cache = _template_summary_formatter.build_summary(_active_template)
+	_active_template_payload_cache = _active_template.to_dict()
 
 
 func _neutralize_motion_outputs(outputs: Dictionary) -> Dictionary:

@@ -124,3 +124,8 @@ func test_status_controller_renders_labels_and_emits_diagnostics_messages() -> v
 	controller._push_runtime_diagnostics(true)
 	assert_eq(messages.size(), 1)
 	assert_eq(messages[0]["type"], "quest_diagnostics")
+
+	control_client.connected = false
+	controller._push_runtime_diagnostics(true)
+	assert_eq(messages.size(), 2)
+	assert_eq(messages[1]["type"], "quest_diagnostics")

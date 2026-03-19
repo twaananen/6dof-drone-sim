@@ -7,13 +7,13 @@
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
 [ext_resource type="Script" uid="uid://b5ccyb0sy2bbb" path="res://scripts/xr/quest_composition_layer_repro_quad.gd" id="6_repro_quad"]
 [ext_resource type="PackedScene" uid="uid://bmp738135p3wf" path="res://scenes/quest_flight_panel.tscn" id="7_quest_panel"]
-[ext_resource type="Script" path="res://scripts/quest/quest_xr_controller.gd" id="8_quest_xr_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_panel_controller.gd" id="9_quest_panel_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_connection_controller.gd" id="10_quest_connection_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_template_controller.gd" id="11_quest_template_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_session_controller.gd" id="12_quest_session_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_flight_runtime_controller.gd" id="13_quest_flight_runtime_controller"]
-[ext_resource type="Script" path="res://scripts/quest/quest_status_controller.gd" id="14_quest_status_controller"]
+[ext_resource type="Script" uid="uid://jt71bwvmlfvo" path="res://scripts/quest/quest_xr_controller.gd" id="8_quest_xr_controller"]
+[ext_resource type="Script" uid="uid://di4qllf4d66bh" path="res://scripts/quest/quest_panel_controller.gd" id="9_quest_panel_controller"]
+[ext_resource type="Script" uid="uid://dl1te6p2dx06w" path="res://scripts/quest/quest_connection_controller.gd" id="10_quest_connection_controller"]
+[ext_resource type="Script" uid="uid://4wc0bwft7j25" path="res://scripts/quest/quest_template_controller.gd" id="11_quest_template_controller"]
+[ext_resource type="Script" uid="uid://drv4ak4w1v1bw" path="res://scripts/quest/quest_session_controller.gd" id="12_quest_session_controller"]
+[ext_resource type="Script" uid="uid://dcfjtopi1sisj" path="res://scripts/quest/quest_flight_runtime_controller.gd" id="13_quest_flight_runtime_controller"]
+[ext_resource type="Script" uid="uid://dn5f0s26nj0x7" path="res://scripts/quest/quest_status_controller.gd" id="14_quest_status_controller"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -41,25 +41,25 @@ size = Vector3(0.25, 0.25, 0.25)
 [node name="QuestMainReproStartup" type="Node3D" unique_id=1816358257]
 script = ExtResource("1_quest_main")
 
-[node name="QuestXrController" type="Node" parent="."]
+[node name="QuestXrController" type="Node" parent="." unique_id=1651088485]
 script = ExtResource("8_quest_xr_controller")
 
-[node name="QuestPanelController" type="Node" parent="."]
+[node name="QuestPanelController" type="Node" parent="." unique_id=2063478674]
 script = ExtResource("9_quest_panel_controller")
 
-[node name="QuestConnectionController" type="Node" parent="."]
+[node name="QuestConnectionController" type="Node" parent="." unique_id=994477045]
 script = ExtResource("10_quest_connection_controller")
 
-[node name="QuestTemplateController" type="Node" parent="."]
+[node name="QuestTemplateController" type="Node" parent="." unique_id=2074493458]
 script = ExtResource("11_quest_template_controller")
 
-[node name="QuestSessionController" type="Node" parent="."]
+[node name="QuestSessionController" type="Node" parent="." unique_id=1713991638]
 script = ExtResource("12_quest_session_controller")
 
-[node name="QuestFlightRuntimeController" type="Node" parent="."]
+[node name="QuestFlightRuntimeController" type="Node" parent="." unique_id=1516862611]
 script = ExtResource("13_quest_flight_runtime_controller")
 
-[node name="QuestStatusController" type="Node" parent="."]
+[node name="QuestStatusController" type="Node" parent="." unique_id=1910970063]
 script = ExtResource("14_quest_status_controller")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1462267146]
