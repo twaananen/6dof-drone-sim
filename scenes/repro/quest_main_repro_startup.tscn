@@ -7,6 +7,13 @@
 [ext_resource type="Script" uid="uid://svmpq0rvrm62" path="res://scripts/network/discovery_listener.gd" id="5_discovery_listener"]
 [ext_resource type="Script" uid="uid://b5ccyb0sy2bbb" path="res://scripts/xr/quest_composition_layer_repro_quad.gd" id="6_repro_quad"]
 [ext_resource type="PackedScene" uid="uid://bmp738135p3wf" path="res://scenes/quest_flight_panel.tscn" id="7_quest_panel"]
+[ext_resource type="Script" path="res://scripts/quest/quest_xr_controller.gd" id="8_quest_xr_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_panel_controller.gd" id="9_quest_panel_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_connection_controller.gd" id="10_quest_connection_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_template_controller.gd" id="11_quest_template_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_session_controller.gd" id="12_quest_session_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_flight_runtime_controller.gd" id="13_quest_flight_runtime_controller"]
+[ext_resource type="Script" path="res://scripts/quest/quest_status_controller.gd" id="14_quest_status_controller"]
 
 [sub_resource type="ProceduralSkyMaterial" id="1_sky_material"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -33,6 +40,27 @@ size = Vector3(0.25, 0.25, 0.25)
 
 [node name="QuestMainReproStartup" type="Node3D" unique_id=1816358257]
 script = ExtResource("1_quest_main")
+
+[node name="QuestXrController" type="Node" parent="."]
+script = ExtResource("8_quest_xr_controller")
+
+[node name="QuestPanelController" type="Node" parent="."]
+script = ExtResource("9_quest_panel_controller")
+
+[node name="QuestConnectionController" type="Node" parent="."]
+script = ExtResource("10_quest_connection_controller")
+
+[node name="QuestTemplateController" type="Node" parent="."]
+script = ExtResource("11_quest_template_controller")
+
+[node name="QuestSessionController" type="Node" parent="."]
+script = ExtResource("12_quest_session_controller")
+
+[node name="QuestFlightRuntimeController" type="Node" parent="."]
+script = ExtResource("13_quest_flight_runtime_controller")
+
+[node name="QuestStatusController" type="Node" parent="."]
+script = ExtResource("14_quest_status_controller")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1462267146]
 environment = SubResource("3_environment")
