@@ -116,21 +116,10 @@ func to_dict() -> Dictionary:
 
 
 func to_summary_dict() -> Dictionary:
-	return {
-		"template_id": template_id,
-		"slug": slug,
-		"display_name": display_name,
-		"origin": origin,
-		"source_template_id": source_template_id,
-		"summary": summary,
-		"control_scheme": control_scheme,
-		"difficulty": difficulty,
-		"betaflight_recommendation": betaflight_recommendation.duplicate(true),
-		"liftoff_recommendation": liftoff_recommendation.duplicate(true),
-		"liftoff_assists": liftoff_assists.duplicate(true),
-		"warnings": warnings.duplicate(true),
-		"usage_tips": usage_tips.duplicate(true),
-	}
+	var d := to_dict()
+	d.erase("schema_version")
+	d.erase("outputs")
+	return d
 
 
 func duplicate_template() -> MappingTemplate:
@@ -174,15 +163,21 @@ func from_dict(data: Dictionary) -> void:
 	summary = str(data.get("summary", ""))
 	control_scheme = str(data.get("control_scheme", "experimental"))
 	difficulty = str(data.get("difficulty", "experimental"))
-	betaflight_recommendation = _merge_recommendation(
+	betaflight_recommendation = _merge_keyed_dict(
 		_default_recommendation(),
-		data.get("betaflight_recommendation", {})
+		data.get("betaflight_recommendation", {}),
+		["recommended", "acceptable", "avoid"]
 	)
-	liftoff_recommendation = _merge_recommendation(
+	liftoff_recommendation = _merge_keyed_dict(
 		_default_recommendation(),
-		data.get("liftoff_recommendation", {})
+		data.get("liftoff_recommendation", {}),
+		["recommended", "acceptable", "avoid"]
 	)
-	liftoff_assists = _merge_assists(_default_assists(), data.get("liftoff_assists", {}))
+	liftoff_assists = _merge_keyed_dict(
+		_default_assists(),
+		data.get("liftoff_assists", {}),
+		["recommended", "optional", "avoid"]
+	)
 	warnings = _string_array(data.get("warnings", []))
 	usage_tips = _string_array(data.get("usage_tips", []))
 
@@ -215,6 +210,8 @@ func load_from_file(path: String) -> Error:
 	var err: Error = json.parse(text)
 	if err != OK:
 		return err
+	if typeof(json.data) != TYPE_DICTIONARY:
+		return ERR_INVALID_DATA
 	from_dict(json.data)
 	return OK
 
@@ -240,21 +237,11 @@ static func control_scheme_options() -> Array:
 	]
 
 
-static func _merge_recommendation(base: Dictionary, data: Variant) -> Dictionary:
+static func _merge_keyed_dict(base: Dictionary, data: Variant, list_keys: Array) -> Dictionary:
 	var merged := base.duplicate(true)
 	if typeof(data) != TYPE_DICTIONARY:
 		return merged
-	for key in ["recommended", "acceptable", "avoid"]:
-		merged[key] = _string_array(data.get(key, []))
-	merged["notes"] = str(data.get("notes", ""))
-	return merged
-
-
-static func _merge_assists(base: Dictionary, data: Variant) -> Dictionary:
-	var merged := base.duplicate(true)
-	if typeof(data) != TYPE_DICTIONARY:
-		return merged
-	for key in ["recommended", "optional", "avoid"]:
+	for key in list_keys:
 		merged[key] = _string_array(data.get(key, []))
 	merged["notes"] = str(data.get("notes", ""))
 	return merged

@@ -116,6 +116,7 @@ func test_status_controller_renders_labels_and_emits_diagnostics_messages() -> v
 		"backend_available": true,
 	})
 	controller.refresh_all()
+	await wait_process_frames(1)
 	assert_string_contains(controller._status_label.text, "Template: Attitude Tilt")
 	assert_string_contains(controller._output_preview_label.text, "Outputs: T 0.50")
 

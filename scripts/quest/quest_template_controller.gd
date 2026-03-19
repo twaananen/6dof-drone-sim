@@ -97,17 +97,6 @@ func handle_control_disconnected() -> void:
 	_template_editor_loaded_id = ""
 
 
-func override_local_state(
-	template_catalog: Array,
-	active_template_id: String,
-	active_template_summary: Dictionary,
-	active_template_payload: Dictionary
-) -> void:
-	_template_catalog = template_catalog.duplicate(true)
-	_active_template_id = active_template_id
-	_active_template_summary = active_template_summary.duplicate(true)
-	_active_template_payload = active_template_payload.duplicate(true)
-
 
 func get_active_template_summary() -> Dictionary:
 	return _active_template_summary.duplicate(true)
@@ -128,12 +117,12 @@ func get_template_catalog() -> Array:
 func sync_template_surfaces(reset_library_selection: bool = true) -> void:
 	if template_library_panel != null:
 		template_library_panel.set_catalog(_template_catalog)
-		if reset_library_selection or str(template_library_panel._selected_template_id).is_empty():
+		if reset_library_selection or str(template_library_panel.get_selected_template_id()).is_empty():
 			template_library_panel.set_selected_template_id(_active_template_id)
 	if template_guide_panel != null:
 		var selected_id := _active_template_id
-		if template_library_panel != null and not str(template_library_panel._selected_template_id).is_empty():
-			selected_id = str(template_library_panel._selected_template_id)
+		if template_library_panel != null and not str(template_library_panel.get_selected_template_id()).is_empty():
+			selected_id = str(template_library_panel.get_selected_template_id())
 		template_guide_panel.set_summary(_catalog_summary(selected_id))
 	if template_editor_panel != null and not _active_template_payload.is_empty() and _template_editor_loaded_id != _active_template_id:
 		var template := MappingTemplate.new()

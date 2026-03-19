@@ -6,6 +6,8 @@ extends PanelContainer
 
 
 func set_summary(summary: Dictionary) -> void:
+	if not is_node_ready():
+		return
 	title_label.text = str(summary.get("display_name", "Template Guide"))
 	var lines := PackedStringArray()
 	var overview := str(summary.get("summary", ""))

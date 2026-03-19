@@ -39,11 +39,6 @@ const PANEL_KEY_TEMPLATE_EDITOR := "template_editor"
 
 var template_library_panel: TemplateLibraryPanel
 
-var _template_catalog: Array = []
-var _active_template_id: String = ""
-var _active_template_summary: Dictionary = {}
-var _active_template_payload: Dictionary = {}
-
 
 func _ready() -> void:
 	_log_boot("READY_BEGIN", {"scene": "quest_main"})
@@ -95,7 +90,6 @@ func _ready() -> void:
 
 	quest_session_controller.refresh_ui_enabled_state(control_client.is_socket_connected())
 	quest_connection_controller.refresh_ui_enabled_state(control_client.is_socket_connected())
-	_sync_template_compat_state_from_controller()
 	quest_status_controller.refresh_all()
 	_log_boot("READY_COMPLETE", {
 		"xr_state": str(quest_status_controller.build_runtime_diagnostics().get("xr_state", "xr_starting")),
@@ -278,11 +272,9 @@ func _on_control_message(message: Dictionary) -> void:
 	match str(message.get("type", "")):
 		"template_catalog":
 			quest_template_controller.apply_template_catalog(message.get("templates", []))
-			_sync_template_compat_state_from_controller()
 		"session_profile":
 			quest_connection_controller.mark_profile_synced()
 			quest_session_controller.apply_session_profile(message.get("profile", {}))
-			quest_status_controller.apply_session_profile(quest_session_controller.get_session_profile())
 			quest_session_controller.refresh_ui_enabled_state(control_client.is_socket_connected())
 		"active_template":
 			quest_template_controller.apply_active_template(
@@ -290,12 +282,10 @@ func _on_control_message(message: Dictionary) -> void:
 				message.get("template_summary", {}),
 				message.get("template", {})
 			)
-			_sync_template_compat_state_from_controller()
 		"status":
 			quest_session_controller.apply_pc_status(message)
 			quest_template_controller.apply_status_template_fallback(message)
 			quest_status_controller.apply_pc_status(message)
-			_sync_template_compat_state_from_controller()
 		"inspect_tree":
 			_handle_inspect_tree(message)
 		"inspect_node":
@@ -330,14 +320,6 @@ func _require_panel_node(quest_panel: Control, node_path: String) -> Node:
 	return node
 
 
-func _sync_template_compat_state_from_controller() -> void:
-	_template_catalog = quest_template_controller.get_template_catalog()
-	_active_template_id = quest_template_controller.get_active_template_id()
-	_active_template_summary = quest_template_controller.get_active_template_summary()
-	_active_template_payload = quest_template_controller.get_active_template_payload()
-	template_library_panel = quest_template_controller.template_library_panel
-
-
 func _build_pose_log_fields(
 	state: Dictionary,
 	origin_transform: Transform3D,
@@ -357,16 +339,6 @@ func _update_status_label() -> void:
 func _build_runtime_diagnostics() -> Dictionary:
 	return quest_status_controller.build_runtime_diagnostics()
 
-
-func _sync_template_surfaces() -> void:
-	quest_template_controller.override_local_state(
-		_template_catalog,
-		_active_template_id,
-		_active_template_summary,
-		_active_template_payload
-	)
-	quest_template_controller.sync_template_surfaces()
-	_sync_template_compat_state_from_controller()
 
 
 func _resolve_inspect_node(path: String) -> Node:

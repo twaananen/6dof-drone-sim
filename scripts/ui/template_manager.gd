@@ -40,8 +40,9 @@ func list_templates() -> Array:
 
 func list_ids() -> PackedStringArray:
 	var ids := PackedStringArray()
-	for summary in list_templates():
-		ids.append(str(summary.get("template_id", "")))
+	for template_id in _catalog.keys():
+		ids.append(template_id)
+	ids.sort()
 	return ids
 
 
@@ -121,10 +122,11 @@ func delete_user_template(template_id: String) -> Error:
 
 
 func ensure_unique_slug(base_slug: String, template_id: String = "") -> String:
-	var candidate := base_slug if not base_slug.is_empty() else "template"
+	var base := base_slug if not base_slug.is_empty() else "template"
+	var candidate := base
 	var index := 2
 	while _slug_in_use(candidate, template_id):
-		candidate = "%s_%d" % [base_slug, index]
+		candidate = "%s_%d" % [base, index]
 		index += 1
 	return candidate
 

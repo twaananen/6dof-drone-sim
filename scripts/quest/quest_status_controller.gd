@@ -23,6 +23,7 @@ var _panel_controller: Node
 var _last_status: Dictionary = {}
 var _session_profile: Dictionary = {}
 var _last_runtime_diagnostics_push_usec: int = 0
+var _status_dirty: bool = true
 
 
 func configure(
@@ -75,7 +76,7 @@ func handle_control_disconnected() -> void:
 
 
 func refresh_all() -> void:
-	_update_status_label()
+	_status_dirty = true
 
 
 func build_runtime_diagnostics() -> Dictionary:
@@ -123,6 +124,9 @@ func build_runtime_diagnostics() -> Dictionary:
 
 
 func _process(_delta: float) -> void:
+	if _status_dirty:
+		_status_dirty = false
+		_update_status_label()
 	_maybe_push_runtime_diagnostics()
 
 

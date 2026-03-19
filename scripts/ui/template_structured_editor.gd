@@ -1,5 +1,5 @@
 class_name TemplateStructuredEditor
-extends Control
+extends PanelContainer
 
 const MappingTemplate = preload("res://scripts/mapping/mapping_template.gd")
 const TemplateSummaryFormatter = preload("res://scripts/mapping/template_summary_formatter.gd")
@@ -91,6 +91,8 @@ func _ready() -> void:
 
 func set_template(template: MappingTemplate) -> void:
 	_template = template.duplicate_template()
+	if not is_node_ready():
+		return
 	_updating = true
 	display_name_edit.text = _template.display_name
 	slug_edit.text = _template.slug

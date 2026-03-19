@@ -1,6 +1,7 @@
 class_name TemplateLibraryPanel
 extends PanelContainer
 
+const MappingTemplate = preload("res://scripts/mapping/mapping_template.gd")
 const TemplateSummaryFormatter = preload("res://scripts/mapping/template_summary_formatter.gd")
 
 signal selection_changed(template_id)
@@ -44,6 +45,10 @@ func set_catalog(catalog: Array) -> void:
 	_refresh()
 
 
+func get_selected_template_id() -> String:
+	return _selected_template_id
+
+
 func set_selected_template_id(template_id: String) -> void:
 	_selected_template_id = template_id
 	_refresh()
@@ -81,7 +86,6 @@ func _on_item_selected(index: int) -> void:
 	_selected_template_id = str(list.get_item_metadata(index))
 	_update_summary(_find_summary(_selected_template_id))
 	selection_changed.emit(_selected_template_id)
-	_refresh()
 
 
 func _find_summary(template_id: String) -> Dictionary:
@@ -116,7 +120,7 @@ func _load_filter_options() -> void:
 	difficulty_filter_select.clear()
 	difficulty_filter_select.add_item("All Difficulties")
 	difficulty_filter_select.set_item_metadata(0, "")
-	for difficulty in ["beginner", "intermediate", "advanced", "experimental"]:
+	for difficulty in MappingTemplate.difficulty_options():
 		difficulty_filter_select.add_item(str(TemplateSummaryFormatter.DIFFICULTY_LABELS.get(difficulty, difficulty)))
 		difficulty_filter_select.set_item_metadata(difficulty_filter_select.item_count - 1, difficulty)
 	difficulty_filter_select.select(0)

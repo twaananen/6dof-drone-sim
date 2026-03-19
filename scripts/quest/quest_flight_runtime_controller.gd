@@ -71,7 +71,7 @@ func get_runtime_diagnostics() -> Dictionary:
 
 
 func sync_flight_origin_indicator(state: Dictionary) -> void:
-	if _right_origin_indicator == null:
+	if _right_origin_indicator == null or _right_hand == null:
 		return
 	var control_active := bool(state.get("control_active", false))
 	if state.get("event_flags", 0) & RawControllerState.EVENT_SET_ORIGIN:
@@ -145,7 +145,7 @@ func _physics_process(_delta: float) -> void:
 	_telemetry_sender.send_state(state)
 	sync_flight_origin_indicator(state)
 	_maybe_log_pose_snapshot(state)
-	local_state_updated.emit(get_last_local_state())
+	local_state_updated.emit(_last_local_controller_state)
 
 
 func _maybe_log_pose_snapshot(state: Dictionary) -> void:

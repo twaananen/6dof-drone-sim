@@ -174,10 +174,9 @@ func test_status_refresh_does_not_reset_template_library_selection() -> void:
 		"display_name": "Rate Direct",
 		"summary": "Other template",
 	}
-	quest_main._template_catalog = [active_summary, other_summary]
-	quest_main._active_template_id = "bundled.attitude_tilt"
-	quest_main._active_template_summary = active_summary
-	quest_main._sync_template_surfaces()
+	var controller = quest_main.quest_template_controller
+	controller.apply_template_catalog([active_summary, other_summary])
+	controller.apply_active_template("bundled.attitude_tilt", active_summary, {})
 
 	var library_panel = quest_main.template_library_panel
 	library_panel.set_selected_template_id("bundled.rate_direct")
