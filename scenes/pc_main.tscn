@@ -4,14 +4,9 @@
 [ext_resource type="Script" uid="uid://ou3gh34l6ju4" path="res://scripts/network/telemetry_receiver.gd" id="2"]
 [ext_resource type="Script" uid="uid://cs2rbhfewq3ks" path="res://scripts/network/control_server.gd" id="3"]
 [ext_resource type="Script" uid="uid://t2ru863ibhwi" path="res://scripts/backend/linux_gamepad_backend.gd" id="4"]
-[ext_resource type="PackedScene" uid="uid://ckn3rr228clfw" path="res://scenes/shared/template_editor.tscn" id="5"]
-[ext_resource type="PackedScene" uid="uid://dx2ps12p7sds1" path="res://scenes/shared/telemetry_panel.tscn" id="6"]
-[ext_resource type="PackedScene" uid="uid://bs3erxrfklcbd" path="res://scenes/shared/output_panel.tscn" id="7"]
-[ext_resource type="PackedScene" uid="uid://diky2fj2g3w6a" path="res://scenes/shared/quest_status_panel.tscn" id="8"]
-[ext_resource type="PackedScene" uid="uid://d2x6u6k3dvl1e" path="res://scenes/shared/workflow_editor_panel.tscn" id="9"]
-[ext_resource type="PackedScene" uid="uid://dxqlxmvy7kw7a" path="res://scenes/shared/workflow_run_panel.tscn" id="10"]
 [ext_resource type="Script" uid="uid://bue7lm3hjt4cm" path="res://scripts/network/discovery_beacon.gd" id="11"]
 [ext_resource type="Script" uid="uid://bkc58nnu6m6lo" path="res://scripts/network/inspect_server.gd" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/shared/pc_app_shell.tscn" id="13"]
 
 [node name="PcMain" type="Control" unique_id=1032354419]
 layout_mode = 3
@@ -39,49 +34,5 @@ script = ExtResource("4")
 [node name="DiscoveryBeacon" type="Node" parent="." unique_id=1653645114]
 script = ExtResource("11")
 
-[node name="VBox" type="VBoxContainer" parent="." unique_id=556399480]
+[node name="AppShell" parent="." unique_id=556399480 instance=ExtResource("13")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="StatusPanel" parent="VBox" unique_id=433963103 instance=ExtResource("8")]
-layout_mode = 2
-
-[node name="MainSplit" type="HSplitContainer" parent="VBox" unique_id=789416721]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LeftColumnScroll" type="ScrollContainer" parent="VBox/MainSplit" unique_id=1124138890]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="LeftColumn" type="VBoxContainer" parent="VBox/MainSplit/LeftColumnScroll" unique_id=1317855923]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="WorkflowEditorPanel" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" unique_id=1570041894 instance=ExtResource("9")]
-layout_mode = 2
-
-[node name="WorkflowRunPanel" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" unique_id=1711650922 instance=ExtResource("10")]
-layout_mode = 2
-
-[node name="TemplateEditor" parent="VBox/MainSplit/LeftColumnScroll/LeftColumn" unique_id=1996861880 instance=ExtResource("5")]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Panels" type="VBoxContainer" parent="VBox/MainSplit" unique_id=2095237430]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="RawPanel" parent="VBox/MainSplit/Panels" unique_id=502507523 instance=ExtResource("6")]
-layout_mode = 2
-
-[node name="DerivedPanel" parent="VBox/MainSplit/Panels" unique_id=1439740978 instance=ExtResource("6")]
-layout_mode = 2
-
-[node name="OutputPanel" parent="VBox/MainSplit/Panels" unique_id=1456175373 instance=ExtResource("7")]
-layout_mode = 2

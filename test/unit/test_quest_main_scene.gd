@@ -49,7 +49,7 @@ func test_quest_main_scene_uses_spatial_ui_panel() -> void:
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer/SubViewport/TemplateLibraryPanel/Margin/VBox/Filters/DifficultyFilterSelect"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateLibraryLayer/SubViewport/TemplateLibraryPanel/Margin/VBox/List"))
 	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateGuideLayer/SubViewport/TemplateGuidePanel/Margin/VBox/Body"))
-	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateEditorLayer/SubViewport/TemplateStructuredEditor/Margin/Scroll/VBox/MetaGrid/DisplayNameEdit"))
+	assert_not_null(quest_main.get_node("XROrigin3D/QuestTemplateEditorLayer/SubViewport/TemplateStructuredEditor/Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid/DisplayNameEdit"))
 	assert_not_null(quest_main.get_node("XROrigin3D/TutorialUiLayer/SubViewport/QuestTutorialPanel/Panel/Margin/Scroll/VBox/HideTutorialButton"))
 	assert_true(_has_event("XR_INPUT_READER_READY"))
 	assert_false(_has_event("XR_INPUT_READER_UNBOUND"))

@@ -1,0 +1,315 @@
+[gd_scene format=3 uid="uid://c0kicl2ya3qqq"]
+
+[ext_resource type="Script" uid="uid://cusiejnkwweha" path="res://scripts/ui/pc_live_workspace.gd" id="1"]
+
+[node name="PcLiveWorkspace" type="Control" unique_id=2066497290]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1437800383]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Scroll" type="ScrollContainer" parent="Margin" unique_id=1948974743]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Scroll" unique_id=1136670772]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="HeroCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=288708575]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HeroVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/HeroCard" unique_id=653018064]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TemplateNameLabel" type="Label" parent="Margin/Scroll/VBox/HeroCard/HeroVBox" unique_id=1874838295]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "No template selected"
+
+[node name="TemplateMetaLabel" type="Label" parent="Margin/Scroll/VBox/HeroCard/HeroVBox" unique_id=1192744390]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Control Scheme | Difficulty"
+
+[node name="TemplateSummaryLabel" type="Label" parent="Margin/Scroll/VBox/HeroCard/HeroVBox" unique_id=537004142]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Choose a template to start evaluating mapped outputs."
+autowrap_mode = 3
+
+[node name="TopRow" type="HBoxContainer" parent="Margin/Scroll/VBox" unique_id=601712027]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="InputsCard" type="PanelContainer" parent="Margin/Scroll/VBox/TopRow" unique_id=2091984969]
+custom_minimum_size = Vector2(250, 220)
+layout_mode = 2
+
+[node name="InputsVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/InputsCard" unique_id=95519854]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InputsTitle" type="Label" parent="Margin/Scroll/VBox/TopRow/InputsCard/InputsVBox" unique_id=870815522]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Live Inputs"
+
+[node name="InputStatusLabel" type="Label" parent="Margin/Scroll/VBox/TopRow/InputsCard/InputsVBox" unique_id=1985761405]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tracking Lost | Control Paused | Origin none"
+autowrap_mode = 3
+
+[node name="AnalogLabel" type="Label" parent="Margin/Scroll/VBox/TopRow/InputsCard/InputsVBox" unique_id=392168957]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Trigger 0.00 | Grip 0.00 | Stick 0.00, 0.00"
+autowrap_mode = 3
+
+[node name="ButtonsLabel" type="Label" parent="Margin/Scroll/VBox/TopRow/InputsCard/InputsVBox" unique_id=1017608303]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Buttons: No buttons pressed"
+autowrap_mode = 3
+
+[node name="OutputsCard" type="PanelContainer" parent="Margin/Scroll/VBox/TopRow" unique_id=1701180818]
+custom_minimum_size = Vector2(280, 220)
+layout_mode = 2
+
+[node name="OutputsVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard" unique_id=1973641200]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OutputsTitle" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=1548228905]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Mapped Outputs"
+
+[node name="OutputSummaryLabel" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=1960488347]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aux 1: 0 | Failsafe Active"
+
+[node name="ThrottleAxis" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=609851725]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/ThrottleAxis" unique_id=443067183]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/ThrottleAxis/Header" unique_id=583821946]
+layout_mode = 2
+text = "Throttle"
+
+[node name="Spacer" type="Control" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/ThrottleAxis/Header" unique_id=994689228]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ThrottleValue" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/ThrottleAxis/Header" unique_id=1063287703]
+layout_mode = 2
+text = "0.00"
+
+[node name="ThrottleBar" type="ProgressBar" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/ThrottleAxis" unique_id=963711412]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="YawAxis" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=2000745032]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/YawAxis" unique_id=1758834137]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/YawAxis/Header" unique_id=396883185]
+layout_mode = 2
+text = "Yaw"
+
+[node name="Spacer" type="Control" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/YawAxis/Header" unique_id=825110979]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="YawValue" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/YawAxis/Header" unique_id=966694062]
+layout_mode = 2
+text = "0.00"
+
+[node name="YawBar" type="ProgressBar" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/YawAxis" unique_id=1678760785]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="PitchAxis" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=1147980591]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/PitchAxis" unique_id=842560674]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/PitchAxis/Header" unique_id=1723309576]
+layout_mode = 2
+text = "Pitch"
+
+[node name="Spacer" type="Control" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/PitchAxis/Header" unique_id=728909725]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PitchValue" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/PitchAxis/Header" unique_id=1264097088]
+layout_mode = 2
+text = "0.00"
+
+[node name="PitchBar" type="ProgressBar" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/PitchAxis" unique_id=351694479]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="RollAxis" type="VBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox" unique_id=802434372]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/RollAxis" unique_id=1464351896]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/RollAxis/Header" unique_id=155938473]
+layout_mode = 2
+text = "Roll"
+
+[node name="Spacer" type="Control" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/RollAxis/Header" unique_id=1209258916]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RollValue" type="Label" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/RollAxis/Header" unique_id=2083601298]
+layout_mode = 2
+text = "0.00"
+
+[node name="RollBar" type="ProgressBar" parent="Margin/Scroll/VBox/TopRow/OutputsCard/OutputsVBox/RollAxis" unique_id=1971622546]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="TopSpacer" type="Control" parent="Margin/Scroll/VBox/TopRow" unique_id=1920448103]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BottomRow" type="HBoxContainer" parent="Margin/Scroll/VBox" unique_id=1579916169]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="WorkflowCard" type="PanelContainer" parent="Margin/Scroll/VBox/BottomRow" unique_id=690434283]
+custom_minimum_size = Vector2(320, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WorkflowVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard" unique_id=1356620904]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WorkflowTitle" type="Label" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard/WorkflowVBox" unique_id=2055297305]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Workflow Readiness"
+
+[node name="WorkflowPhaseLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard/WorkflowVBox" unique_id=1161973095]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Phase: Setup"
+
+[node name="WorkflowSummaryLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard/WorkflowVBox" unique_id=658571465]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Waiting for runtime status."
+autowrap_mode = 3
+
+[node name="ChecklistLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard/WorkflowVBox" unique_id=1096522329]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Checklist: No manual checks yet."
+autowrap_mode = 3
+
+[node name="NextActionsLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/WorkflowCard/WorkflowVBox" unique_id=679240640]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Next: Capture a ready snapshot when the pass looks clean."
+autowrap_mode = 3
+
+[node name="RecentCard" type="PanelContainer" parent="Margin/Scroll/VBox/BottomRow" unique_id=1982175665]
+custom_minimum_size = Vector2(320, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RecentVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/BottomRow/RecentCard" unique_id=1632008161]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RecentTitle" type="Label" parent="Margin/Scroll/VBox/BottomRow/RecentCard/RecentVBox" unique_id=1553724249]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Recent Pass"
+
+[node name="LastSnapshotLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/RecentCard/RecentVBox" unique_id=765457196]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No snapshot captured yet."
+autowrap_mode = 3
+
+[node name="ExportSummaryLabel" type="Label" parent="Margin/Scroll/VBox/BottomRow/RecentCard/RecentVBox" unique_id=1990416528]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No report exported yet."
+autowrap_mode = 3
+
+[node name="ActionsCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=1828592120]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ActionsVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/ActionsCard" unique_id=1802049464]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ActionsTitle" type="Label" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox" unique_id=1173721821]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Quick Run Actions"
+
+[node name="NoteEdit" type="LineEdit" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox" unique_id=1158249426]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+placeholder_text = "Optional note for the next snapshot or export"
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox" unique_id=646261943]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SnapshotButton" type="Button" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox/Buttons" unique_id=1565977950]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Capture Snapshot"
+
+[node name="IssueButton" type="Button" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox/Buttons" unique_id=638376779]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Report Issue"
+
+[node name="ExportButton" type="Button" parent="Margin/Scroll/VBox/ActionsCard/ActionsVBox/Buttons" unique_id=767347126]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Export Report"

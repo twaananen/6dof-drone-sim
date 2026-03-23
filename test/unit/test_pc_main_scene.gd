@@ -12,23 +12,38 @@ func _assign_test_ports(pc_main: Node) -> void:
 	pc_main.get_node("InspectServer").listen_port = _test_port_base + 2
 
 
-func test_pc_main_scene_wraps_left_column_in_scroll_container() -> void:
+func test_pc_main_scene_uses_workspace_shell_layout() -> void:
 	var scene: PackedScene = load("res://scenes/pc_main.tscn")
 	assert_not_null(scene)
 
 	var pc_main := scene.instantiate()
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowEditorPanel"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowRunPanel"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/Margin/VBox/Filters/SchemeFilterSelect"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Library/Margin/VBox/Filters/DifficultyFilterSelect"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Guide"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/Editor"))
-	assert_not_null(pc_main.get_node("VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor/VBox/Tabs/AdvancedJson"))
+	assert_not_null(pc_main.get_node("AppShell"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/StatusBar"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/NavRail"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/LiveWorkspace"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/TemplateWorkspace"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/SessionWorkspace"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/DiagnosticsWorkspace"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/TemplateWorkspace/Margin/VBox/BodySplit/LibraryPanel"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/TemplateWorkspace/Margin/VBox/BodySplit/RightColumn/Tabs/GuidePanel"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/TemplateWorkspace/Margin/VBox/BodySplit/RightColumn/Tabs/StructuredEditor"))
+	assert_not_null(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/TemplateWorkspace/Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox/JsonEditor"))
 
 	pc_main.free()
+
+
+func test_pc_main_defaults_to_live_workspace() -> void:
+	var scene: PackedScene = load("res://scenes/pc_main.tscn")
+	assert_not_null(scene)
+
+	var pc_main := scene.instantiate()
+	_assign_test_ports(pc_main)
+	add_child_autofree(pc_main)
+	await wait_process_frames(1)
+
+	assert_eq(pc_main.app_shell.get_current_workspace(), "live")
+	assert_true(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/LiveWorkspace").visible)
+	assert_false(pc_main.get_node("AppShell/Margin/VBox/Body/WorkspaceStack/DiagnosticsWorkspace").visible)
 
 
 func test_pc_runtime_pauses_motion_outputs_but_preserves_aux_button_when_control_inactive() -> void:

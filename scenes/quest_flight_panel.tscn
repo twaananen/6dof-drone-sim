@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bmp738135p3wf"]
 
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="1_vr_theme"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_chrome_style.tres" id="2_chrome_style"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_resize_handle_style.tres" id="4_resize_style"]
+[ext_resource type="StyleBox" uid="uid://dd5wijuhxp50a" path="res://resources/quest_panel_chrome_style.tres" id="2_chrome_style"]
+[ext_resource type="StyleBox" uid="uid://go0l17cp4j8l" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" uid="uid://myb6qut22j3m" path="res://resources/quest_panel_resize_handle_style.tres" id="4_resize_style"]
 
 [node name="QuestFlightPanel" type="Control" unique_id=944695423]
 layout_mode = 3

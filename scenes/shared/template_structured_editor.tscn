@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://78llojj38aqb" path="res://scripts/ui/template_structured_editor.gd" id="1"]
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="2_vr_theme"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" uid="uid://go0l17cp4j8l" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
 
 [node name="TemplateStructuredEditor" type="PanelContainer" unique_id=340932935]
 anchors_preset = 15
@@ -31,305 +31,378 @@ size_flags_vertical = 3
 [node name="VBox" type="VBoxContainer" parent="Margin/Scroll" unique_id=1447778642]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="Margin/Scroll/VBox" unique_id=1914390467]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 28
 text = "Template Editor"
 
 [node name="Intro" type="Label" parent="Margin/Scroll/VBox" unique_id=808001331]
 layout_mode = 2
-text = "Edit metadata, simulator guidance, and the binding structure for the active template."
+text = "Edit metadata, guidance, and binding behavior for the active template."
 autowrap_mode = 3
 
-[node name="MetaGrid" type="GridContainer" parent="Margin/Scroll/VBox" unique_id=1701344518]
+[node name="MetadataCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=530348532]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MetadataVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/MetadataCard" unique_id=1694786406]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MetadataTitle" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox" unique_id=492882428]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Identity"
+
+[node name="MetaGrid" type="GridContainer" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox" unique_id=1543472747]
 layout_mode = 2
 columns = 4
 
-[node name="DisplayNameLabel" type="Label" parent="Margin/Scroll/VBox/MetaGrid" unique_id=1176854119]
+[node name="DisplayNameLabel" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=1176854119]
 layout_mode = 2
 text = "Display Name"
 
-[node name="DisplayNameEdit" type="LineEdit" parent="Margin/Scroll/VBox/MetaGrid" unique_id=2007529991]
-custom_minimum_size = Vector2(0, 72)
+[node name="DisplayNameEdit" type="LineEdit" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=2007529991]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SlugLabel" type="Label" parent="Margin/Scroll/VBox/MetaGrid" unique_id=110086410]
+[node name="SlugLabel" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=110086410]
 layout_mode = 2
 text = "Slug"
 
-[node name="SlugEdit" type="LineEdit" parent="Margin/Scroll/VBox/MetaGrid" unique_id=709455967]
-custom_minimum_size = Vector2(0, 72)
+[node name="SlugEdit" type="LineEdit" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=709455967]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ControlSchemeLabel" type="Label" parent="Margin/Scroll/VBox/MetaGrid" unique_id=2136690050]
+[node name="ControlSchemeLabel" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=2136690050]
 layout_mode = 2
 text = "Control Scheme"
 
-[node name="ControlSchemeSelect" type="OptionButton" parent="Margin/Scroll/VBox/MetaGrid" unique_id=851094266]
-custom_minimum_size = Vector2(0, 72)
+[node name="ControlSchemeSelect" type="OptionButton" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=851094266]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
-[node name="DifficultyLabel" type="Label" parent="Margin/Scroll/VBox/MetaGrid" unique_id=1133233478]
+[node name="DifficultyLabel" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=1133233478]
 layout_mode = 2
 text = "Difficulty"
 
-[node name="DifficultySelect" type="OptionButton" parent="Margin/Scroll/VBox/MetaGrid" unique_id=1276410172]
-custom_minimum_size = Vector2(0, 72)
+[node name="DifficultySelect" type="OptionButton" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid" unique_id=1276410172]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
-[node name="SummaryLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=393833038]
+[node name="SummaryLabel" type="Label" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox" unique_id=393833038]
 layout_mode = 2
 text = "Summary"
 
-[node name="SummaryEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=1064026172]
-custom_minimum_size = Vector2(0, 80)
+[node name="SummaryEdit" type="TextEdit" parent="Margin/Scroll/VBox/MetadataCard/MetadataVBox" unique_id=1064026172]
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 
-[node name="RecommendationsGrid" type="GridContainer" parent="Margin/Scroll/VBox" unique_id=1974808881]
-layout_mode = 2
-columns = 2
-
-[node name="BetaRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=235794705]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Betaflight recommended"
-
-[node name="BetaAcceptableEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=158728147]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Betaflight acceptable"
-
-[node name="BetaAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=1381294953]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Betaflight avoid"
-
-[node name="LiftoffRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=2140875233]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Liftoff recommended"
-
-[node name="LiftoffAcceptableEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=261421830]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Liftoff acceptable"
-
-[node name="LiftoffAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=63007724]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Liftoff avoid"
-
-[node name="AssistsRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=1589908517]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Assists recommended"
-
-[node name="AssistsOptionalEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=522263079]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Assists optional"
-
-[node name="AssistsAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/RecommendationsGrid" unique_id=612814403]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-placeholder_text = "Assists avoid"
-
-[node name="BetaNotesLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=320640534]
-layout_mode = 2
-text = "Betaflight Notes"
-
-[node name="BetaNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=1234280174]
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
-
-[node name="LiftoffNotesLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=1690487873]
-layout_mode = 2
-text = "Liftoff Notes"
-
-[node name="LiftoffNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=1466701398]
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
-
-[node name="AssistsNotesLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=1560152224]
-layout_mode = 2
-text = "Assist Notes"
-
-[node name="AssistsNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=211146841]
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
-
-[node name="WarningsLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=941920027]
-layout_mode = 2
-text = "Warnings"
-
-[node name="WarningsEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=997396765]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-
-[node name="UsageTipsLabel" type="Label" parent="Margin/Scroll/VBox" unique_id=1444812277]
-layout_mode = 2
-text = "Usage Tips"
-
-[node name="UsageTipsEdit" type="TextEdit" parent="Margin/Scroll/VBox" unique_id=124101243]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-
-[node name="OutputToolbar" type="HBoxContainer" parent="Margin/Scroll/VBox" unique_id=1471516150]
-layout_mode = 2
-
-[node name="OutputSelect" type="OptionButton" parent="Margin/Scroll/VBox/OutputToolbar" unique_id=2008455874]
-custom_minimum_size = Vector2(0, 72)
+[node name="GuidanceCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=2107473820]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AddBindingButton" type="Button" parent="Margin/Scroll/VBox/OutputToolbar" unique_id=569095183]
+[node name="GuidanceVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/GuidanceCard" unique_id=1140415947]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GuidanceTitle" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1024685154]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Guidance"
+
+[node name="RecommendationsGrid" type="GridContainer" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1974808881]
+layout_mode = 2
+columns = 2
+
+[node name="BetaRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=235794705]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Betaflight recommended"
+
+[node name="BetaAcceptableEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=158728147]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Betaflight acceptable"
+
+[node name="BetaAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=1381294953]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Betaflight avoid"
+
+[node name="LiftoffRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=2140875233]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Liftoff recommended"
+
+[node name="LiftoffAcceptableEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=261421830]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Liftoff acceptable"
+
+[node name="LiftoffAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=63007724]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Liftoff avoid"
+
+[node name="AssistsRecommendedEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=1589908517]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Assists recommended"
+
+[node name="AssistsOptionalEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=522263079]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Assists optional"
+
+[node name="AssistsAvoidEdit" type="LineEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid" unique_id=612814403]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+placeholder_text = "Assists avoid"
+
+[node name="BetaNotesLabel" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=320640534]
+layout_mode = 2
+text = "Betaflight Notes"
+
+[node name="BetaNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1234280174]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="LiftoffNotesLabel" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1690487873]
+layout_mode = 2
+text = "Liftoff Notes"
+
+[node name="LiftoffNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1466701398]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="AssistsNotesLabel" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1560152224]
+layout_mode = 2
+text = "Assist Notes"
+
+[node name="AssistsNotesEdit" type="TextEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=211146841]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="WarningsLabel" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=941920027]
+layout_mode = 2
+text = "Warnings"
+
+[node name="WarningsEdit" type="TextEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=997396765]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="UsageTipsLabel" type="Label" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=1444812277]
+layout_mode = 2
+text = "Usage Tips"
+
+[node name="UsageTipsEdit" type="TextEdit" parent="Margin/Scroll/VBox/GuidanceCard/GuidanceVBox" unique_id=124101243]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="BindingsCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=1558062068]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BindingsVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/BindingsCard" unique_id=1142501516]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BindingsTitle" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox" unique_id=165877890]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Bindings Studio"
+
+[node name="BindingsSplit" type="HSplitContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox" unique_id=1987263157]
+layout_mode = 2
+size_flags_horizontal = 3
+split_offsets = PackedInt32Array(260)
+split_offset = 260
+
+[node name="BindingRail" type="PanelContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit" unique_id=1310298342]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+
+[node name="RailVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail" unique_id=689252210]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OutputToolbar" type="HBoxContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox" unique_id=1471516150]
+layout_mode = 2
+
+[node name="OutputSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar" unique_id=2008455874]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AddBindingButton" type="Button" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar" unique_id=569095183]
 layout_mode = 2
 text = "Add Binding"
 
-[node name="RemoveBindingButton" type="Button" parent="Margin/Scroll/VBox/OutputToolbar" unique_id=84497648]
+[node name="RemoveBindingButton" type="Button" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar" unique_id=84497648]
 layout_mode = 2
-text = "Remove Binding"
+text = "Remove"
 
-[node name="BindingList" type="ItemList" parent="Margin/Scroll/VBox" unique_id=257005472]
-custom_minimum_size = Vector2(0, 220)
+[node name="BindingList" type="ItemList" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox" unique_id=257005472]
+custom_minimum_size = Vector2(0, 260)
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="BindingGrid" type="GridContainer" parent="Margin/Scroll/VBox" unique_id=1411497998]
+[node name="BindingInspector" type="PanelContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit" unique_id=417963083]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="InspectorVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector" unique_id=1952346880]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BindingSectionTitle" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox" unique_id=916438369]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Binding Detail"
+
+[node name="BindingGrid" type="GridContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox" unique_id=1411497998]
 layout_mode = 2
 columns = 4
 
-[node name="SourceLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=265115431]
+[node name="SourceLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=265115431]
 layout_mode = 2
 text = "Source"
 
-[node name="SourceSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1009666251]
-custom_minimum_size = Vector2(0, 72)
+[node name="SourceSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1009666251]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
-[node name="ModeLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1176268540]
+[node name="ModeLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1176268540]
 layout_mode = 2
 text = "Mode"
 
-[node name="ModeSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingGrid" unique_id=217016264]
-custom_minimum_size = Vector2(0, 72)
+[node name="ModeSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=217016264]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
-[node name="RangeMinLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1554287332]
+[node name="RangeMinLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1554287332]
 layout_mode = 2
 text = "Range Min"
 
-[node name="RangeMinSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1117818709]
+[node name="RangeMinSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1117818709]
 layout_mode = 2
 min_value = -999.0
 max_value = 999.0
 step = 0.01
 
-[node name="RangeMaxLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=2128837271]
+[node name="RangeMaxLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=2128837271]
 layout_mode = 2
 text = "Range Max"
 
-[node name="RangeMaxSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingGrid" unique_id=2061046818]
+[node name="RangeMaxSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=2061046818]
 layout_mode = 2
 min_value = -999.0
 max_value = 999.0
 step = 0.01
 
-[node name="WeightLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1552355324]
+[node name="WeightLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1552355324]
 layout_mode = 2
 text = "Weight"
 
-[node name="WeightSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1973315308]
+[node name="WeightSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1973315308]
 layout_mode = 2
 min_value = -5.0
 max_value = 5.0
 step = 0.01
 value = 1.0
 
-[node name="SmoothingLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1349085732]
+[node name="SmoothingLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1349085732]
 layout_mode = 2
 text = "Smoothing"
 
-[node name="SmoothingSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1074247626]
+[node name="SmoothingSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1074247626]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 
-[node name="InvertLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1788936600]
+[node name="InvertLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1788936600]
 layout_mode = 2
 text = "Invert"
 
-[node name="InvertCheck" type="CheckBox" parent="Margin/Scroll/VBox/BindingGrid" unique_id=382114757]
+[node name="InvertCheck" type="CheckBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=382114757]
 layout_mode = 2
 text = "Binding"
 
-[node name="CurveLabel" type="Label" parent="Margin/Scroll/VBox/BindingGrid" unique_id=173111813]
+[node name="CurveLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=173111813]
 layout_mode = 2
 text = "Curve"
 
-[node name="CurveSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingGrid" unique_id=1272412103]
+[node name="CurveSelect" type="OptionButton" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid" unique_id=1272412103]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
-[node name="OutputGrid" type="GridContainer" parent="Margin/Scroll/VBox" unique_id=1645379135]
+[node name="OutputSectionTitle" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox" unique_id=773003543]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Output Tuning"
+
+[node name="OutputGrid" type="GridContainer" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox" unique_id=1645379135]
 layout_mode = 2
 columns = 4
 
-[node name="DeadzoneLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=609743361]
+[node name="DeadzoneLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=609743361]
 layout_mode = 2
 text = "Deadzone"
 
-[node name="DeadzoneSpin" type="SpinBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=1125979124]
+[node name="DeadzoneSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=1125979124]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 
-[node name="ExpoLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=118084699]
+[node name="ExpoLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=118084699]
 layout_mode = 2
 text = "Expo"
 
-[node name="ExpoSpin" type="SpinBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=1939877151]
+[node name="ExpoSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=1939877151]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 
-[node name="SensitivityLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=1594362397]
+[node name="SensitivityLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=1594362397]
 layout_mode = 2
 text = "Sensitivity"
 
-[node name="SensitivitySpin" type="SpinBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=731812663]
+[node name="SensitivitySpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=731812663]
 layout_mode = 2
 min_value = 0.1
 max_value = 5.0
 step = 0.01
 value = 1.0
 
-[node name="InvertOutputLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=604597778]
+[node name="InvertOutputLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=604597778]
 layout_mode = 2
 text = "Invert Output"
 
-[node name="InvertOutputCheck" type="CheckBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=860416578]
+[node name="InvertOutputCheck" type="CheckBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=860416578]
 layout_mode = 2
 text = "Output"
 
-[node name="OutputMinLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=2015323237]
+[node name="OutputMinLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=2015323237]
 layout_mode = 2
 text = "Output Min"
 
-[node name="OutputMinSpin" type="SpinBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=2114820905]
+[node name="OutputMinSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=2114820905]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.01
 value = -1.0
 
-[node name="OutputMaxLabel" type="Label" parent="Margin/Scroll/VBox/OutputGrid" unique_id=1536555796]
+[node name="OutputMaxLabel" type="Label" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=1536555796]
 layout_mode = 2
 text = "Output Max"
 
-[node name="OutputMaxSpin" type="SpinBox" parent="Margin/Scroll/VBox/OutputGrid" unique_id=1661012290]
+[node name="OutputMaxSpin" type="SpinBox" parent="Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid" unique_id=1661012290]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0

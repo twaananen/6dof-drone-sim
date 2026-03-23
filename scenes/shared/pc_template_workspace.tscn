@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://b2gutcouqikfl"]
+
+[ext_resource type="Script" uid="uid://b6g67x1d61pjc" path="res://scripts/ui/pc_template_workspace.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://cxtnuh2ruf2e0" path="res://scenes/shared/template_library_panel.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://cyv2vsl0g8ytm" path="res://scenes/shared/template_guide_panel.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://c8sue43vq0vpg" path="res://scenes/shared/template_structured_editor.tscn" id="4"]
+
+[node name="PcTemplateWorkspace" type="Control" unique_id=1214047194]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=512645886]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=1618195177]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="HeaderCard" type="PanelContainer" parent="Margin/VBox" unique_id=37327836]
+layout_mode = 2
+
+[node name="HeaderVBox" type="VBoxContainer" parent="Margin/VBox/HeaderCard" unique_id=614803066]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TemplateTitle" type="Label" parent="Margin/VBox/HeaderCard/HeaderVBox" unique_id=1263378473]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Template Studio"
+
+[node name="IdentityLabel" type="Label" parent="Margin/VBox/HeaderCard/HeaderVBox" unique_id=188167990]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No template selected"
+autowrap_mode = 3
+
+[node name="SummaryLabel" type="Label" parent="Margin/VBox/HeaderCard/HeaderVBox" unique_id=1790663671]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Choose a template from the library or create a new one."
+autowrap_mode = 3
+
+[node name="StateLabel" type="Label" parent="Margin/VBox/HeaderCard/HeaderVBox" unique_id=1147350660]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Idle"
+
+[node name="BodySplit" type="HBoxContainer" parent="Margin/VBox" unique_id=1062690689]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="LibraryPanel" parent="Margin/VBox/BodySplit" unique_id=581419605 instance=ExtResource("2")]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RightColumn" type="VBoxContainer" parent="Margin/VBox/BodySplit" unique_id=961492479]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Tabs" type="TabContainer" parent="Margin/VBox/BodySplit/RightColumn" unique_id=150742637]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="GuidePanel" parent="Margin/VBox/BodySplit/RightColumn/Tabs" unique_id=1286492618 instance=ExtResource("3")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 0
+
+[node name="StructuredEditor" parent="Margin/VBox/BodySplit/RightColumn/Tabs" unique_id=527386633 instance=ExtResource("4")]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 1
+
+[node name="AdvancedJson" type="Control" parent="Margin/VBox/BodySplit/RightColumn/Tabs" unique_id=1259486273]
+visible = false
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_tab_index = 2
+
+[node name="JsonVBox" type="VBoxContainer" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson" unique_id=921564920]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="JsonIntro" type="Label" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox" unique_id=1367342081]
+layout_mode = 2
+text = "Inspect or edit the active template as JSON."
+
+[node name="JsonButtons" type="HBoxContainer" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox" unique_id=2042445694]
+layout_mode = 2
+
+[node name="JsonApplyButton" type="Button" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox/JsonButtons" unique_id=1418585580]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Apply JSON"
+
+[node name="JsonSaveButton" type="Button" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox/JsonButtons" unique_id=1636764248]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save JSON"
+
+[node name="JsonEditor" type="TextEdit" parent="Margin/VBox/BodySplit/RightColumn/Tabs/AdvancedJson/JsonVBox" unique_id=1548519206]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3

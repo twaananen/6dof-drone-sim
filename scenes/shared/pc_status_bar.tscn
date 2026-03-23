@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://dqvfpeow6uhpp"]
+
+[ext_resource type="Script" uid="uid://enhjdoebi32s" path="res://scripts/ui/pc_status_bar.gd" id="1"]
+
+[node name="PcStatusBar" type="PanelContainer" unique_id=390830836]
+custom_minimum_size = Vector2(0, 72)
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=2015254565]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 12
+
+[node name="HBox" type="HBoxContainer" parent="Margin" unique_id=1011712055]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Brand" type="Label" parent="Margin/HBox" unique_id=1458506797]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Drone Control Lab"
+
+[node name="Spacer" type="Control" parent="Margin/HBox" unique_id=2135390403]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TemplateCard" type="PanelContainer" parent="Margin/HBox" unique_id=715799340]
+layout_mode = 2
+
+[node name="TemplateLabel" type="Label" parent="Margin/HBox/TemplateCard" unique_id=686392868]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Template: None"
+
+[node name="WorkflowCard" type="PanelContainer" parent="Margin/HBox" unique_id=777732841]
+layout_mode = 2
+
+[node name="WorkflowLabel" type="Label" parent="Margin/HBox/WorkflowCard" unique_id=573929139]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Workflow: Passthrough Standalone"
+
+[node name="ConnectionCard" type="PanelContainer" parent="Margin/HBox" unique_id=1432335512]
+layout_mode = 2
+
+[node name="ConnectionLabel" type="Label" parent="Margin/HBox/ConnectionCard" unique_id=1896566874]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Connection: Disconnected"
+
+[node name="BackendCard" type="PanelContainer" parent="Margin/HBox" unique_id=1394222302]
+layout_mode = 2
+
+[node name="BackendLabel" type="Label" parent="Margin/HBox/BackendCard" unique_id=1845571792]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Backend: Offline"
+
+[node name="PacketsCard" type="PanelContainer" parent="Margin/HBox" unique_id=760044197]
+layout_mode = 2
+
+[node name="PacketsLabel" type="Label" parent="Margin/HBox/PacketsCard" unique_id=851652507]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Packets: 0 / 0 dropped"
+
+[node name="FailsafeCard" type="PanelContainer" parent="Margin/HBox" unique_id=842431043]
+layout_mode = 2
+
+[node name="FailsafeLabel" type="Label" parent="Margin/HBox/FailsafeCard" unique_id=1485185910]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Failsafe: Active"

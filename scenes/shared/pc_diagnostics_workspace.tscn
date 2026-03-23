@@ -1,0 +1,126 @@
+[gd_scene format=3 uid="uid://6fa6h5j0qllr"]
+
+[ext_resource type="Script" uid="uid://brrewtxobhkeg" path="res://scripts/ui/pc_diagnostics_workspace.gd" id="1"]
+
+[node name="PcDiagnosticsWorkspace" type="Control" unique_id=1815890939]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=965533290]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Scroll" type="ScrollContainer" parent="Margin" unique_id=415838394]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Scroll" unique_id=1345681268]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="ConnectionCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=1476067679]
+layout_mode = 2
+
+[node name="ConnectionVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/ConnectionCard" unique_id=1220685627]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConnectionTitle" type="Label" parent="Margin/Scroll/VBox/ConnectionCard/ConnectionVBox" unique_id=2122695029]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Connection"
+
+[node name="ConnectionSummaryLabel" type="Label" parent="Margin/Scroll/VBox/ConnectionCard/ConnectionVBox" unique_id=1556226853]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Control disconnected | Backend offline | Packets 0 / 0 dropped | Beacon 0"
+autowrap_mode = 3
+
+[node name="QuestDetailsLabel" type="Label" parent="Margin/Scroll/VBox/ConnectionCard/ConnectionVBox" unique_id=792711008]
+unique_name_in_owner = true
+layout_mode = 2
+text = "XR xr_starting | Discovery waiting | Quest control paused | Target n/a"
+autowrap_mode = 3
+
+[node name="InputCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=1417901846]
+layout_mode = 2
+
+[node name="InputVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/InputCard" unique_id=1723602571]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InputTitle" type="Label" parent="Margin/Scroll/VBox/InputCard/InputVBox" unique_id=1345210777]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Input Pipeline"
+
+[node name="RawLabel" type="Label" parent="Margin/Scroll/VBox/InputCard/InputVBox" unique_id=1642696820]
+layout_mode = 2
+text = "Raw Telemetry"
+
+[node name="RawJsonEdit" type="TextEdit" parent="Margin/Scroll/VBox/InputCard/InputVBox" unique_id=1324808734]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+editable = false
+
+[node name="DerivedLabel" type="Label" parent="Margin/Scroll/VBox/InputCard/InputVBox" unique_id=542340559]
+layout_mode = 2
+text = "Derived Sources"
+
+[node name="DerivedJsonEdit" type="TextEdit" parent="Margin/Scroll/VBox/InputCard/InputVBox" unique_id=462904594]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+editable = false
+
+[node name="OutputCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=927123677]
+layout_mode = 2
+
+[node name="OutputVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/OutputCard" unique_id=1265251671]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OutputTitle" type="Label" parent="Margin/Scroll/VBox/OutputCard/OutputVBox" unique_id=794076769]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Output / Backend"
+
+[node name="OutputJsonEdit" type="TextEdit" parent="Margin/Scroll/VBox/OutputCard/OutputVBox" unique_id=941088993]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+editable = false
+
+[node name="DebugCard" type="PanelContainer" parent="Margin/Scroll/VBox" unique_id=945860927]
+layout_mode = 2
+
+[node name="DebugVBox" type="VBoxContainer" parent="Margin/Scroll/VBox/DebugCard" unique_id=1791367562]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DebugTitle" type="Label" parent="Margin/Scroll/VBox/DebugCard/DebugVBox" unique_id=2011893251]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Debug Actions"
+
+[node name="DebugActionsLabel" type="Label" parent="Margin/Scroll/VBox/DebugCard/DebugVBox" unique_id=1038253898]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No debug actions right now."
+autowrap_mode = 3

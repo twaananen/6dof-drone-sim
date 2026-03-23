@@ -6,8 +6,6 @@ const TemplateSummaryFormatter = preload("res://scripts/mapping/template_summary
 const FailsafeSupervisor = preload("res://scripts/mapping/failsafe_supervisor.gd")
 const SourceDeriver = preload("res://scripts/telemetry/source_deriver.gd")
 const TemplateManager = preload("res://scripts/ui/template_manager.gd")
-const WorkflowEditorPanel = preload("res://scripts/ui/workflow_editor_panel.gd")
-const WorkflowRunPanel = preload("res://scripts/ui/workflow_run_panel.gd")
 const SessionBaselineComparator = preload("res://scripts/workflow/session_baseline_comparator.gd")
 const SessionProfile = preload("res://scripts/workflow/session_profile.gd")
 const SessionProfileStore = preload("res://scripts/workflow/session_profile_store.gd")
@@ -19,13 +17,7 @@ const SessionRunStore = preload("res://scripts/workflow/session_run_store.gd")
 @onready var inspect_server: Node = $InspectServer
 @onready var backend: Node = $LinuxGamepadBackend
 @onready var discovery_beacon: Node = $DiscoveryBeacon
-@onready var quest_status_panel: QuestStatusPanel = $VBox/StatusPanel
-@onready var workflow_editor: WorkflowEditorPanel = $VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowEditorPanel
-@onready var workflow_run_panel: WorkflowRunPanel = $VBox/MainSplit/LeftColumnScroll/LeftColumn/WorkflowRunPanel
-@onready var template_editor: TemplateEditor = $VBox/MainSplit/LeftColumnScroll/LeftColumn/TemplateEditor
-@onready var raw_panel: TelemetryPanel = $VBox/MainSplit/Panels/RawPanel
-@onready var derived_panel: TelemetryPanel = $VBox/MainSplit/Panels/DerivedPanel
-@onready var output_panel: TelemetryPanel = $VBox/MainSplit/Panels/OutputPanel
+@onready var app_shell: PcAppShell = $AppShell
 
 var _source_deriver: SourceDeriver = SourceDeriver.new()
 var _mapping_engine: MappingEngine = MappingEngine.new()
@@ -62,16 +54,16 @@ func _ready() -> void:
 	control_server.client_connected.connect(_send_initial_status)
 	control_server.client_disconnected.connect(_on_control_client_disconnected)
 	inspect_server.query_received.connect(_on_inspect_query)
-	workflow_editor.profile_applied.connect(_on_session_profile_applied)
-	workflow_editor.reload_requested.connect(_reload_session_profile)
-	workflow_run_panel.snapshot_requested.connect(_on_snapshot_requested)
-	workflow_run_panel.export_requested.connect(_on_export_requested)
-	template_editor.template_applied.connect(_apply_template)
-	template_editor.template_saved.connect(_on_template_saved)
-	template_editor.template_deleted.connect(_on_template_deleted)
+	app_shell.live_workspace.snapshot_requested.connect(_on_snapshot_requested)
+	app_shell.live_workspace.export_requested.connect(_on_export_requested)
+	app_shell.session_workspace.profile_applied.connect(_on_session_profile_applied)
+	app_shell.session_workspace.reload_requested.connect(_reload_session_profile)
+	app_shell.session_workspace.snapshot_requested.connect(_on_snapshot_requested)
+	app_shell.session_workspace.export_requested.connect(_on_export_requested)
+	app_shell.template_workspace.template_applied.connect(_apply_template)
+	app_shell.template_workspace.template_saved.connect(_on_template_saved)
+	app_shell.template_workspace.template_deleted.connect(_on_template_deleted)
 	_session_run_history = _session_run_store.load_history()
-	workflow_run_panel.set_history(_session_run_history)
-	workflow_run_panel.set_last_report_export(_last_report_export)
 	_reload_session_profile()
 
 	var template_ids: PackedStringArray = _template_manager.list_ids()
@@ -79,20 +71,14 @@ func _ready() -> void:
 		var template: MappingTemplate = _template_manager.load_template(template_ids[0])
 		if template != null:
 			_apply_template(template)
+	else:
+		_refresh_desktop_ui()
 
 
 func _process(_delta: float) -> void:
-	if _active_template == null:
-		return
-	var status_payload := _build_status_payload()
-	quest_status_panel.set_status(status_payload)
-	workflow_editor.set_runtime_status(status_payload)
-	workflow_run_panel.set_runtime_status(status_payload)
 	if _ui_dirty:
 		_ui_dirty = false
-		raw_panel.set_payload("Raw Telemetry", _serialize_state_for_ui(_pending_raw_state))
-		derived_panel.set_payload("Derived Sources", _pending_derived)
-		output_panel.set_payload("Mapped Outputs", _pending_outputs)
+		_refresh_desktop_ui()
 
 
 func _on_state_received(state: Dictionary) -> void:
@@ -147,7 +133,7 @@ func _apply_template(template: MappingTemplate) -> void:
 	_refresh_active_template_cache()
 	_live_tuning_settings.clear()
 	_rebuild_runtime_template()
-	template_editor.set_template(template)
+	_refresh_desktop_ui()
 	_send_initial_status()
 
 
@@ -168,6 +154,7 @@ func _on_control_message(message: Dictionary) -> void:
 			_send_initial_status()
 		"quest_diagnostics":
 			_quest_runtime_diagnostics = message.get("diagnostics", {}).duplicate(true)
+			_refresh_desktop_ui()
 			_send_status_update()
 		"select_template":
 			var template_id: String = str(message.get("template_id", ""))
@@ -257,6 +244,7 @@ func _on_inspect_query(message: Dictionary) -> void:
 
 func _on_control_client_disconnected() -> void:
 	_quest_runtime_diagnostics = {}
+	_refresh_desktop_ui()
 	_send_status_update()
 
 
@@ -265,6 +253,7 @@ func _apply_global_tuning(settings: Dictionary) -> void:
 		return
 	_live_tuning_settings.merge(settings, true)
 	_rebuild_runtime_template()
+	_refresh_desktop_ui()
 	_send_status_update()
 
 
@@ -277,6 +266,7 @@ func _rebuild_runtime_template() -> void:
 
 
 func _send_initial_status() -> void:
+	_refresh_desktop_ui()
 	if not control_server.has_client():
 		return
 	control_server.send_message({
@@ -391,6 +381,107 @@ func _build_status_payload() -> Dictionary:
 	return payload
 
 
+func _refresh_desktop_ui(status_payload: Dictionary = {}) -> void:
+	if app_shell == null:
+		return
+	if status_payload.is_empty():
+		status_payload = _build_status_payload()
+	app_shell.set_shell_status(_build_shell_status(status_payload))
+	app_shell.set_live_data(_build_live_data(status_payload))
+	app_shell.set_session_data(_build_session_data(status_payload))
+	app_shell.set_template_data({
+		"template_id": status_payload.get("template_id", ""),
+	})
+	app_shell.set_diagnostics_data(_build_diagnostics_data(status_payload))
+
+
+func _build_shell_status(status_payload: Dictionary) -> Dictionary:
+	return {
+		"template_name": str(status_payload.get("template_name", "No template")),
+		"workflow_label": "%s / %s" % [
+			str(status_payload.get("session_preset_label", "Custom Workflow")),
+			str(status_payload.get("session_mode_label", "Passthrough Standalone")),
+		],
+		"connected": bool(status_payload.get("connected", false)),
+		"backend_available": bool(status_payload.get("backend_available", false)),
+		"packets_received": int(status_payload.get("packets_received", 0)),
+		"packets_dropped": int(status_payload.get("packets_dropped", 0)),
+		"failsafe_active": bool(status_payload.get("failsafe_active", false)),
+	}
+
+
+func _build_live_data(status_payload: Dictionary) -> Dictionary:
+	var recent_snapshots: Array = status_payload.get("recent_run_snapshots", [])
+	var latest_snapshot: Dictionary = recent_snapshots[0] if not recent_snapshots.is_empty() else {}
+	var thumbstick: Vector2 = _pending_raw_state.get("thumbstick", Vector2.ZERO)
+	return {
+		"template_name": str(status_payload.get("template_name", "No template")),
+		"template_summary": status_payload.get("template_summary", {}).duplicate(true),
+		"input_summary": {
+			"tracking_valid": bool(_pending_raw_state.get("tracking_valid", false)),
+			"control_active": bool(_pending_raw_state.get("control_active", false)),
+			"trigger": float(_pending_raw_state.get("trigger", 0.0)),
+			"grip": float(_pending_raw_state.get("grip", 0.0)),
+			"thumbstick_x": thumbstick.x,
+			"thumbstick_y": thumbstick.y,
+			"buttons_summary": _build_buttons_summary(int(_pending_raw_state.get("buttons", 0))),
+			"origin_event": _origin_event_label(int(_pending_raw_state.get("event_flags", 0))),
+		},
+		"output_summary": status_payload.get("output_summary", {}).duplicate(true),
+		"failsafe_active": bool(status_payload.get("failsafe_active", false)),
+		"phase_label": str(status_payload.get("session_playbook", {}).get("phase_label", "Setup")),
+		"workflow_summary": str(status_payload.get("session_diagnostics", {}).get("summary", "Waiting for runtime status.")),
+		"manual_check_summary": str(status_payload.get("session_manual_check_summary", "No manual checks yet.")),
+		"next_actions": status_payload.get("session_playbook", {}).get("next_actions", []).duplicate(),
+		"latest_snapshot": latest_snapshot.duplicate(true),
+		"last_report_export": _last_report_export.duplicate(true),
+	}
+
+
+func _build_session_data(status_payload: Dictionary) -> Dictionary:
+	return {
+		"profile": _session_profile.duplicate_profile(),
+		"runtime_status": status_payload.duplicate(true),
+		"history": _session_run_history.duplicate(true),
+		"last_report_export": _last_report_export.duplicate(true),
+	}
+
+
+func _build_diagnostics_data(status_payload: Dictionary) -> Dictionary:
+	return {
+		"status": status_payload.duplicate(true),
+		"raw": _serialize_state_for_ui(_pending_raw_state),
+		"derived": _pending_derived.duplicate(true),
+		"outputs": _pending_outputs.duplicate(true),
+		"debug_actions": status_payload.get("session_playbook", {}).get("debug_actions", []).duplicate(),
+	}
+	
+
+func _build_buttons_summary(buttons: int) -> String:
+	var labels := PackedStringArray()
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_SOUTH):
+		labels.append("A")
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_EAST):
+		labels.append("B")
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_WEST):
+		labels.append("X")
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_NORTH):
+		labels.append("Y")
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_THUMBSTICK):
+		labels.append("Stick")
+	if RawControllerState.button_pressed(buttons, RawControllerState.BUTTON_MENU):
+		labels.append("Menu")
+	return ", ".join(labels) if not labels.is_empty() else "No buttons pressed"
+
+
+func _origin_event_label(event_flags: int) -> String:
+	if event_flags & RawControllerState.EVENT_SET_ORIGIN:
+		return "set"
+	if event_flags & RawControllerState.EVENT_CLEAR_ORIGIN:
+		return "clear"
+	return "none"
+
+
 func _active_template_summary() -> Dictionary:
 	if _active_template == null:
 		return {}
@@ -434,17 +525,14 @@ func _on_export_requested(note: String) -> void:
 
 func _reload_session_profile() -> void:
 	_session_profile = _session_store.load_profile()
-	workflow_editor.set_profile(_session_profile)
-	workflow_run_panel.set_profile(_session_profile)
-	workflow_run_panel.set_last_report_export(_last_report_export)
+	_refresh_desktop_ui()
 	_send_session_profile()
 	_send_status_update()
 
 
 func _persist_and_broadcast_session_profile() -> void:
 	_session_store.save_profile(_session_profile)
-	workflow_editor.set_profile(_session_profile)
-	workflow_run_panel.set_profile(_session_profile)
+	_refresh_desktop_ui()
 	_send_session_profile()
 	_send_status_update()
 
@@ -458,7 +546,7 @@ func _capture_run_snapshot(kind: String, note: String, origin: String) -> void:
 		origin,
 		note
 	)
-	workflow_run_panel.set_history(_session_run_history)
+	_refresh_desktop_ui()
 	_send_status_update()
 
 
@@ -495,5 +583,5 @@ func _export_session_report(note: String = "") -> void:
 				false
 			),
 		}
-	workflow_run_panel.set_last_report_export(_last_report_export)
+	_refresh_desktop_ui()
 	_send_status_update()

@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" uid="uid://c8xncgtslm565" path="res://scripts/ui/template_guide_panel.gd" id="1"]
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="2_vr_theme"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" uid="uid://go0l17cp4j8l" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
 
 [node name="TemplateGuidePanel" type="PanelContainer" unique_id=56349659]
+clip_contents = true
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -31,11 +32,9 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Margin/VBox" unique_id=1158171827]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 24
 text = "Template Guide"
 
 [node name="Body" type="RichTextLabel" parent="Margin/VBox" unique_id=1829145808]
 layout_mode = 2
 size_flags_vertical = 3
-fit_content = true
-scroll_active = false

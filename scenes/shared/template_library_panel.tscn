@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b5il1povmkhpd" path="res://scripts/ui/template_library_panel.gd" id="1"]
 [ext_resource type="Theme" uid="uid://cvrpanltheme1" path="res://resources/vr_panel_theme.tres" id="2_vr_theme"]
-[ext_resource type="StyleBox" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
+[ext_resource type="StyleBox" uid="uid://go0l17cp4j8l" path="res://resources/quest_panel_body_style.tres" id="3_body_style"]
 
 [node name="TemplateLibraryPanel" type="PanelContainer" unique_id=471168504]
 anchors_preset = 15
@@ -18,60 +18,65 @@ script = ExtResource("1")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
 
 [node name="VBox" type="VBoxContainer" parent="Margin" unique_id=1921689560]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Margin/VBox" unique_id=320879311]
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
-text = "Template Library"
+theme_override_font_sizes/font_size = 22
+text = "Templates"
 
 [node name="Intro" type="Label" parent="Margin/VBox" unique_id=1976368330]
 layout_mode = 2
-text = "Browse built-in and user templates, then copy or apply the one you want to fly."
+text = "Pick a template to apply, copy, or edit."
 autowrap_mode = 3
 
-[node name="Filters" type="HBoxContainer" parent="Margin/VBox" unique_id=167724562]
+[node name="Filters" type="VBoxContainer" parent="Margin/VBox" unique_id=167724562]
 layout_mode = 2
+theme_override_constants/separation = 6
 
 [node name="SchemeFilterLabel" type="Label" parent="Margin/VBox/Filters" unique_id=159591981]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Scheme"
 
 [node name="SchemeFilterSelect" type="OptionButton" parent="Margin/VBox/Filters" unique_id=495687814]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="DifficultyFilterLabel" type="Label" parent="Margin/VBox/Filters" unique_id=543886615]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "Difficulty"
 
 [node name="DifficultyFilterSelect" type="OptionButton" parent="Margin/VBox/Filters" unique_id=376949484]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="List" type="ItemList" parent="Margin/VBox" unique_id=1146784482]
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(220, 220)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Summary" type="Label" parent="Margin/VBox" unique_id=207834233]
-custom_minimum_size = Vector2(0, 108)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="Buttons" type="HBoxContainer" parent="Margin/VBox" unique_id=550880782]
+[node name="Buttons" type="GridContainer" parent="Margin/VBox" unique_id=550880782]
 layout_mode = 2
+columns = 2
 
 [node name="ApplyButton" type="Button" parent="Margin/VBox/Buttons" unique_id=555618133]
 layout_mode = 2

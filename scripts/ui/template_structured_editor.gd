@@ -36,49 +36,50 @@ const SOURCES := [
 
 signal apply_requested(template)
 signal save_requested(template)
+signal template_changed(template)
 
 var _template: MappingTemplate = MappingTemplate.new()
 var _updating: bool = false
 var _current_output_name: String = "throttle"
 var _current_binding_index: int = -1
 
-@onready var display_name_edit: LineEdit = $Margin/Scroll/VBox/MetaGrid/DisplayNameEdit
-@onready var slug_edit: LineEdit = $Margin/Scroll/VBox/MetaGrid/SlugEdit
-@onready var summary_edit: TextEdit = $Margin/Scroll/VBox/SummaryEdit
-@onready var control_scheme_select: OptionButton = $Margin/Scroll/VBox/MetaGrid/ControlSchemeSelect
-@onready var difficulty_select: OptionButton = $Margin/Scroll/VBox/MetaGrid/DifficultySelect
-@onready var beta_recommended_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/BetaRecommendedEdit
-@onready var beta_acceptable_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/BetaAcceptableEdit
-@onready var beta_avoid_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/BetaAvoidEdit
-@onready var beta_notes_edit: TextEdit = $Margin/Scroll/VBox/BetaNotesEdit
-@onready var liftoff_recommended_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/LiftoffRecommendedEdit
-@onready var liftoff_acceptable_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/LiftoffAcceptableEdit
-@onready var liftoff_avoid_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/LiftoffAvoidEdit
-@onready var liftoff_notes_edit: TextEdit = $Margin/Scroll/VBox/LiftoffNotesEdit
-@onready var assists_recommended_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/AssistsRecommendedEdit
-@onready var assists_optional_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/AssistsOptionalEdit
-@onready var assists_avoid_edit: LineEdit = $Margin/Scroll/VBox/RecommendationsGrid/AssistsAvoidEdit
-@onready var assists_notes_edit: TextEdit = $Margin/Scroll/VBox/AssistsNotesEdit
-@onready var warnings_edit: TextEdit = $Margin/Scroll/VBox/WarningsEdit
-@onready var usage_tips_edit: TextEdit = $Margin/Scroll/VBox/UsageTipsEdit
-@onready var output_select: OptionButton = $Margin/Scroll/VBox/OutputToolbar/OutputSelect
-@onready var add_binding_button: Button = $Margin/Scroll/VBox/OutputToolbar/AddBindingButton
-@onready var remove_binding_button: Button = $Margin/Scroll/VBox/OutputToolbar/RemoveBindingButton
-@onready var binding_list: ItemList = $Margin/Scroll/VBox/BindingList
-@onready var source_select: OptionButton = $Margin/Scroll/VBox/BindingGrid/SourceSelect
-@onready var mode_select: OptionButton = $Margin/Scroll/VBox/BindingGrid/ModeSelect
-@onready var range_min_spin: SpinBox = $Margin/Scroll/VBox/BindingGrid/RangeMinSpin
-@onready var range_max_spin: SpinBox = $Margin/Scroll/VBox/BindingGrid/RangeMaxSpin
-@onready var weight_spin: SpinBox = $Margin/Scroll/VBox/BindingGrid/WeightSpin
-@onready var invert_check: CheckBox = $Margin/Scroll/VBox/BindingGrid/InvertCheck
-@onready var smoothing_spin: SpinBox = $Margin/Scroll/VBox/BindingGrid/SmoothingSpin
-@onready var curve_select: OptionButton = $Margin/Scroll/VBox/BindingGrid/CurveSelect
-@onready var deadzone_spin: SpinBox = $Margin/Scroll/VBox/OutputGrid/DeadzoneSpin
-@onready var expo_spin: SpinBox = $Margin/Scroll/VBox/OutputGrid/ExpoSpin
-@onready var sensitivity_spin: SpinBox = $Margin/Scroll/VBox/OutputGrid/SensitivitySpin
-@onready var invert_output_check: CheckBox = $Margin/Scroll/VBox/OutputGrid/InvertOutputCheck
-@onready var output_min_spin: SpinBox = $Margin/Scroll/VBox/OutputGrid/OutputMinSpin
-@onready var output_max_spin: SpinBox = $Margin/Scroll/VBox/OutputGrid/OutputMaxSpin
+@onready var display_name_edit: LineEdit = $Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid/DisplayNameEdit
+@onready var slug_edit: LineEdit = $Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid/SlugEdit
+@onready var summary_edit: TextEdit = $Margin/Scroll/VBox/MetadataCard/MetadataVBox/SummaryEdit
+@onready var control_scheme_select: OptionButton = $Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid/ControlSchemeSelect
+@onready var difficulty_select: OptionButton = $Margin/Scroll/VBox/MetadataCard/MetadataVBox/MetaGrid/DifficultySelect
+@onready var beta_recommended_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/BetaRecommendedEdit
+@onready var beta_acceptable_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/BetaAcceptableEdit
+@onready var beta_avoid_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/BetaAvoidEdit
+@onready var beta_notes_edit: TextEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/BetaNotesEdit
+@onready var liftoff_recommended_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/LiftoffRecommendedEdit
+@onready var liftoff_acceptable_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/LiftoffAcceptableEdit
+@onready var liftoff_avoid_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/LiftoffAvoidEdit
+@onready var liftoff_notes_edit: TextEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/LiftoffNotesEdit
+@onready var assists_recommended_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/AssistsRecommendedEdit
+@onready var assists_optional_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/AssistsOptionalEdit
+@onready var assists_avoid_edit: LineEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/RecommendationsGrid/AssistsAvoidEdit
+@onready var assists_notes_edit: TextEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/AssistsNotesEdit
+@onready var warnings_edit: TextEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/WarningsEdit
+@onready var usage_tips_edit: TextEdit = $Margin/Scroll/VBox/GuidanceCard/GuidanceVBox/UsageTipsEdit
+@onready var output_select: OptionButton = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar/OutputSelect
+@onready var add_binding_button: Button = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar/AddBindingButton
+@onready var remove_binding_button: Button = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/OutputToolbar/RemoveBindingButton
+@onready var binding_list: ItemList = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingRail/RailVBox/BindingList
+@onready var source_select: OptionButton = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/SourceSelect
+@onready var mode_select: OptionButton = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/ModeSelect
+@onready var range_min_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/RangeMinSpin
+@onready var range_max_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/RangeMaxSpin
+@onready var weight_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/WeightSpin
+@onready var invert_check: CheckBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/InvertCheck
+@onready var smoothing_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/SmoothingSpin
+@onready var curve_select: OptionButton = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/BindingGrid/CurveSelect
+@onready var deadzone_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/DeadzoneSpin
+@onready var expo_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/ExpoSpin
+@onready var sensitivity_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/SensitivitySpin
+@onready var invert_output_check: CheckBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/InvertOutputCheck
+@onready var output_min_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/OutputMinSpin
+@onready var output_max_spin: SpinBox = $Margin/Scroll/VBox/BindingsCard/BindingsVBox/BindingsSplit/BindingInspector/InspectorVBox/OutputGrid/OutputMaxSpin
 @onready var apply_button: Button = $Margin/Scroll/VBox/ActionBar/ApplyButton
 @onready var save_button: Button = $Margin/Scroll/VBox/ActionBar/SaveButton
 
@@ -180,6 +181,7 @@ func _on_meta_changed(_value: Variant) -> void:
 	if _updating:
 		return
 	_commit_meta_fields()
+	template_changed.emit(get_template())
 
 
 func _on_binding_or_output_changed(_value: Variant) -> void:
@@ -188,6 +190,7 @@ func _on_binding_or_output_changed(_value: Variant) -> void:
 	_commit_output_fields()
 	_commit_binding_fields()
 	_refresh_binding_list()
+	template_changed.emit(get_template())
 
 
 func _on_output_selected(index: int) -> void:
@@ -197,6 +200,7 @@ func _on_output_selected(index: int) -> void:
 	_commit_binding_fields()
 	_current_output_name = str(output_select.get_item_metadata(index))
 	_refresh_output_fields()
+	template_changed.emit(get_template())
 
 
 func _on_add_binding_pressed() -> void:
@@ -204,6 +208,7 @@ func _on_add_binding_pressed() -> void:
 	_refresh_output_fields()
 	binding_list.select(binding_list.item_count - 1)
 	_on_binding_selected(binding_list.item_count - 1)
+	template_changed.emit(get_template())
 
 
 func _on_remove_binding_pressed() -> void:
@@ -213,6 +218,7 @@ func _on_remove_binding_pressed() -> void:
 	bindings.remove_at(_current_binding_index)
 	_current_binding_index = clampi(_current_binding_index - 1, -1, bindings.size() - 1)
 	_refresh_output_fields()
+	template_changed.emit(get_template())
 
 
 func _on_binding_selected(index: int) -> void:

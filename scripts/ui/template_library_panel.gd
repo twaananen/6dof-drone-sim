@@ -100,7 +100,8 @@ func _update_summary(summary: Dictionary) -> void:
 		summary_label.text = "No templates match the current filters."
 		return
 	var lines := PackedStringArray()
-	lines.append(str(summary.get("summary", "")))
+	var short_summary := str(summary.get("summary", "")).split("\n", false)[0]
+	lines.append(short_summary)
 	lines.append("Scheme: %s" % str(summary.get("control_scheme_label", summary.get("control_scheme", ""))))
 	lines.append("Origin: %s" % str(summary.get("origin", "")))
 	summary_label.text = "\n".join(lines)
