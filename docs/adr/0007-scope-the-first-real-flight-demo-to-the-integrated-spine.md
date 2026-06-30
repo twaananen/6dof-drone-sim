@@ -1,0 +1,3 @@
+# Scope the first real-flight demo to the integrated spine
+
+The First Real-Flight Demo should prove the integrated spine of the Quest-Native Flight Station: real FPV in the Quest app if possible, a real Command Path, Trustworthy Control Feel with the Stick Control Scheme, RC-Style Arming, and contained Air65 flight through takeoff, maneuver, landing, and disarm. Spatial control, rich mixed-reality environment details, telemetry-driven overlays, autonomous guardrails, and polished outdoor readiness are deliberately excluded from this demo so the first proof stays focused on replacing the multi-machine pilot station.
