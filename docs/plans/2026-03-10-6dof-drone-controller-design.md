@@ -1,5 +1,7 @@
 # 6DOF VR Drone Controller - Phase 1a Design
 
+> Superseded context: this document describes the March 2026 simulator-era, multi-machine Phase 1a architecture. For the current Quest-native real-drone product direction, start with [CONTEXT.md](../../CONTEXT.md), [Quest-Native Flight Station PRD](../prd/quest-native-flight-station.md), and [Quest-Only Command Synthesis](../research/quest-only-command-synthesis.md).
+
 **Date**: 2026-03-13
 **Status**: Approved for implementation
 

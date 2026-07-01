@@ -25,8 +25,8 @@ An ordinary nearby FPV flight where the drone stays close enough for conservativ
 _Avoid_: long-range flight, expedition flight, cinematic mission
 
 **External Safety Fallback**:
-A separate controller or human safety arrangement available during early validation flights. It is outside the Quest-Native Flight Station product surface and should not shape the normal Quest app workflow.
-_Avoid_: built-in fallback, product safety mode, secondary control path
+A separate controller or human safety arrangement available during early validation flights. It is outside the Quest-Native Flight Station product surface, is not an alternate product Command Path, and should not shape the normal Quest app workflow.
+_Avoid_: built-in fallback, product safety mode, secondary control path, product fallback transport
 
 **Stick Control Scheme**:
 A Quest control scheme that preserves the normal FPV sticks-and-switches mental model. It is the first proof control experience for real flight and a durable fallback control style.
@@ -155,6 +155,22 @@ _Avoid_: decorative controller model, confirmed telemetry, full dashboard
 **Command Path**:
 The end-to-end route by which pilot intent from the Quest reaches the drone as control input. It should be invisible during active flight but inspectable during setup and preflight.
 _Avoid_: Wi-Fi plumbing, transport details, radio implementation
+
+**Quest-Air65 Native Command Path**:
+The strict research target where the Quest 3 uses only its built-in hardware and app-accessible OS APIs to send pilot intent to the existing Air65 onboard receiver or receiver-adjacent firmware, without external command hardware in the live command loop.
+_Avoid_: bridge architecture, TX module accessory, PC-assisted command path, traditional radio path
+
+**Receiver-Native Command Mode**:
+A possible Air65 receiver-side mode where the onboard receiver accepts Quest-originated network commands and outputs normal control input to Betaflight, such as CRSF channel frames or a verified MSP control path. It may be stock, if the receiver's existing Wi-Fi/MSP tunnel can do it, or custom firmware if the hardware and recovery story are proven.
+_Avoid_: Quest RF transmission, Betaflight configuration mode, external bridge mode
+
+**Stock MSP Tunnel Probe**:
+A no-flash research experiment that tests whether the Air65's stock ExpressLRS receiver Wi-Fi mode exposes an MSP-over-TCP path to Betaflight that can carry safe RC-input probes while disarmed and props-off. It is evidence-gathering, not a product decision to make the app a Betaflight configurator.
+_Avoid_: configurator workflow, proof of live RC by assumption, firmware flash prerequisite
+
+**Out-of-Product Command Hardware**:
+Hardware such as external ELRS TX modules, microcontroller bridges, USB-UART adapters, bench receivers, or logic analyzers that may help with evidence, recovery, or comparison, but is excluded from the Quest-Air65 Native Command Path and must not become the normal product command loop without a new product decision.
+_Avoid_: hidden product bridge, shopping-list research, fallback architecture by default
 
 **Readiness State**:
 The pilot-facing answer to whether the Quest-Native Flight Station is prepared for flight. It summarizes the pieces needed for safe operation without exposing low-level plumbing during active flight.

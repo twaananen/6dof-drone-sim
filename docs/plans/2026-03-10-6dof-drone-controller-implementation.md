@@ -1,5 +1,7 @@
 # 6DOF VR Drone Controller - Phase 1a Implementation Plan
 
+> Superseded context: this document describes the March 2026 simulator-era, multi-machine implementation plan. For the current Quest-native real-drone product direction, start with [CONTEXT.md](../../CONTEXT.md), [Quest-Native Flight Station PRD](../prd/quest-native-flight-station.md), and [Quest-Only Command Synthesis](../research/quest-only-command-synthesis.md).
+
 **Date**: 2026-03-13
 **Goal**: Build the first working PC-mapped prototype for experimenting with Quest 3 embodied drone-control schemes in Liftoff on Linux.
 

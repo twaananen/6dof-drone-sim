@@ -1,6 +1,9 @@
 # Project Overview
 
 This project is a Godot 4.6.1 project that is used to develop a 6DOF Drone Controller prototype using the Meta Quest 3.
+
+This is a bold and project, so we need to go places that are not well trodden and try things that might seem insane. So we need to be ambitious.
+
 Read the plans for the project in the `docs/plans` folder.
 
 # Working with GodotXR

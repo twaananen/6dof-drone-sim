@@ -7,7 +7,7 @@ Related documents:
 
 - [Domain glossary](../../CONTEXT.md)
 - [Architecture decisions](../adr/)
-- [Quest 3 to ExpressLRS Research Brief](../research/quest3-expresslrs-research-brief.md)
+- [Quest 3 to Air65 Native Command Research Brief](../research/quest3-expresslrs-research-brief.md)
 
 ## Problem Statement
 
@@ -24,7 +24,7 @@ The app provides two main spatial surfaces:
 - A rich, world-locked Control Workbench for setup, tuning, dry-run testing, readiness inspection, diagnostics, and profile management.
 - A quiet, world-locked Flight Cockpit for active flight, using passthrough by default, keeping FPV video dominant, and treating Quest controllers as Flight Instruments.
 
-The Command Research Track is the primary next risk: prove an End-to-End Pilot Loop where Quest controller movement becomes stable pilot intent, traverses the Command Path, is accepted as real drone control input, and feels predictable enough to arm in a contained setting. The Video Integration Research Branch runs separately: live FPV inside the app is the target, but Control-First Validation may temporarily use a separate HDMI capture app for video.
+The Command Research Track is the primary next risk: prove an End-to-End Pilot Loop where Quest controller movement becomes stable pilot intent, traverses the Quest-Air65 Native Command Path, is accepted as real drone control input, and feels predictable enough to arm in a contained setting. The current hard research constraint is that the live product command path uses Quest hardware and the existing Air65 onboard receiver/flight-controller path, not an external bridge, TX module, PC, phone, or traditional radio. The Video Integration Research Branch runs separately: live FPV inside the app is the target, but Control-First Validation may temporarily use a separate HDMI capture app for video.
 
 ## Goals
 
@@ -155,7 +155,7 @@ The final target is an Integrated Flight View with live FPV inside the app. Cont
 ## Implementation Decisions
 
 - Use Product-Shaped Slices for research and implementation. Even rough prototypes should exercise Flight Session, Quest Control Scheme, Flight Cockpit, Readiness State, and profile concepts.
-- Treat the Command Research Track as the main risk. The first research target is the End-to-End Pilot Loop, not a whole-cockpit build.
+- Treat the Command Research Track as the main risk. The first research target is the Quest-Air65 Native Command Path and the End-to-End Pilot Loop, not a whole-cockpit build or an external command-hardware workaround.
 - Keep Video Integration Research separate from command validation. Integrated video remains the product target but should not block Control-First Validation.
 - Preserve Simulator-to-Real Continuity at the product model and control-feel level while allowing Session Environment-specific command and video adapters.
 - Introduce or evolve a high-level Flight Session orchestration seam that can bind Session Environment, Flight Binding, readiness, cockpit/workbench state, and armed/disarmed transitions.
@@ -195,7 +195,7 @@ The final target is an Integrated Flight View with live FPV inside the app. Cont
 2. **Binding and channel slice**: Drone Profile, Channel Mapping Setup, Flight Binding, Last Good Binding, and Channel Debug Panel.
 3. **Simulator continuity slice**: same Tunable Control Profile and Command Visualization used in simulator Session Environment.
 4. **Cockpit state slice**: Cockpit Transition, Flight Cockpit, RC-Style Arming UI state, disarmed-only return, cockpit re-arm, and locked visual placement while armed.
-5. **Command research slice**: real-drone Session Environment with a command adapter capable of proving the End-to-End Pilot Loop against the selected ExpressLRS path.
+5. **Command research slice**: real-drone Session Environment with a receiver endpoint adapter capable of proving the End-to-End Pilot Loop against the selected Quest-Air65 Native Command Path.
 6. **Control-First Validation slice**: contained Air65 flight with Quest control, Stick Control Scheme, RC-Style Arming, and video supplied by the HDMI capture app if integrated video is not ready.
 7. **Video integration slice**: analog FPV feed appears inside the Quest app as the Integrated Flight View without blocking command validation.
 
@@ -218,7 +218,8 @@ The final target is an Integrated Flight View with live FPV inside the app. Cont
 
 ## Open Questions
 
-- Which command transport makes the Quest a reliable ExpressLRS pilot input source while preserving Trustworthy Control Feel?
+- Can the existing Air65 onboard receiver path become a reliable Quest-Air65 Native Command Path while preserving Trustworthy Control Feel?
+- Does the stock receiver MSP tunnel provide a no-flash command ingress, or is receiver-native firmware required?
 - What ExpressLRS/Betaflight behavior should drive the eventual response to Input Authority Risk?
 - What is the lowest-latency feasible path for analog FPV capture inside the Quest app?
 - Can the HDMI capture app and the Quest control app run in a useful split arrangement during Control-First Validation?
